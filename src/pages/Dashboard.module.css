@@ -1,0 +1,183 @@
+.dashboardContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 5%;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logoInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoIcon {
+  color: var(--color-primary);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.logoutBtn:hover {
+  color: var(--color-danger);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 3rem 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.welcomeHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.welcomeHeader h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.sparkle {
+  color: var(--color-warning);
+}
+
+.welcomeHeader p {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+.selectionArea {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  padding: 2rem;
+}
+
+.section h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-text-main);
+}
+
+.gridBtn {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.optionBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  color: var(--color-text-main);
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all var(--transition-normal);
+}
+
+.optionBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.optionBtn.selected {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+}
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+.gridCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.cardDisciplina {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  padding: 2rem 1rem;
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.cardDisciplina:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
+  border-color: var(--card-color);
+}
+
+.cardSelected {
+  background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+  border-color: var(--card-color);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2), 0 0 20px var(--card-color);
+  transform: translateY(-5px);
+}
+
+.cardIcon {
+  font-size: 3rem;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+}
+
+.cardName {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.actionArea {
+  margin-top: 3rem;
+  display: flex;
+  justify-content: center;
+}
+
+.proceedBtn {
+  font-size: 1.2rem;
+  padding: 1rem 2.5rem;
+}
+
+.proceedBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
