@@ -87,7 +87,7 @@ const Trilha = () => {
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
           <BookOpen className={styles.logoIcon} />
-          <h2>EduReforço</h2>
+          <h2>My voice</h2>
         </div>
         <div className={styles.navActions}>
           <span className={styles.badgeInfo}>{ano}</span>

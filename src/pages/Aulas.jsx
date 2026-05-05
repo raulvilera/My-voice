@@ -1,6 +1,5 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, LogOut, PlayCircle, BarChart, ChevronRight } from 'lucide-react';
+import { BookOpen, PlayCircle, BarChart, ChevronRight } from 'lucide-react';
 import styles from './Aulas.module.css';
 
 const modulos = [
@@ -17,7 +16,7 @@ const Aulas = () => {
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
           <BookOpen className={styles.logoIcon} />
-          <h2>EduReforço</h2>
+          <h2>My voice</h2>
         </div>
         <div className={styles.navActions}>
           <span className={styles.badgeInfo}>Matemática - 8º Ano</span>
