@@ -39,7 +39,7 @@ const Login = () => {
             <div className={styles.logo}>
               <BookOpen size={36} color="#fff" strokeWidth={2.5} />
             </div>
-            <h2>Bem-vindo ao <span className="text-gradient">My voice</span></h2>
+            <h2>Bem-vindo ao<br/><span className="text-gradient">My voice</span></h2>
             <p className={styles.subtitle}>Sua jornada de aprendizado começa aqui.</p>
           </div>
 
