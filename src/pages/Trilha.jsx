@@ -1,603 +1,300 @@
-/* ── Layout ──────────────────────────────────────────────────────────────── */
-.trilhaContainer {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2rem;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.logoInfo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.logoIcon {
-  color: var(--color-primary);
-}
-
-.logoInfo h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.logoutBtn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: color var(--transition-fast);
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--glass-border);
-}
-
-.logoutBtn:hover {
-  color: var(--color-text-main);
-  background: rgba(255,255,255,0.08);
-}
-
-.mainContent {
-  flex: 1;
-  padding: 2rem;
-  max-width: 860px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.header {
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.header h1 {
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-}
-
-.header p {
-  color: var(--color-text-muted);
-  font-size: 1rem;
-}
-
-/* ── Aula Cards ──────────────────────────────────────────────────────────── */
-.aulasList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.aulaCard {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  cursor: pointer;
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-}
-
-.aulaCard:hover:not(.aulaBloqueada) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.25);
-}
-
-.aulaBloqueada {
-  opacity: 0.45;
-  cursor: not-allowed;
-  filter: grayscale(0.4);
-}
-
-.aulaNumero {
-  min-width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.bloqueadoNum {
-  background: rgba(255,255,255,0.1);
-}
-
-.aulaInfo {
-  flex: 1;
-}
-
-.aulaTagSmall {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-tertiary);
-  margin-bottom: 0.25rem;
-  display: block;
-}
-
-.aulaInfo h3 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.2rem;
-}
-
-.aulaInfo p {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  margin-bottom: 0.5rem;
-}
-
-.aulaSections {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.sectionPill {
-  font-size: 0.7rem;
-  padding: 0.2rem 0.6rem;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-full);
-  color: var(--color-text-muted);
-}
-
-.aulaArrow {
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-  transition: transform var(--transition-fast);
-}
-
-.aulaCard:hover:not(.aulaBloqueada) .aulaArrow {
-  transform: translateX(4px);
-  color: var(--color-primary);
-}
-
-.lockIcon {
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-
-/* ── Modal ───────────────────────────────────────────────────────────────── */
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
-  z-index: 200;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-.modalContent {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 820px;
-  margin: auto;
-  animation: fadeIn 0.3s ease-out;
-  overflow: hidden;
-}
-
-.modalHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.75rem 2rem 1.25rem;
-  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.1));
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.aulaTag {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-tertiary);
-  display: block;
-  margin-bottom: 0.4rem;
-}
-
-.modalTitleText {
-  font-size: 1.4rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
-}
-
-.modalSubtitle {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.closeBtn {
-  color: var(--color-text-muted);
-  padding: 0.4rem;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-  transition: color var(--transition-fast), background var(--transition-fast);
-}
-
-.closeBtn:hover {
-  color: var(--color-text-main);
-  background: rgba(255,255,255,0.1);
-}
-
-.modalBody {
-  padding: 1.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.motivaFrase {
-  text-align: center;
-  font-style: italic;
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-  padding: 1rem 2rem 1.5rem;
-  border-top: 1px solid var(--glass-border);
-}
-
-/* ── Section Blocks ──────────────────────────────────────────────────────── */
-.sectionBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.sectionTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-tertiary);
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.hint {
-  margin-left: auto;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: var(--color-text-muted);
-  font-style: italic;
-}
-
-/* ── Diálogo ─────────────────────────────────────────────────────────────── */
-.dialogBox {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(0,0,0,0.2);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
-}
-
-.bubble {
-  max-width: 82%;
-  padding: 0.65rem 1rem;
-  border-radius: 1rem;
-  font-size: 0.92rem;
-  line-height: 1.5;
-}
-
-.bubbleA {
-  align-self: flex-start;
-  background: rgba(139, 92, 246, 0.18);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-bottom-left-radius: 0.25rem;
-}
-
-.bubbleB {
-  align-self: flex-end;
-  background: rgba(6, 182, 212, 0.15);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-bottom-right-radius: 0.25rem;
-}
-
-.bubbleName {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 0.2rem;
-  opacity: 0.7;
-}
-
-.bubbleA .bubbleName { color: var(--color-primary); }
-.bubbleB .bubbleName { color: var(--color-tertiary); }
-
-/* ── Verbos ──────────────────────────────────────────────────────────────── */
-.tableWrapper {
-  overflow-x: auto;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border);
-}
-
-.verbTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-}
-
-.verbTable th {
-  text-align: left;
-  padding: 0.75rem 1rem;
-  background: rgba(139, 92, 246, 0.15);
-  color: var(--color-text-muted);
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.verbTable tr:not(:last-child) td {
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.verbTable td {
-  padding: 0.7rem 1rem;
-}
-
-.verbTable tr:hover td {
-  background: rgba(255,255,255,0.03);
-}
-
-.verbName {
-  font-weight: 600;
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
-}
-
-.verbForm {
-  background: rgba(139,92,246,0.12);
-  color: var(--color-primary);
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-/* ── Vocabulário ─────────────────────────────────────────────────────────── */
-.vocabGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-  gap: 0.6rem;
-}
-
-.vocabCard {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  padding: 0.65rem 0.85rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.vocabCard:hover {
-  background: rgba(139,92,246,0.12);
-  border-color: rgba(139,92,246,0.4);
-}
-
-.vocabRevealed {
-  background: rgba(6,182,212,0.1);
-  border-color: rgba(6,182,212,0.4);
-}
-
-.vocabEn {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--color-text-main);
-}
-
-.vocabPt {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-}
-
-.vocabRevealed .vocabPt {
-  color: var(--color-tertiary);
-  font-weight: 500;
-}
-
-/* ── Exercícios ──────────────────────────────────────────────────────────── */
-.exercGrupo {
-  background: rgba(0,0,0,0.15);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  padding: 1rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.exercInstrucao {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.exercList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.exercItem {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.9rem;
-  flex-wrap: wrap;
-  padding: 0.4rem 0.6rem;
-  border-radius: var(--radius-sm);
-  transition: background var(--transition-fast);
-}
-
-.certo {
-  background: rgba(16, 185, 129, 0.1);
-}
-
-.errado {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.exercNum {
-  color: var(--color-text-muted);
-  font-size: 0.8rem;
-  min-width: 18px;
-}
-
-.exercLabel {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  flex: 1;
-  line-height: 1.8;
-}
-
-.exercInput {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-main);
-  padding: 0.2rem 0.5rem;
-  font-size: 0.88rem;
-  font-family: inherit;
-  width: 80px;
-  text-align: center;
-  transition: border-color var(--transition-fast);
-}
-
-.exercInput:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  background: rgba(139,92,246,0.1);
-}
-
-.exercIcon {
-  display: flex;
-  align-items: center;
-}
-
-.certo .exercIcon { color: var(--color-success); }
-.errado .exercIcon { color: var(--color-danger); }
-
-.gabarito {
-  font-size: 0.78rem;
-  color: var(--color-success);
-  font-weight: 600;
-}
-
-.exercBtns {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-}
-
-.checkBtn, .resetBtn {
-  font-size: 0.88rem;
-  padding: 0.6rem 1.2rem;
-}
-
-.scoreBox {
-  padding: 0.75rem 1.25rem;
-  background: rgba(16,185,129,0.1);
-  border: 1px solid rgba(16,185,129,0.3);
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-success);
-  text-align: center;
-}
-
-.scorePerfect {
-  background: rgba(245,158,11,0.1);
-  border-color: rgba(245,158,11,0.4);
-  color: var(--color-warning);
-}
-
-/* ── Error ───────────────────────────────────────────────────────────────── */
-.errorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  gap: 1.5rem;
-  text-align: center;
-  padding: 2rem;
-}
-
-/* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  .mainContent {
-    padding: 1.25rem 1rem;
-  }
-
-  .navbar {
-    padding: 1rem;
-  }
-
-  .aulaCard {
-    padding: 1rem;
-  }
-
-  .modalHeader {
-    padding: 1.25rem 1rem 1rem;
-  }
-
-  .modalBody {
-    padding: 1rem;
-  }
-
-  .modalTitleText {
-    font-size: 1.1rem;
-  }
-
-  .vocabGrid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  }
-
-  .exercInput {
-    width: 65px;
-  }
-}
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, LogOut, ChevronDown, ChevronUp, MessageCircle, BookMarked, Grid3x3, PenLine, Check, X, RotateCcw, ChevronRight, Mic } from 'lucide-react';
+import { myVoiceData } from '../data/myvoiceData';
+import styles from './Trilha.module.css';
+
+// ── Diálogo ──────────────────────────────────────────────────────────────────
+const SecaoDialogo = ({ section }) => (
+  <div className={styles.sectionBlock}>
+    <h3 className={styles.sectionTitle}>
+      <MessageCircle size={20} /> {section.titulo}
+    </h3>
+    <div className={styles.dialogBox}>
+      {section.falas.map((fala, i) => {
+        const isA = fala.personagem === section.personagens[0];
+        return (
+          <div key={i} className={`${styles.bubble} ${isA ? styles.bubbleA : styles.bubbleB}`}>
+            <span className={styles.bubbleName}>{fala.personagem}</span>
+            <p>{fala.texto}</p>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+);
+
+// ── Verbos ────────────────────────────────────────────────────────────────────
+const SecaoVerbos = ({ section }) => (
+  <div className={styles.sectionBlock}>
+    <h3 className={styles.sectionTitle}>
+      <BookMarked size={20} /> {section.titulo}
+    </h3>
+    <div className={styles.tableWrapper}>
+      <table className={styles.verbTable}>
+        <thead>
+          <tr>
+            <th>Verbo</th>
+            <th>Presente</th>
+            <th>Passado</th>
+            <th>Particípio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {section.verbos.map((v, i) => (
+            <tr key={i}>
+              <td className={styles.verbName}>{v.verbo}</td>
+              <td><span className={styles.verbForm}>{v.presente}</span></td>
+              <td><span className={styles.verbForm}>{v.passado}</span></td>
+              <td><span className={styles.verbForm}>{v.participio}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+// ── Vocabulário ───────────────────────────────────────────────────────────────
+const SecaoVocabulario = ({ section }) => {
+  const [revealed, setRevealed] = useState({});
+  const toggleReveal = (i) => setRevealed(prev => ({ ...prev, [i]: !prev[i] }));
+
+  return (
+    <div className={styles.sectionBlock}>
+      <h3 className={styles.sectionTitle}>
+        <Grid3x3 size={20} /> {section.titulo}
+        <span className={styles.hint}>Clique para ver a tradução</span>
+      </h3>
+      <div className={styles.vocabGrid}>
+        {section.palavras.map((p, i) => (
+          <div
+            key={i}
+            className={`${styles.vocabCard} ${revealed[i] ? styles.vocabRevealed : ''}`}
+            onClick={() => toggleReveal(i)}
+          >
+            <span className={styles.vocabEn}>{p.en}</span>
+            <span className={styles.vocabPt}>{revealed[i] ? p.pt : '···'}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ── Exercícios ────────────────────────────────────────────────────────────────
+const SecaoExercicios = ({ section }) => {
+  const [respostas, setRespostas] = useState({});
+  const [resultados, setResultados] = useState({});
+  const [checked, setChecked] = useState(false);
+
+  const handleInput = (grupoIdx, questaoIdx, val) => {
+    setRespostas(prev => ({ ...prev, [`${grupoIdx}-${questaoIdx}`]: val }));
+    setChecked(false);
+  };
+
+  const verificar = () => {
+    const res = {};
+    section.grupos.forEach((grupo, gi) => {
+      grupo.questoes.forEach((q, qi) => {
+        const chave = `${gi}-${qi}`;
+        const resposta = (respostas[chave] || '').trim().toLowerCase();
+        res[chave] = resposta === q.resposta.toLowerCase();
+      });
+    });
+    setResultados(res);
+    setChecked(true);
+  };
+
+  const resetar = () => {
+    setRespostas({});
+    setResultados({});
+    setChecked(false);
+  };
+
+  const total = section.grupos.reduce((acc, g) => acc + g.questoes.length, 0);
+  const acertos = checked ? Object.values(resultados).filter(Boolean).length : 0;
+
+  return (
+    <div className={styles.sectionBlock}>
+      <h3 className={styles.sectionTitle}>
+        <PenLine size={20} /> {section.titulo}
+      </h3>
+
+      {section.grupos.map((grupo, gi) => (
+        <div key={gi} className={styles.exercGrupo}>
+          <p className={styles.exercInstrucao}>{grupo.instrucao}</p>
+          <div className={styles.exercList}>
+            {grupo.questoes.map((q, qi) => {
+              const chave = `${gi}-${qi}`;
+              const status = checked ? (resultados[chave] ? 'certo' : 'errado') : '';
+              return (
+                <div key={qi} className={`${styles.exercItem} ${styles[status]}`}>
+                  <span className={styles.exercNum}>{qi + 1}.</span>
+                  <label className={styles.exercLabel}>
+                    {q.pergunta.split('___').map((part, pi, arr) => (
+                      <React.Fragment key={pi}>
+                        {part}
+                        {pi < arr.length - 1 && (
+                          <input
+                            type="text"
+                            className={styles.exercInput}
+                            value={respostas[chave] || ''}
+                            onChange={e => handleInput(gi, qi, e.target.value)}
+                            placeholder="?"
+                          />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </label>
+                  {checked && (
+                    <span className={styles.exercIcon}>
+                      {resultados[chave] ? <Check size={16} /> : <X size={16} />}
+                    </span>
+                  )}
+                  {checked && !resultados[chave] && (
+                    <span className={styles.gabarito}>✓ {q.resposta}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {checked && (
+        <div className={`${styles.scoreBox} ${acertos === total ? styles.scorePerfect : ''}`}>
+          {acertos === total ? '🎉' : acertos >= total / 2 ? '👍' : '💪'}
+          {' '}{acertos}/{total} corretas
+          {acertos === total && ' — Perfeito!'}
+        </div>
+      )}
+
+      <div className={styles.exercBtns}>
+        <button className={`btn-primary ${styles.checkBtn}`} onClick={verificar}>
+          <Check size={18} /> Verificar Respostas
+        </button>
+        <button className={`btn-secondary ${styles.resetBtn}`} onClick={resetar}>
+          <RotateCcw size={18} /> Reiniciar
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ── Aula Modal / Drawer ───────────────────────────────────────────────────────
+const AulaViewer = ({ aula, onClose }) => {
+  if (!aula) return null;
+
+  const renderSection = (sec, idx) => {
+    switch (sec.type) {
+      case 'dialogo':    return <SecaoDialogo    key={idx} section={sec} />;
+      case 'verbos':     return <SecaoVerbos     key={idx} section={sec} />;
+      case 'vocabulario': return <SecaoVocabulario key={idx} section={sec} />;
+      case 'exercicios': return <SecaoExercicios  key={idx} section={sec} />;
+      default: return null;
+    }
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={`${styles.modalContent}`} onClick={e => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div>
+            <span className={styles.aulaTag}>Aula {aula.numero}</span>
+            <h2 className={styles.modalTitleText}>{aula.titulo}</h2>
+            <p className={styles.modalSubtitle}>{aula.subtitulo}</p>
+          </div>
+          <button className={styles.closeBtn} onClick={onClose}><X size={24} /></button>
+        </div>
+
+        <div className={styles.modalBody}>
+          {aula.sections.map((sec, idx) => renderSection(sec, idx))}
+        </div>
+
+        <div className={styles.motivaFrase}>
+          "Você não precisa acertar tudo. Você só precisa continuar." ✨
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
+const Trilha = () => {
+  const navigate = useNavigate();
+  const [aulaSelecionada, setAulaSelecionada] = useState(null);
+
+  const curso = myVoiceData.basico;
+
+  return (
+    <div className={styles.trilhaContainer}>
+      <nav className={styles.navbar}>
+        <div className={styles.logoInfo}>
+          <Mic className={styles.logoIcon} size={28} />
+          <h2>My Voice</h2>
+        </div>
+        <button className={styles.logoutBtn} onClick={() => navigate('/dashboard')}>
+          <LogOut size={20} />
+          Voltar
+        </button>
+      </nav>
+
+      <main className={styles.mainContent}>
+        <header className={styles.header}>
+          <h1 className="text-gradient">{curso.nome}</h1>
+          <p>{curso.descricao}</p>
+        </header>
+
+        <div className={styles.aulasList}>
+          {curso.aulas.map((aula, idx) => (
+            <div
+              key={aula.id}
+              className={`glass-panel ${styles.aulaCard}`}
+              onClick={() => setAulaSelecionada(aula)}
+            >
+              <div className={styles.aulaNumero}>
+                <span>{String(aula.numero).padStart(2, '0')}</span>
+              </div>
+              <div className={styles.aulaInfo}>
+                <span className={styles.aulaTagSmall}>{aula.tag}</span>
+                <h3>{aula.titulo}</h3>
+                <p>{aula.subtitulo}</p>
+                <div className={styles.aulaSections}>
+                  {aula.sections.map((s, si) => (
+                    <span key={si} className={styles.sectionPill}>
+                      {s.type === 'dialogo' ? '💬 Diálogo'
+                        : s.type === 'verbos' ? '📘 Verbos'
+                        : s.type === 'vocabulario' ? '📖 Vocab'
+                        : '✏️ Exercícios'}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <ChevronRight size={24} className={styles.aulaArrow} />
+            </div>
+          ))}
+
+          {/* Próximas aulas (placeholder) */}
+          {[3, 4, 5].map(n => (
+            <div key={n} className={`glass-panel ${styles.aulaCard} ${styles.aulaBloqueada}`}>
+              <div className={`${styles.aulaNumero} ${styles.bloqueadoNum}`}>
+                <span>{String(n).padStart(2, '0')}</span>
+              </div>
+              <div className={styles.aulaInfo}>
+                <span className={styles.aulaTagSmall}>Em breve</span>
+                <h3>Aula {n} – Linda & Glinda</h3>
+                <p>Conteúdo sendo preparado…</p>
+              </div>
+              <span className={styles.lockIcon}>🔒</span>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <AulaViewer aula={aulaSelecionada} onClose={() => setAulaSelecionada(null)} />
+    </div>
+  );
+};
+
+export default Trilha;
