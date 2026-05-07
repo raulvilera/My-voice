@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, MessageCircle, BookMarked, Grid3x3, PenLine, Check, X, RotateCcw, ChevronRight, Mic, Play, Square, Volume2 } from 'lucide-react';
+import { LogOut, MessageCircle, BookMarked, Grid3x3, PenLine, Check, X, RotateCcw, ChevronRight, Mic, Play, Square, Volume2, ArrowLeft } from 'lucide-react';
 import { myVoiceData } from '../data/myvoiceData';
 import styles from './Trilha.module.css';
 
@@ -14,16 +14,14 @@ const SecaoDialogo = ({ section }) => {
   const cancelledRef                      = useRef(false);
 
   useEffect(() => {
-    const load = () => {
-      if (window.speechSynthesis.getVoices().length > 0) setVoicesReady(true);
-    };
+    const load = () => { if (window.speechSynthesis.getVoices().length > 0) setVoicesReady(true); };
     load();
     window.speechSynthesis.onvoiceschanged = load;
     return () => { window.speechSynthesis.onvoiceschanged = null; };
   }, []);
 
   const getVoice = useCallback((personagem) => {
-    const voices  = window.speechSynthesis.getVoices();
+    const voices   = window.speechSynthesis.getVoices();
     const enVoices = voices.filter(v => v.lang.startsWith('en'));
     if (!enVoices.length) return null;
     const isFirst  = personagem === section.personagens[0];
@@ -40,9 +38,7 @@ const SecaoDialogo = ({ section }) => {
   const stop = useCallback(() => {
     cancelledRef.current = true;
     window.speechSynthesis.cancel();
-    setIsPlaying(false);
-    setActiveFala(-1);
-    setActiveWordIdx(-1);
+    setIsPlaying(false); setActiveFala(-1); setActiveWordIdx(-1);
   }, []);
 
   const playAll = useCallback(() => {
@@ -51,29 +47,22 @@ const SecaoDialogo = ({ section }) => {
     cancelledRef.current = false;
     setIsPlaying(true);
     let idx = 0;
-
     const speakNext = () => {
       if (cancelledRef.current || idx >= section.falas.length) {
-        setIsPlaying(false); setActiveFala(-1); setActiveWordIdx(-1);
-        return;
+        setIsPlaying(false); setActiveFala(-1); setActiveWordIdx(-1); return;
       }
-      const fala  = section.falas[idx];
-      const words = fala.texto.split(/\s+/);
-      setActiveFala(idx);
-      setActiveWordIdx(-1);
-
+      const fala = section.falas[idx];
+      setActiveFala(idx); setActiveWordIdx(-1);
       const utter    = new SpeechSynthesisUtterance(fala.texto);
       utter.lang     = 'en-US';
       utter.rate     = speed;
       utter.pitch    = fala.personagem === section.personagens[0] ? 1.1 : 0.95;
       const voice    = getVoice(fala.personagem);
       if (voice) utter.voice = voice;
-
       utter.onboundary = (e) => {
         if (e.name === 'word') {
-          const soFar    = fala.texto.slice(0, e.charIndex);
-          const wordCount = soFar.trim() === '' ? 0 : soFar.trim().split(/\s+/).length;
-          setActiveWordIdx(wordCount);
+          const soFar = fala.texto.slice(0, e.charIndex);
+          setActiveWordIdx(soFar.trim() === '' ? 0 : soFar.trim().split(/\s+/).length);
         }
       };
       utter.onend   = () => { if (!cancelledRef.current) { setActiveWordIdx(-1); idx++; setTimeout(speakNext, 400); } };
@@ -87,36 +76,22 @@ const SecaoDialogo = ({ section }) => {
 
   return (
     <div className={styles.sectionBlock}>
-      <h3 className={styles.sectionTitle}>
-        <MessageCircle size={20} /> {section.titulo}
-      </h3>
-
+      <h3 className={styles.sectionTitle}><MessageCircle size={20}/> {section.titulo}</h3>
       <div className={styles.audioBar}>
-        <button
-          className={`${styles.playBtn} ${isPlaying ? styles.playBtnActive : ''}`}
-          onClick={isPlaying ? stop : playAll}
-          disabled={!voicesReady}
-        >
-          {isPlaying ? <Square size={16} /> : <Play size={16} />}
+        <button className={`${styles.playBtn} ${isPlaying ? styles.playBtnActive : ''}`} onClick={isPlaying ? stop : playAll} disabled={!voicesReady}>
+          {isPlaying ? <Square size={16}/> : <Play size={16}/>}
           {isPlaying ? 'Parar' : voicesReady ? 'Ouvir Diálogo' : 'Carregando…'}
         </button>
-
         <div className={styles.speedControl}>
-          <Volume2 size={14} />
+          <Volume2 size={14}/>
           {[0.75, 0.9, 1, 1.25].map(s => (
-            <button
-              key={s}
-              className={`${styles.speedBtn} ${speed === s ? styles.speedActive : ''}`}
-              onClick={() => { setSpeed(s); if (isPlaying) stop(); }}
-            >
+            <button key={s} className={`${styles.speedBtn} ${speed === s ? styles.speedActive : ''}`} onClick={() => { setSpeed(s); if (isPlaying) stop(); }}>
               {s === 0.75 ? '0.75×' : s === 0.9 ? '0.9×' : s === 1 ? '1×' : '1.25×'}
             </button>
           ))}
         </div>
-
         <span className={styles.voiceInfo}>🎙 {section.personagens.join(' · ')}</span>
       </div>
-
       <div className={styles.dialogBox}>
         {section.falas.map((fala, fi) => {
           const isA   = fala.personagem === section.personagens[0];
@@ -127,9 +102,7 @@ const SecaoDialogo = ({ section }) => {
               <span className={styles.bubbleName}>{fala.personagem}</span>
               <p className={styles.bubbleText}>
                 {active
-                  ? words.map((w, wi) => (
-                      <span key={wi} className={`${styles.word} ${wi === activeWordIdx ? styles.wordActive : ''}`}>{w}{' '}</span>
-                    ))
+                  ? words.map((w, wi) => <span key={wi} className={`${styles.word} ${wi === activeWordIdx ? styles.wordActive : ''}`}>{w}{' '}</span>)
                   : fala.texto}
               </p>
             </div>
@@ -143,7 +116,7 @@ const SecaoDialogo = ({ section }) => {
 // ── Verbos ────────────────────────────────────────────────────────────────────
 const SecaoVerbos = ({ section }) => (
   <div className={styles.sectionBlock}>
-    <h3 className={styles.sectionTitle}><BookMarked size={20} /> {section.titulo}</h3>
+    <h3 className={styles.sectionTitle}><BookMarked size={20}/> {section.titulo}</h3>
     <div className={styles.tableWrapper}>
       <table className={styles.verbTable}>
         <thead><tr><th>Verbo</th><th>Presente</th><th>Passado</th><th>Particípio</th></tr></thead>
@@ -168,7 +141,7 @@ const SecaoVocabulario = ({ section }) => {
   return (
     <div className={styles.sectionBlock}>
       <h3 className={styles.sectionTitle}>
-        <Grid3x3 size={20} /> {section.titulo}
+        <Grid3x3 size={20}/> {section.titulo}
         <span className={styles.hint}>Clique para ver a tradução</span>
       </h3>
       <div className={styles.vocabGrid}>
@@ -190,7 +163,6 @@ const SecaoExercicios = ({ section }) => {
   const [checked, setChecked]       = useState(false);
 
   const handleInput = (gi, qi, val) => { setRespostas(prev => ({ ...prev, [`${gi}-${qi}`]: val })); setChecked(false); };
-
   const verificar = () => {
     const res = {};
     section.grupos.forEach((g, gi) => g.questoes.forEach((q, qi) => {
@@ -198,14 +170,13 @@ const SecaoExercicios = ({ section }) => {
     }));
     setResultados(res); setChecked(true);
   };
-
   const resetar = () => { setRespostas({}); setResultados({}); setChecked(false); };
   const total   = section.grupos.reduce((acc, g) => acc + g.questoes.length, 0);
   const acertos = checked ? Object.values(resultados).filter(Boolean).length : 0;
 
   return (
     <div className={styles.sectionBlock}>
-      <h3 className={styles.sectionTitle}><PenLine size={20} /> {section.titulo}</h3>
+      <h3 className={styles.sectionTitle}><PenLine size={20}/> {section.titulo}</h3>
       {section.grupos.map((grupo, gi) => (
         <div key={gi} className={styles.exercGrupo}>
           <p className={styles.exercInstrucao}>{grupo.instrucao}</p>
@@ -221,7 +192,7 @@ const SecaoExercicios = ({ section }) => {
                       <React.Fragment key={pi}>
                         {part}
                         {pi < arr.length - 1 && (
-                          <input type="text" className={styles.exercInput} value={respostas[chave] || ''} onChange={e => handleInput(gi, qi, e.target.value)} placeholder="?" />
+                          <input type="text" className={styles.exercInput} value={respostas[chave] || ''} onChange={e => handleInput(gi, qi, e.target.value)} placeholder="?"/>
                         )}
                       </React.Fragment>
                     ))}
@@ -247,18 +218,15 @@ const SecaoExercicios = ({ section }) => {
   );
 };
 
-// ── Aula Modal ────────────────────────────────────────────────────────────────
-const AulaViewer = ({ aula, onClose }) => {
-  if (!aula) return null;
-  const render = (sec, idx) => {
-    switch (sec.type) {
-      case 'dialogo':     return <SecaoDialogo     key={idx} section={sec} />;
-      case 'verbos':      return <SecaoVerbos      key={idx} section={sec} />;
-      case 'vocabulario': return <SecaoVocabulario key={idx} section={sec} />;
-      case 'exercicios':  return <SecaoExercicios  key={idx} section={sec} />;
-      default: return null;
-    }
-  };
+// ── Modal de seção individual ─────────────────────────────────────────────────
+const SecaoModal = ({ aula, secType, onClose }) => {
+  if (!aula || !secType) return null;
+  const sec = aula.sections.find(s => s.type === secType);
+  if (!sec) return null;
+
+  // Para diálogo: mostra TODAS as seções
+  const sectionsToShow = secType === 'dialogo' ? aula.sections : [sec];
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -266,53 +234,93 @@ const AulaViewer = ({ aula, onClose }) => {
           <div>
             <span className={styles.aulaTag}>Aula {aula.numero}</span>
             <h2 className={styles.modalTitleText}>{aula.titulo}</h2>
-            <p className={styles.modalSubtitle}>{aula.subtitulo}</p>
+            <p className={styles.modalSubtitle}>
+              {secType === 'dialogo'     ? '💬 Diálogo completo'
+              : secType === 'verbos'     ? '📘 Verbos'
+              : secType === 'vocabulario'? '📖 Vocabulário'
+              :                           '✏️ Exercícios'}
+            </p>
           </div>
           <button className={styles.closeBtn} onClick={onClose}><X size={24}/></button>
         </div>
-        <div className={styles.modalBody}>{aula.sections.map(render)}</div>
+        <div className={styles.modalBody}>
+          {sectionsToShow.map((s, idx) => {
+            switch (s.type) {
+              case 'dialogo':     return <SecaoDialogo     key={idx} section={s}/>;
+              case 'verbos':      return <SecaoVerbos      key={idx} section={s}/>;
+              case 'vocabulario': return <SecaoVocabulario key={idx} section={s}/>;
+              case 'exercicios':  return <SecaoExercicios  key={idx} section={s}/>;
+              default: return null;
+            }
+          })}
+        </div>
         <div className={styles.motivaFrase}>"Você não precisa acertar tudo. Você só precisa continuar." ✨</div>
       </div>
     </div>
   );
 };
 
+// ── Pill labels ───────────────────────────────────────────────────────────────
+const PILL_LABELS = {
+  dialogo:     { emoji: '💬', label: 'Diálogo' },
+  verbos:      { emoji: '📘', label: 'Verbos' },
+  vocabulario: { emoji: '📖', label: 'Vocab' },
+  exercicios:  { emoji: '✏️', label: 'Exercícios' },
+};
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const Trilha = () => {
   const navigate = useNavigate();
-  const [aulaSelecionada, setAulaSelecionada] = useState(null);
+  const [modal, setModal] = useState(null); // { aula, secType }
   const curso = myVoiceData.basico;
+
+  const openSec = (aula, secType, e) => {
+    e.stopPropagation();
+    setModal({ aula, secType });
+  };
 
   return (
     <div className={styles.trilhaContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}><Mic className={styles.logoIcon} size={28}/><h2>My Voice</h2></div>
-        <button className={styles.logoutBtn} onClick={() => navigate('/dashboard')}><LogOut size={20}/>Voltar</button>
+        <button className={styles.logoutBtn} onClick={() => navigate('/dashboard')}><LogOut size={20}/> Voltar</button>
       </nav>
+
       <main className={styles.mainContent}>
         <header className={styles.header}>
           <h1 className="text-gradient">{curso.nome}</h1>
           <p>{curso.descricao}</p>
         </header>
+
         <div className={styles.aulasList}>
           {curso.aulas.map(aula => (
-            <div key={aula.id} className={`glass-panel ${styles.aulaCard}`} onClick={() => setAulaSelecionada(aula)}>
-              <div className={styles.aulaNumero}><span>{String(aula.numero).padStart(2,'0')}</span></div>
+            <div key={aula.id} className={`glass-panel ${styles.aulaCard}`}>
+              <div className={styles.aulaNumero}>
+                <span>{String(aula.numero).padStart(2,'0')}</span>
+              </div>
               <div className={styles.aulaInfo}>
                 <span className={styles.aulaTagSmall}>{aula.tag}</span>
                 <h3>{aula.titulo}</h3>
                 <p>{aula.subtitulo}</p>
                 <div className={styles.aulaSections}>
-                  {aula.sections.map((s, si) => (
-                    <span key={si} className={styles.sectionPill}>
-                      {s.type==='dialogo'?'💬 Diálogo':s.type==='verbos'?'📘 Verbos':s.type==='vocabulario'?'📖 Vocab':'✏️ Exercícios'}
-                    </span>
-                  ))}
+                  {aula.sections.map((s, si) => {
+                    const { emoji, label } = PILL_LABELS[s.type] || {};
+                    return (
+                      <button
+                        key={si}
+                        className={styles.sectionPillBtn}
+                        onClick={(e) => openSec(aula, s.type, e)}
+                        title={`Abrir ${label}`}
+                      >
+                        {emoji} {label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <ChevronRight size={24} className={styles.aulaArrow}/>
             </div>
           ))}
+
           {[3,4,5].map(n => (
             <div key={n} className={`glass-panel ${styles.aulaCard} ${styles.aulaBloqueada}`}>
               <div className={`${styles.aulaNumero} ${styles.bloqueadoNum}`}><span>{String(n).padStart(2,'0')}</span></div>
@@ -326,7 +334,8 @@ const Trilha = () => {
           ))}
         </div>
       </main>
-      <AulaViewer aula={aulaSelecionada} onClose={() => setAulaSelecionada(null)}/>
+
+      {modal && <SecaoModal aula={modal.aula} secType={modal.secType} onClose={() => setModal(null)}/>}
     </div>
   );
 };
