@@ -601,3 +601,101 @@
     width: 65px;
   }
 }
+
+/* ── Audio Player ────────────────────────────────────────────────────────── */
+.audioBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.playBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.playBtn:hover:not(:disabled) {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
+.playBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.playBtnActive {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  animation: pulse 1.5s infinite;
+}
+
+.speedControl {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-text-muted);
+}
+
+.speedBtn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.speedBtn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--color-text-main);
+}
+
+.speedActive {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.voiceInfo {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-left: auto;
+}
+
+/* ── Bubble Audio States ─────────────────────────────────────────────────── */
+.bubbleActive {
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+}
+
+.bubbleText {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.word {
+  display: inline;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+.wordActive {
+  background: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  font-weight: 600;
+}
