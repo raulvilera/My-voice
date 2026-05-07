@@ -1,45 +1,152 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, LogOut, ChevronDown, ChevronUp, MessageCircle, BookMarked, Grid3x3, PenLine, Check, X, RotateCcw, ChevronRight, Mic } from 'lucide-react';
+import { LogOut, MessageCircle, BookMarked, Grid3x3, PenLine, Check, X, RotateCcw, ChevronRight, Mic, Play, Square, Volume2 } from 'lucide-react';
 import { myVoiceData } from '../data/myvoiceData';
 import styles from './Trilha.module.css';
 
-// ── Diálogo ──────────────────────────────────────────────────────────────────
-const SecaoDialogo = ({ section }) => (
-  <div className={styles.sectionBlock}>
-    <h3 className={styles.sectionTitle}>
-      <MessageCircle size={20} /> {section.titulo}
-    </h3>
-    <div className={styles.dialogBox}>
-      {section.falas.map((fala, i) => {
-        const isA = fala.personagem === section.personagens[0];
-        return (
-          <div key={i} className={`${styles.bubble} ${isA ? styles.bubbleA : styles.bubbleB}`}>
-            <span className={styles.bubbleName}>{fala.personagem}</span>
-            <p>{fala.texto}</p>
-          </div>
-        );
-      })}
+// ── Diálogo com Áudio ─────────────────────────────────────────────────────────
+const SecaoDialogo = ({ section }) => {
+  const [isPlaying, setIsPlaying]         = useState(false);
+  const [activeFala, setActiveFala]       = useState(-1);
+  const [activeWordIdx, setActiveWordIdx] = useState(-1);
+  const [speed, setSpeed]                 = useState(0.9);
+  const [voicesReady, setVoicesReady]     = useState(false);
+  const cancelledRef                      = useRef(false);
+
+  useEffect(() => {
+    const load = () => {
+      if (window.speechSynthesis.getVoices().length > 0) setVoicesReady(true);
+    };
+    load();
+    window.speechSynthesis.onvoiceschanged = load;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
+
+  const getVoice = useCallback((personagem) => {
+    const voices  = window.speechSynthesis.getVoices();
+    const enVoices = voices.filter(v => v.lang.startsWith('en'));
+    if (!enVoices.length) return null;
+    const isFirst  = personagem === section.personagens[0];
+    const preferred = isFirst
+      ? ['Samantha','Karen','Victoria','Moira','Tessa','Zoe']
+      : ['Daniel','Alex','Fred','Fiona','Serena','Rishi'];
+    for (const name of preferred) {
+      const v = enVoices.find(v => v.name.includes(name));
+      if (v) return v;
+    }
+    return enVoices[isFirst ? 0 : Math.min(1, enVoices.length - 1)];
+  }, [section.personagens]);
+
+  const stop = useCallback(() => {
+    cancelledRef.current = true;
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setActiveFala(-1);
+    setActiveWordIdx(-1);
+  }, []);
+
+  const playAll = useCallback(() => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    cancelledRef.current = false;
+    setIsPlaying(true);
+    let idx = 0;
+
+    const speakNext = () => {
+      if (cancelledRef.current || idx >= section.falas.length) {
+        setIsPlaying(false); setActiveFala(-1); setActiveWordIdx(-1);
+        return;
+      }
+      const fala  = section.falas[idx];
+      const words = fala.texto.split(/\s+/);
+      setActiveFala(idx);
+      setActiveWordIdx(-1);
+
+      const utter    = new SpeechSynthesisUtterance(fala.texto);
+      utter.lang     = 'en-US';
+      utter.rate     = speed;
+      utter.pitch    = fala.personagem === section.personagens[0] ? 1.1 : 0.95;
+      const voice    = getVoice(fala.personagem);
+      if (voice) utter.voice = voice;
+
+      utter.onboundary = (e) => {
+        if (e.name === 'word') {
+          const soFar    = fala.texto.slice(0, e.charIndex);
+          const wordCount = soFar.trim() === '' ? 0 : soFar.trim().split(/\s+/).length;
+          setActiveWordIdx(wordCount);
+        }
+      };
+      utter.onend   = () => { if (!cancelledRef.current) { setActiveWordIdx(-1); idx++; setTimeout(speakNext, 400); } };
+      utter.onerror = () => { if (!cancelledRef.current) { idx++; speakNext(); } };
+      window.speechSynthesis.speak(utter);
+    };
+    speakNext();
+  }, [section.falas, section.personagens, speed, getVoice]);
+
+  useEffect(() => () => stop(), [stop]);
+
+  return (
+    <div className={styles.sectionBlock}>
+      <h3 className={styles.sectionTitle}>
+        <MessageCircle size={20} /> {section.titulo}
+      </h3>
+
+      <div className={styles.audioBar}>
+        <button
+          className={`${styles.playBtn} ${isPlaying ? styles.playBtnActive : ''}`}
+          onClick={isPlaying ? stop : playAll}
+          disabled={!voicesReady}
+        >
+          {isPlaying ? <Square size={16} /> : <Play size={16} />}
+          {isPlaying ? 'Parar' : voicesReady ? 'Ouvir Diálogo' : 'Carregando…'}
+        </button>
+
+        <div className={styles.speedControl}>
+          <Volume2 size={14} />
+          {[0.75, 0.9, 1, 1.25].map(s => (
+            <button
+              key={s}
+              className={`${styles.speedBtn} ${speed === s ? styles.speedActive : ''}`}
+              onClick={() => { setSpeed(s); if (isPlaying) stop(); }}
+            >
+              {s === 0.75 ? '0.75×' : s === 0.9 ? '0.9×' : s === 1 ? '1×' : '1.25×'}
+            </button>
+          ))}
+        </div>
+
+        <span className={styles.voiceInfo}>🎙 {section.personagens.join(' · ')}</span>
+      </div>
+
+      <div className={styles.dialogBox}>
+        {section.falas.map((fala, fi) => {
+          const isA   = fala.personagem === section.personagens[0];
+          const active = activeFala === fi;
+          const words  = fala.texto.split(/\s+/);
+          return (
+            <div key={fi} className={`${styles.bubble} ${isA ? styles.bubbleA : styles.bubbleB} ${active ? styles.bubbleActive : ''}`}>
+              <span className={styles.bubbleName}>{fala.personagem}</span>
+              <p className={styles.bubbleText}>
+                {active
+                  ? words.map((w, wi) => (
+                      <span key={wi} className={`${styles.word} ${wi === activeWordIdx ? styles.wordActive : ''}`}>{w}{' '}</span>
+                    ))
+                  : fala.texto}
+              </p>
+            </div>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ── Verbos ────────────────────────────────────────────────────────────────────
 const SecaoVerbos = ({ section }) => (
   <div className={styles.sectionBlock}>
-    <h3 className={styles.sectionTitle}>
-      <BookMarked size={20} /> {section.titulo}
-    </h3>
+    <h3 className={styles.sectionTitle}><BookMarked size={20} /> {section.titulo}</h3>
     <div className={styles.tableWrapper}>
       <table className={styles.verbTable}>
-        <thead>
-          <tr>
-            <th>Verbo</th>
-            <th>Presente</th>
-            <th>Passado</th>
-            <th>Particípio</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Verbo</th><th>Presente</th><th>Passado</th><th>Particípio</th></tr></thead>
         <tbody>
           {section.verbos.map((v, i) => (
             <tr key={i}>
@@ -58,8 +165,6 @@ const SecaoVerbos = ({ section }) => (
 // ── Vocabulário ───────────────────────────────────────────────────────────────
 const SecaoVocabulario = ({ section }) => {
   const [revealed, setRevealed] = useState({});
-  const toggleReveal = (i) => setRevealed(prev => ({ ...prev, [i]: !prev[i] }));
-
   return (
     <div className={styles.sectionBlock}>
       <h3 className={styles.sectionTitle}>
@@ -68,11 +173,7 @@ const SecaoVocabulario = ({ section }) => {
       </h3>
       <div className={styles.vocabGrid}>
         {section.palavras.map((p, i) => (
-          <div
-            key={i}
-            className={`${styles.vocabCard} ${revealed[i] ? styles.vocabRevealed : ''}`}
-            onClick={() => toggleReveal(i)}
-          >
+          <div key={i} className={`${styles.vocabCard} ${revealed[i] ? styles.vocabRevealed : ''}`} onClick={() => setRevealed(prev => ({ ...prev, [i]: !prev[i] }))}>
             <span className={styles.vocabEn}>{p.en}</span>
             <span className={styles.vocabPt}>{revealed[i] ? p.pt : '···'}</span>
           </div>
@@ -84,49 +185,33 @@ const SecaoVocabulario = ({ section }) => {
 
 // ── Exercícios ────────────────────────────────────────────────────────────────
 const SecaoExercicios = ({ section }) => {
-  const [respostas, setRespostas] = useState({});
+  const [respostas, setRespostas]   = useState({});
   const [resultados, setResultados] = useState({});
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked]       = useState(false);
 
-  const handleInput = (grupoIdx, questaoIdx, val) => {
-    setRespostas(prev => ({ ...prev, [`${grupoIdx}-${questaoIdx}`]: val }));
-    setChecked(false);
-  };
+  const handleInput = (gi, qi, val) => { setRespostas(prev => ({ ...prev, [`${gi}-${qi}`]: val })); setChecked(false); };
 
   const verificar = () => {
     const res = {};
-    section.grupos.forEach((grupo, gi) => {
-      grupo.questoes.forEach((q, qi) => {
-        const chave = `${gi}-${qi}`;
-        const resposta = (respostas[chave] || '').trim().toLowerCase();
-        res[chave] = resposta === q.resposta.toLowerCase();
-      });
-    });
-    setResultados(res);
-    setChecked(true);
+    section.grupos.forEach((g, gi) => g.questoes.forEach((q, qi) => {
+      res[`${gi}-${qi}`] = (respostas[`${gi}-${qi}`] || '').trim().toLowerCase() === q.resposta.toLowerCase();
+    }));
+    setResultados(res); setChecked(true);
   };
 
-  const resetar = () => {
-    setRespostas({});
-    setResultados({});
-    setChecked(false);
-  };
-
-  const total = section.grupos.reduce((acc, g) => acc + g.questoes.length, 0);
+  const resetar = () => { setRespostas({}); setResultados({}); setChecked(false); };
+  const total   = section.grupos.reduce((acc, g) => acc + g.questoes.length, 0);
   const acertos = checked ? Object.values(resultados).filter(Boolean).length : 0;
 
   return (
     <div className={styles.sectionBlock}>
-      <h3 className={styles.sectionTitle}>
-        <PenLine size={20} /> {section.titulo}
-      </h3>
-
+      <h3 className={styles.sectionTitle}><PenLine size={20} /> {section.titulo}</h3>
       {section.grupos.map((grupo, gi) => (
         <div key={gi} className={styles.exercGrupo}>
           <p className={styles.exercInstrucao}>{grupo.instrucao}</p>
           <div className={styles.exercList}>
             {grupo.questoes.map((q, qi) => {
-              const chave = `${gi}-${qi}`;
+              const chave  = `${gi}-${qi}`;
               const status = checked ? (resultados[chave] ? 'certo' : 'errado') : '';
               return (
                 <div key={qi} className={`${styles.exercItem} ${styles[status]}`}>
@@ -136,85 +221,57 @@ const SecaoExercicios = ({ section }) => {
                       <React.Fragment key={pi}>
                         {part}
                         {pi < arr.length - 1 && (
-                          <input
-                            type="text"
-                            className={styles.exercInput}
-                            value={respostas[chave] || ''}
-                            onChange={e => handleInput(gi, qi, e.target.value)}
-                            placeholder="?"
-                          />
+                          <input type="text" className={styles.exercInput} value={respostas[chave] || ''} onChange={e => handleInput(gi, qi, e.target.value)} placeholder="?" />
                         )}
                       </React.Fragment>
                     ))}
                   </label>
-                  {checked && (
-                    <span className={styles.exercIcon}>
-                      {resultados[chave] ? <Check size={16} /> : <X size={16} />}
-                    </span>
-                  )}
-                  {checked && !resultados[chave] && (
-                    <span className={styles.gabarito}>✓ {q.resposta}</span>
-                  )}
+                  {checked && <span className={styles.exercIcon}>{resultados[chave] ? <Check size={16}/> : <X size={16}/>}</span>}
+                  {checked && !resultados[chave] && <span className={styles.gabarito}>✓ {q.resposta}</span>}
                 </div>
               );
             })}
           </div>
         </div>
       ))}
-
       {checked && (
         <div className={`${styles.scoreBox} ${acertos === total ? styles.scorePerfect : ''}`}>
-          {acertos === total ? '🎉' : acertos >= total / 2 ? '👍' : '💪'}
-          {' '}{acertos}/{total} corretas
-          {acertos === total && ' — Perfeito!'}
+          {acertos === total ? '🎉' : acertos >= total / 2 ? '👍' : '💪'}{' '}{acertos}/{total} corretas{acertos === total && ' — Perfeito!'}
         </div>
       )}
-
       <div className={styles.exercBtns}>
-        <button className={`btn-primary ${styles.checkBtn}`} onClick={verificar}>
-          <Check size={18} /> Verificar Respostas
-        </button>
-        <button className={`btn-secondary ${styles.resetBtn}`} onClick={resetar}>
-          <RotateCcw size={18} /> Reiniciar
-        </button>
+        <button className={`btn-primary ${styles.checkBtn}`} onClick={verificar}><Check size={18}/> Verificar Respostas</button>
+        <button className={`btn-secondary ${styles.resetBtn}`} onClick={resetar}><RotateCcw size={18}/> Reiniciar</button>
       </div>
     </div>
   );
 };
 
-// ── Aula Modal / Drawer ───────────────────────────────────────────────────────
+// ── Aula Modal ────────────────────────────────────────────────────────────────
 const AulaViewer = ({ aula, onClose }) => {
   if (!aula) return null;
-
-  const renderSection = (sec, idx) => {
+  const render = (sec, idx) => {
     switch (sec.type) {
-      case 'dialogo':    return <SecaoDialogo    key={idx} section={sec} />;
-      case 'verbos':     return <SecaoVerbos     key={idx} section={sec} />;
+      case 'dialogo':     return <SecaoDialogo     key={idx} section={sec} />;
+      case 'verbos':      return <SecaoVerbos      key={idx} section={sec} />;
       case 'vocabulario': return <SecaoVocabulario key={idx} section={sec} />;
-      case 'exercicios': return <SecaoExercicios  key={idx} section={sec} />;
+      case 'exercicios':  return <SecaoExercicios  key={idx} section={sec} />;
       default: return null;
     }
   };
-
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={`${styles.modalContent}`} onClick={e => e.stopPropagation()}>
+      <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div>
             <span className={styles.aulaTag}>Aula {aula.numero}</span>
             <h2 className={styles.modalTitleText}>{aula.titulo}</h2>
             <p className={styles.modalSubtitle}>{aula.subtitulo}</p>
           </div>
-          <button className={styles.closeBtn} onClick={onClose}><X size={24} /></button>
+          <button className={styles.closeBtn} onClick={onClose}><X size={24}/></button>
         </div>
-
-        <div className={styles.modalBody}>
-          {aula.sections.map((sec, idx) => renderSection(sec, idx))}
-        </div>
-
-        <div className={styles.motivaFrase}>
-          "Você não precisa acertar tudo. Você só precisa continuar." ✨
-        </div>
+        <div className={styles.modalBody}>{aula.sections.map(render)}</div>
+        <div className={styles.motivaFrase}>"Você não precisa acertar tudo. Você só precisa continuar." ✨</div>
       </div>
     </div>
   );
@@ -224,38 +281,23 @@ const AulaViewer = ({ aula, onClose }) => {
 const Trilha = () => {
   const navigate = useNavigate();
   const [aulaSelecionada, setAulaSelecionada] = useState(null);
-
   const curso = myVoiceData.basico;
 
   return (
     <div className={styles.trilhaContainer}>
       <nav className={styles.navbar}>
-        <div className={styles.logoInfo}>
-          <Mic className={styles.logoIcon} size={28} />
-          <h2>My Voice</h2>
-        </div>
-        <button className={styles.logoutBtn} onClick={() => navigate('/dashboard')}>
-          <LogOut size={20} />
-          Voltar
-        </button>
+        <div className={styles.logoInfo}><Mic className={styles.logoIcon} size={28}/><h2>My Voice</h2></div>
+        <button className={styles.logoutBtn} onClick={() => navigate('/dashboard')}><LogOut size={20}/>Voltar</button>
       </nav>
-
       <main className={styles.mainContent}>
         <header className={styles.header}>
           <h1 className="text-gradient">{curso.nome}</h1>
           <p>{curso.descricao}</p>
         </header>
-
         <div className={styles.aulasList}>
-          {curso.aulas.map((aula, idx) => (
-            <div
-              key={aula.id}
-              className={`glass-panel ${styles.aulaCard}`}
-              onClick={() => setAulaSelecionada(aula)}
-            >
-              <div className={styles.aulaNumero}>
-                <span>{String(aula.numero).padStart(2, '0')}</span>
-              </div>
+          {curso.aulas.map(aula => (
+            <div key={aula.id} className={`glass-panel ${styles.aulaCard}`} onClick={() => setAulaSelecionada(aula)}>
+              <div className={styles.aulaNumero}><span>{String(aula.numero).padStart(2,'0')}</span></div>
               <div className={styles.aulaInfo}>
                 <span className={styles.aulaTagSmall}>{aula.tag}</span>
                 <h3>{aula.titulo}</h3>
@@ -263,24 +305,17 @@ const Trilha = () => {
                 <div className={styles.aulaSections}>
                   {aula.sections.map((s, si) => (
                     <span key={si} className={styles.sectionPill}>
-                      {s.type === 'dialogo' ? '💬 Diálogo'
-                        : s.type === 'verbos' ? '📘 Verbos'
-                        : s.type === 'vocabulario' ? '📖 Vocab'
-                        : '✏️ Exercícios'}
+                      {s.type==='dialogo'?'💬 Diálogo':s.type==='verbos'?'📘 Verbos':s.type==='vocabulario'?'📖 Vocab':'✏️ Exercícios'}
                     </span>
                   ))}
                 </div>
               </div>
-              <ChevronRight size={24} className={styles.aulaArrow} />
+              <ChevronRight size={24} className={styles.aulaArrow}/>
             </div>
           ))}
-
-          {/* Próximas aulas (placeholder) */}
-          {[3, 4, 5].map(n => (
+          {[3,4,5].map(n => (
             <div key={n} className={`glass-panel ${styles.aulaCard} ${styles.aulaBloqueada}`}>
-              <div className={`${styles.aulaNumero} ${styles.bloqueadoNum}`}>
-                <span>{String(n).padStart(2, '0')}</span>
-              </div>
+              <div className={`${styles.aulaNumero} ${styles.bloqueadoNum}`}><span>{String(n).padStart(2,'0')}</span></div>
               <div className={styles.aulaInfo}>
                 <span className={styles.aulaTagSmall}>Em breve</span>
                 <h3>Aula {n} – Linda & Glinda</h3>
@@ -291,8 +326,7 @@ const Trilha = () => {
           ))}
         </div>
       </main>
-
-      <AulaViewer aula={aulaSelecionada} onClose={() => setAulaSelecionada(null)} />
+      <AulaViewer aula={aulaSelecionada} onClose={() => setAulaSelecionada(null)}/>
     </div>
   );
 };
