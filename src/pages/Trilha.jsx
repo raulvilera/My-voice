@@ -1,161 +1,603 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, LogOut, ChevronDown, ChevronUp, PlayCircle, Gamepad2, X } from 'lucide-react';
-import { bnccData } from '../data/bnccData';
-import styles from './Trilha.module.css';
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.trilhaContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-const ModalTema = ({ tema, onClose }) => {
-  if (!tema) return null;
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+}
 
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={`glass-panel ${styles.modalContent}`} onClick={e => e.stopPropagation()}>
-        <button className={styles.closeBtn} onClick={onClose}>
-          <X size={24} />
-        </button>
-        
-        <h2 className={styles.modalTitle}>{tema.titulo}</h2>
-        
-        <div className={styles.modalBody}>
-          <div className={styles.videoSection}>
-            {tema.videoUrl ? (
-              <iframe 
-                className={styles.videoIframe}
-                src={tema.videoUrl} 
-                title="YouTube video player" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-              ></iframe>
-            ) : (
-              <div className={styles.placeholderMedia}>Vídeo não disponível</div>
-            )}
-          </div>
+.logoInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 
-          <div className={styles.infoSection}>
-            <div className={styles.explicacaoCard}>
-              <h3>Resumo</h3>
-              <p>{tema.explicacao}</p>
-            </div>
-            
-            {tema.imagemUrl && (
-              <div className={styles.imageCard}>
-                <img src={tema.imagemUrl} alt={tema.titulo} />
-              </div>
-            )}
+.logoIcon {
+  color: var(--color-primary);
+}
 
-            {tema.gameUrl && (
-              <a href={tema.gameUrl} target="_blank" rel="noopener noreferrer" className={`btn-primary ${styles.gameLink}`}>
-                <Gamepad2 size={20} />
-                Praticar com Gamificação
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+.logoInfo h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-const Trilha = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { ano, disciplina } = location.state || {};
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--glass-border);
+}
 
-  const [bimestreExpandido, setBimestreExpandido] = useState(1);
-  const [temaSelecionado, setTemaSelecionado] = useState(null);
+.logoutBtn:hover {
+  color: var(--color-text-main);
+  background: rgba(255,255,255,0.08);
+}
 
-  // Fallback seguro caso o usuário acesse a rota direto
-  if (!ano || !disciplina) {
-    return (
-      <div className={styles.errorContainer}>
-        <h2>Ops! Você precisa escolher um ano e disciplina primeiro.</h2>
-        <button className="btn-primary" onClick={() => navigate('/dashboard')}>Voltar ao Dashboard</button>
-      </div>
-    );
+.mainContent {
+  flex: 1;
+  padding: 2rem;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+/* ── Aula Cards ──────────────────────────────────────────────────────────── */
+.aulasList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.aulaCard {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.aulaCard:hover:not(.aulaBloqueada) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.25);
+}
+
+.aulaBloqueada {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+.aulaNumero {
+  min-width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.bloqueadoNum {
+  background: rgba(255,255,255,0.1);
+}
+
+.aulaInfo {
+  flex: 1;
+}
+
+.aulaTagSmall {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-tertiary);
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.aulaInfo h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.aulaInfo p {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.aulaSections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.sectionPill {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+}
+
+.aulaArrow {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.aulaCard:hover:not(.aulaBloqueada) .aulaArrow {
+  transform: translateX(4px);
+  color: var(--color-primary);
+}
+
+.lockIcon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.modalContent {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 820px;
+  margin: auto;
+  animation: fadeIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.75rem 2rem 1.25rem;
+  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.1));
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.aulaTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-tertiary);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.modalTitleText {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.modalSubtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.closeBtn {
+  color: var(--color-text-muted);
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.closeBtn:hover {
+  color: var(--color-text-main);
+  background: rgba(255,255,255,0.1);
+}
+
+.modalBody {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.motivaFrase {
+  text-align: center;
+  font-style: italic;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: 1rem 2rem 1.5rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* ── Section Blocks ──────────────────────────────────────────────────────── */
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-tertiary);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.hint {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ── Diálogo ─────────────────────────────────────────────────────────────── */
+.dialogBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+}
+
+.bubble {
+  max-width: 82%;
+  padding: 0.65rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.bubbleA {
+  align-self: flex-start;
+  background: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-bottom-left-radius: 0.25rem;
+}
+
+.bubbleB {
+  align-self: flex-end;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-bottom-right-radius: 0.25rem;
+}
+
+.bubbleName {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+  opacity: 0.7;
+}
+
+.bubbleA .bubbleName { color: var(--color-primary); }
+.bubbleB .bubbleName { color: var(--color-tertiary); }
+
+/* ── Verbos ──────────────────────────────────────────────────────────────── */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+}
+
+.verbTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.verbTable th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.verbTable tr:not(:last-child) td {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.verbTable td {
+  padding: 0.7rem 1rem;
+}
+
+.verbTable tr:hover td {
+  background: rgba(255,255,255,0.03);
+}
+
+.verbName {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.verbForm {
+  background: rgba(139,92,246,0.12);
+  color: var(--color-primary);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* ── Vocabulário ─────────────────────────────────────────────────────────── */
+.vocabGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 0.6rem;
+}
+
+.vocabCard {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.vocabCard:hover {
+  background: rgba(139,92,246,0.12);
+  border-color: rgba(139,92,246,0.4);
+}
+
+.vocabRevealed {
+  background: rgba(6,182,212,0.1);
+  border-color: rgba(6,182,212,0.4);
+}
+
+.vocabEn {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.vocabPt {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.vocabRevealed .vocabPt {
+  color: var(--color-tertiary);
+  font-weight: 500;
+}
+
+/* ── Exercícios ──────────────────────────────────────────────────────────── */
+.exercGrupo {
+  background: rgba(0,0,0,0.15);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.exercInstrucao {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.exercList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.exercItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.certo {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.errado {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.exercNum {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  min-width: 18px;
+}
+
+.exercLabel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  flex: 1;
+  line-height: 1.8;
+}
+
+.exercInput {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-main);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  width: 80px;
+  text-align: center;
+  transition: border-color var(--transition-fast);
+}
+
+.exercInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: rgba(139,92,246,0.1);
+}
+
+.exercIcon {
+  display: flex;
+  align-items: center;
+}
+
+.certo .exercIcon { color: var(--color-success); }
+.errado .exercIcon { color: var(--color-danger); }
+
+.gabarito {
+  font-size: 0.78rem;
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.exercBtns {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.checkBtn, .resetBtn {
+  font-size: 0.88rem;
+  padding: 0.6rem 1.2rem;
+}
+
+.scoreBox {
+  padding: 0.75rem 1.25rem;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-success);
+  text-align: center;
+}
+
+.scorePerfect {
+  background: rgba(245,158,11,0.1);
+  border-color: rgba(245,158,11,0.4);
+  color: var(--color-warning);
+}
+
+/* ── Error ───────────────────────────────────────────────────────────────── */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .mainContent {
+    padding: 1.25rem 1rem;
   }
 
-  const dadosAno = bnccData[ano] || {};
-  const dadosDisciplina = dadosAno[disciplina] || null;
+  .navbar {
+    padding: 1rem;
+  }
 
-  const toggleBimestre = (id) => {
-    setBimestreExpandido(bimestreExpandido === id ? null : id);
-  };
+  .aulaCard {
+    padding: 1rem;
+  }
 
-  return (
-    <div className={styles.trilhaContainer}>
-      <nav className={styles.navbar}>
-        <div className={styles.logoInfo}>
-          <BookOpen className={styles.logoIcon} />
-          <h2>My voice</h2>
-        </div>
-        <div className={styles.navActions}>
-          <span className={styles.badgeInfo}>{ano}</span>
-          <button className={styles.logoutBtn} onClick={() => navigate('/dashboard')}>
-            <LogOut size={20} />
-            Voltar
-          </button>
-        </div>
-      </nav>
+  .modalHeader {
+    padding: 1.25rem 1rem 1rem;
+  }
 
-      <main className={styles.mainContent}>
-        <header className={styles.header}>
-          <h1 className="text-gradient">
-            Trilha de {dadosDisciplina ? dadosDisciplina.nome : 'Disciplina'}
-          </h1>
-          <p>Conteúdos baseados nas diretrizes da BNCC, divididos por bimestre.</p>
-        </header>
+  .modalBody {
+    padding: 1rem;
+  }
 
-        {!dadosDisciplina ? (
-          <div className={`glass-panel ${styles.noData}`}>
-            <h3>Conteúdos em breve!</h3>
-            <p>Estamos preparando os materiais de {disciplina} para o {ano}.</p>
-          </div>
-        ) : (
-          <div className={styles.accordionContainer}>
-            {dadosDisciplina.bimestres.map((bim) => (
-              <div key={bim.id} className={`glass-panel ${styles.bimestreCard}`}>
-                <button 
-                  className={styles.bimestreHeader} 
-                  onClick={() => toggleBimestre(bim.id)}
-                >
-                  <h3>{bim.nome}</h3>
-                  {bimestreExpandido === bim.id ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                </button>
+  .modalTitleText {
+    font-size: 1.1rem;
+  }
 
-                {bimestreExpandido === bim.id && (
-                  <div className={`${styles.temasList} animate-fade-in`}>
-                    {bim.temas && bim.temas.length > 0 ? (
-                      bim.temas.map((tema) => (
-                        <div 
-                          key={tema.id} 
-                          className={styles.temaItem}
-                          onClick={() => setTemaSelecionado(tema)}
-                        >
-                          <div className={styles.temaIcon}>
-                            <PlayCircle size={24} />
-                          </div>
-                          <div className={styles.temaInfo}>
-                            <h4>{tema.titulo}</h4>
-                            <p>Clique para acessar vídeo, resumo e jogos.</p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className={styles.emptyTemas}>Nenhum tema cadastrado para este bimestre ainda.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
+  .vocabGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
 
-      {/* Renderiza o Modal se houver um tema selecionado */}
-      <ModalTema tema={temaSelecionado} onClose={() => setTemaSelecionado(null)} />
-    </div>
-  );
-};
-
-export default Trilha;
+  .exercInput {
+    width: 65px;
+  }
+}
