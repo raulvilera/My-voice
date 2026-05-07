@@ -699,3 +699,26 @@
   color: #fbbf24;
   font-weight: 600;
 }
+
+/* ── Section Pill Buttons ────────────────────────────────────────────────── */
+.sectionPillBtn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  background: rgba(139,92,246,0.12);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sectionPillBtn:hover {
+  background: rgba(139,92,246,0.28);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139,92,246,0.25);
+}
