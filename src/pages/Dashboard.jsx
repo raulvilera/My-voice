@@ -1,25 +1,53 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, LogOut, ChevronRight, GraduationCap, Sparkles } from 'lucide-react';
+import { LogOut, Mic, BookOpen, Star, ChevronRight, Sparkles } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
-const anos = ['6º Ano', '7º Ano', '8º Ano', '9º Ano'];
-const disciplinas = [
-  { id: 'mat', nome: 'Matemática', cor: 'var(--color-primary)', icone: '📐' },
-  { id: 'por', nome: 'Português', cor: 'var(--color-secondary)', icone: '📚' },
-  { id: 'cie', nome: 'Ciências', cor: 'var(--color-success)', icone: '🔬' },
-  { id: 'his', nome: 'História', cor: 'var(--color-warning)', icone: '🏛️' },
-  { id: 'geo', nome: 'Geografia', cor: 'var(--color-tertiary)', icone: '🌍' }
+const cursos = [
+  {
+    id: 'basico',
+    nome: 'Inglês Básico',
+    descricao: 'Do zero à primeira conversa. Comece aqui.',
+    icone: '🟢',
+    nivel: 'Iniciante',
+    aulas: 2,
+    disponivel: true,
+  },
+  {
+    id: 'intermediario1',
+    nome: 'Inglês Intermediário 1',
+    descricao: 'Expanda seu vocabulário e gramática.',
+    icone: '🔵',
+    nivel: 'Intermediário',
+    aulas: 0,
+    disponivel: false,
+  },
+  {
+    id: 'intermediario2',
+    nome: 'Inglês Intermediário 2',
+    descricao: 'Conversação e compreensão avançada.',
+    icone: '🟣',
+    nivel: 'Intermediário',
+    aulas: 0,
+    disponivel: false,
+  },
+  {
+    id: 'avancado',
+    nome: 'Avançado',
+    descricao: 'Fluência e domínio completo do idioma.',
+    icone: '🟡',
+    nivel: 'Avançado',
+    aulas: 0,
+    disponivel: false,
+  },
 ];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [anoSelecionado, setAnoSelecionado] = useState('');
-  const [disciplinaSelecionada, setDisciplinaSelecionada] = useState('');
 
-  const handleContinuar = () => {
-    if (anoSelecionado && disciplinaSelecionada) {
-      navigate('/trilha', { state: { ano: anoSelecionado, disciplina: disciplinaSelecionada } });
+  const handleAcessar = (curso) => {
+    if (curso.disponivel) {
+      navigate('/trilha', { state: { curso: curso.id } });
     }
   };
 
@@ -27,8 +55,8 @@ const Dashboard = () => {
     <div className={styles.dashboardContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <BookOpen className={styles.logoIcon} />
-          <h2>EduReforço</h2>
+          <Mic className={styles.logoIcon} size={26} />
+          <h2>My Voice</h2>
         </div>
         <button className={styles.logoutBtn} onClick={() => navigate('/login')}>
           <LogOut size={20} />
@@ -38,55 +66,48 @@ const Dashboard = () => {
 
       <main className={styles.mainContent}>
         <header className={styles.welcomeHeader}>
-          <h1 className="text-gradient">Monte seu Reforço Ideal <Sparkles className={styles.sparkle} /></h1>
-          <p>Escolha o ano e a disciplina que você quer dominar.</p>
+          <h1 className="text-gradient">
+            Sua voz em inglês começa aqui <Sparkles className={styles.sparkle} size={24} />
+          </h1>
+          <p>Escolha seu curso e inicie sua jornada de aprendizado.</p>
         </header>
 
-        <div className={styles.selectionArea}>
-          {/* Seleção de Ano */}
-          <section className={`glass-panel ${styles.section}`}>
-            <h3><GraduationCap size={24} /> 1. Qual o seu ano escolar?</h3>
-            <div className={styles.gridBtn}>
-              {anos.map((ano) => (
-                <button
-                  key={ano}
-                  className={`${styles.optionBtn} ${anoSelecionado === ano ? styles.selected : ''}`}
-                  onClick={() => setAnoSelecionado(ano)}
-                >
-                  {ano}
-                </button>
-              ))}
+        <div className={styles.cursosGrid}>
+          {cursos.map((curso) => (
+            <div
+              key={curso.id}
+              className={`glass-panel ${styles.cursoCard} ${!curso.disponivel ? styles.bloqueado : ''}`}
+              onClick={() => handleAcessar(curso)}
+            >
+              <div className={styles.cardTop}>
+                <span className={styles.cursoIcone}>{curso.icone}</span>
+                <span className={`${styles.nivelBadge} ${styles[`nivel_${curso.nivel.toLowerCase().replace(' ', '_')}`]}`}>
+                  {curso.nivel}
+                </span>
+              </div>
+              <h3>{curso.nome}</h3>
+              <p>{curso.descricao}</p>
+              <div className={styles.cardFooter}>
+                {curso.disponivel ? (
+                  <>
+                    <span className={styles.aulasInfo}>
+                      <BookOpen size={14} /> {curso.aulas} aula{curso.aulas !== 1 ? 's' : ''} disponíveis
+                    </span>
+                    <span className={styles.acessarBtn}>
+                      Acessar <ChevronRight size={16} />
+                    </span>
+                  </>
+                ) : (
+                  <span className={styles.breve}>🔒 Em breve</span>
+                )}
+              </div>
             </div>
-          </section>
-
-          {/* Seleção de Disciplina */}
-          <section className={`glass-panel ${styles.section} ${!anoSelecionado ? styles.disabled : ''}`}>
-            <h3><BookOpen size={24} /> 2. Escolha a disciplina</h3>
-            <div className={styles.gridCards}>
-              {disciplinas.map((disc) => (
-                <div
-                  key={disc.id}
-                  className={`${styles.cardDisciplina} ${disciplinaSelecionada === disc.id ? styles.cardSelected : ''}`}
-                  style={{ '--card-color': disc.cor }}
-                  onClick={() => anoSelecionado && setDisciplinaSelecionada(disc.id)}
-                >
-                  <span className={styles.cardIcon}>{disc.icone}</span>
-                  <span className={styles.cardName}>{disc.nome}</span>
-                </div>
-              ))}
-            </div>
-          </section>
+          ))}
         </div>
 
-        <div className={styles.actionArea}>
-          <button 
-            className={`btn-primary ${styles.proceedBtn}`}
-            disabled={!anoSelecionado || !disciplinaSelecionada}
-            onClick={handleContinuar}
-          >
-            Acessar Módulos
-            <ChevronRight size={24} />
-          </button>
+        <div className={`glass-panel ${styles.motivaBox}`}>
+          <Star size={18} className={styles.motivaStar} />
+          <p>"Prática com propósito. Sua voz em inglês começa aqui."</p>
         </div>
       </main>
     </div>
