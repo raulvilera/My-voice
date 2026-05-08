@@ -1,81 +1,122 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Key, Mail, ArrowRight } from 'lucide-react';
+import { Mic, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './Login.module.css';
 
 const Login = () => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const navigate          = useNavigate();
+  const { signIn, signUp } = useAuth();
 
-  const handleLogin = (e) => {
+  const [tab, setTab]         = useState('entrar'); // 'entrar' | 'cadastrar'
+  const [nome, setNome]       = useState('');
+  const [email, setEmail]     = useState('');
+  const [senha, setSenha]     = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro]       = useState('');
+  const [sucesso, setSucesso] = useState('');
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulando login
-    if (email && password) {
-      navigate('/dashboard');
+    setErro(''); setLoading(true);
+    try {
+      const { user } = await signIn(email, senha);
+      // redireciona após fetchProfile (feito no AuthContext)
+      // pequena espera para o profile carregar
+      setTimeout(() => navigate('/'), 300);
+    } catch (err) {
+      setErro(err.message === 'Invalid login credentials'
+        ? 'E-mail ou senha incorretos.'
+        : err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCadastro = async (e) => {
+    e.preventDefault();
+    setErro(''); setSucesso(''); setLoading(true);
+    if (senha.length < 6) { setErro('A senha deve ter pelo menos 6 caracteres.'); setLoading(false); return; }
+    try {
+      await signUp(email, senha, nome);
+      setSucesso('Cadastro realizado! Verifique seu e-mail para confirmar o acesso.');
+      setNome(''); setEmail(''); setSenha('');
+    } catch (err) {
+      setErro(err.message.includes('already registered')
+        ? 'Este e-mail já está cadastrado.'
+        : err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className={styles.container}>
-      {/* Lado da Ilustração (Visível apenas em telas maiores) */}
-      <div className={styles.illustrationSide}>
-        <div className={styles.imageWrapper}>
-          <img src="/login-bg.png" alt="Educação e Tecnologia" />
+    <div className={styles.loginPage}>
+      <div className={styles.card}>
+        {/* Logo */}
+        <div className={styles.logoArea}>
+          <div className={styles.logoIcon}><Mic size={32} /></div>
+          <h1>My Voice</h1>
+          <p>Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem.</p>
         </div>
-        <div className={styles.branding}>
-          <h1>Aprenda de forma<br/>inteligente.</h1>
-          <p>O My voice utiliza metodologias dinâmicas alinhadas à BNCC para acelerar seu desenvolvimento escolar.</p>
+
+        {/* Tabs */}
+        <div className={styles.tabs}>
+          <button className={`${styles.tab} ${tab === 'entrar' ? styles.tabActive : ''}`} onClick={() => { setTab('entrar'); setErro(''); setSucesso(''); }}>
+            Entrar
+          </button>
+          <button className={`${styles.tab} ${tab === 'cadastrar' ? styles.tabActive : ''}`} onClick={() => { setTab('cadastrar'); setErro(''); setSucesso(''); }}>
+            Cadastrar
+          </button>
         </div>
-      </div>
 
-      {/* Lado do Formulário de Login */}
-      <div className={styles.loginSide}>
-        <div className={`${styles.shape1} ${styles.floatingShape}`}></div>
-        <div className={`${styles.shape2} ${styles.floatingShape}`}></div>
-        
-        <div className={`${styles.loginBox} animate-fade-in`}>
-          <div className={styles.header}>
-            <div className={styles.logo}>
-              <BookOpen size={36} color="#fff" strokeWidth={2.5} />
-            </div>
-            <h2>Bem-vindo ao<br/><span className="text-gradient">My voice</span></h2>
-            <p className={styles.subtitle}>Sua jornada de aprendizado começa aqui.</p>
-          </div>
-
+        {/* Form Login */}
+        {tab === 'entrar' && (
           <form onSubmit={handleLogin} className={styles.form}>
-            <div className={styles.inputGroup}>
-              <Mail className={styles.icon} size={20} />
-              <input
-                type="email"
-                placeholder="Seu e-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+            <div className={styles.field}>
+              <Mail size={18} className={styles.fieldIcon} />
+              <input type="email" placeholder="Seu e-mail" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
             </div>
-
-            <div className={styles.inputGroup}>
-              <Key className={styles.icon} size={20} />
-              <input
-                type="password"
-                placeholder="Sua senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <div className={styles.field}>
+              <Lock size={18} className={styles.fieldIcon} />
+              <input type={showPwd ? 'text' : 'password'} placeholder="Sua senha" value={senha} onChange={e => setSenha(e.target.value)} required autoComplete="current-password" />
+              <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(p => !p)}>
+                {showPwd ? <EyeOff size={16}/> : <Eye size={16}/>}
+              </button>
             </div>
-
-            <button type="submit" className={`btn-primary ${styles.submitBtn}`}>
-              Entrar na Plataforma
-              <ArrowRight size={20} />
+            {erro && <div className={styles.erro}><AlertCircle size={16}/> {erro}</div>}
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
+              {loading ? 'Entrando…' : 'Entrar na Plataforma'}
             </button>
           </form>
+        )}
 
-          <div className={styles.footer}>
-            <p>Ainda não tem uma conta? <a href="#" className={styles.link}>Cadastre-se</a></p>
-          </div>
-        </div>
+        {/* Form Cadastro */}
+        {tab === 'cadastrar' && (
+          <form onSubmit={handleCadastro} className={styles.form}>
+            <div className={styles.field}>
+              <User size={18} className={styles.fieldIcon} />
+              <input type="text" placeholder="Seu nome completo" value={nome} onChange={e => setNome(e.target.value)} required />
+            </div>
+            <div className={styles.field}>
+              <Mail size={18} className={styles.fieldIcon} />
+              <input type="email" placeholder="Seu e-mail" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
+            </div>
+            <div className={styles.field}>
+              <Lock size={18} className={styles.fieldIcon} />
+              <input type={showPwd ? 'text' : 'password'} placeholder="Crie uma senha (mín. 6 caracteres)" value={senha} onChange={e => setSenha(e.target.value)} required autoComplete="new-password" />
+              <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(p => !p)}>
+                {showPwd ? <EyeOff size={16}/> : <Eye size={16}/>}
+              </button>
+            </div>
+            {erro    && <div className={styles.erro}><AlertCircle size={16}/> {erro}</div>}
+            {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
+              {loading ? 'Cadastrando…' : 'Criar Conta'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
