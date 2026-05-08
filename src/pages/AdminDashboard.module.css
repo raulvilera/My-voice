@@ -1,0 +1,283 @@
+.adminContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(15,23,42,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logoInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoIcon { color: var(--color-primary); }
+
+.logoInfo h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.roleTag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-tertiary);
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nomeProf {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--glass-border);
+  transition: all var(--transition-fast);
+}
+
+.logoutBtn:hover {
+  color: var(--color-text-main);
+  background: rgba(255,255,255,0.07);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Stats */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+}
+
+.statIcon        { color: var(--color-primary); }
+.statIconGreen   { color: var(--color-success); }
+.statIconRed     { color: var(--color-danger); }
+.statIconPurple  { color: var(--color-secondary); }
+
+.statNum {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Painel de alunos */
+.alunosPanel {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.panelHeader h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.buscaField {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  padding: 0.45rem 0.9rem;
+  color: var(--color-text-muted);
+  transition: border-color var(--transition-fast);
+}
+
+.buscaField:focus-within {
+  border-color: var(--color-primary);
+}
+
+.buscaField input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text-main);
+  font-size: 0.85rem;
+  font-family: inherit;
+  width: 200px;
+}
+
+.buscaField input::placeholder { color: var(--color-text-muted); }
+
+.alunosList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.alunoRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.alunoRow:hover { background: rgba(255,255,255,0.06); }
+
+.inativo { opacity: 0.5; }
+
+.alunoAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.alunoInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.alunoNome {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alunoEmail {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alunoMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.alunoData {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.statusBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.ativo {
+  background: rgba(16,185,129,0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(16,185,129,0.3);
+}
+
+.bloqueado {
+  background: rgba(239,68,68,0.12);
+  color: var(--color-danger);
+  border: 1px solid rgba(239,68,68,0.25);
+}
+
+.toggleBtn {
+  flex-shrink: 0;
+  padding: 0.3rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.toggleBtnAtivo  { color: var(--color-success); }
+.toggleBtnInativo { color: var(--color-danger); }
+
+.toggleBtn:hover { background: rgba(255,255,255,0.08); transform: scale(1.1); }
+
+.loadingMsg, .emptyMsg {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  padding: 2rem;
+}
+
+@media (max-width: 600px) {
+  .mainContent { padding: 1rem; }
+  .navbar { padding: 1rem; }
+  .nomeProf { display: none; }
+  .buscaField input { width: 130px; }
+  .alunoMeta { display: none; }
+}
+
