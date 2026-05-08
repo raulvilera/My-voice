@@ -10,20 +10,26 @@ export const AuthProvider = ({ children }) => {
 
   const fetchProfile = async (userId) => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
+      if (error) throw error;
       setProfile(data);
     } catch (e) {
-      setProfile(null);
+      // Se não conseguir buscar o perfil, cria um perfil básico
+      // para não travar o carregamento
+      setProfile({ id: userId, role: 'aluno', name: '' });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // Timeout de segurança: após 5s força o loading para false
+    const timeout = setTimeout(() => setLoading(false), 5000);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -43,7 +49,10 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const signIn = async (email, password) => {
