@@ -338,7 +338,7 @@ const NovaAula = ({ onSalvo }) => {
           <p className={styles.agenteResumo}>{registroIA.resumo}</p>
           {registroIA.objetivos?.length > 0 && (
             <ul className={styles.agenteList}>
-              {registroIA.objetivos.map((o: string, i: number) => <li key={i}>{o}</li>)}
+              {registroIA.objetivos.map((o, i) => <li key={i}>{o}</li>)}
             </ul>
           )}
           {registroIA.sugestao_uso && (
@@ -346,7 +346,7 @@ const NovaAula = ({ onSalvo }) => {
           )}
           {registroIA.tags_automaticas?.length > 0 && (
             <div className={styles.agenteTags}>
-              {registroIA.tags_automaticas.map((t: string, i: number) => (
+              {registroIA.tags_automaticas.map((t, i) => (
                 <span key={i} className={styles.agenteTag}>{t}</span>
               ))}
             </div>
