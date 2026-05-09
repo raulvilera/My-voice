@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Mic, LogOut, Users, ToggleLeft, ToggleRight, Search,
   Plus, Eye, X, Upload, FileText, Loader2,
-  MessageCircle, BookMarked, Grid3x3, PenLine,
+  MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
 } from 'lucide-react';
+import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
@@ -447,11 +448,52 @@ const GerenciarAlunos = () => {
   );
 };
 
+// ── Modo Ver como Aluno ───────────────────────────────────────────────────────
+const ModoAluno = ({ onFechar }) => (
+  <div style={{
+    position: 'fixed', inset: 0, zIndex: 300,
+    display: 'flex', flexDirection: 'column',
+    background: 'var(--color-bg-primary, #0f172a)',
+  }}>
+    {/* Banner fixo */}
+    <div style={{
+      background: 'linear-gradient(135deg, #7c3aed, #db2777)',
+      padding: '0.6rem 1.25rem',
+      display: 'flex', alignItems: 'center',
+      justifyContent: 'space-between', gap: '1rem',
+      flexShrink: 0, zIndex: 400,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <GraduationCap size={18} color="#fff"/>
+        <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
+          Modo Visualização — você está vendo como o aluno vê
+        </span>
+      </div>
+      <button
+        onClick={onFechar}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '0.4rem',
+          background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)',
+          borderRadius: '999px', padding: '0.35rem 0.9rem',
+          color: '#fff', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
+        }}
+      >
+        <X size={15}/> Voltar à área da professora
+      </button>
+    </div>
+    {/* Trilha do aluno em modo somente-leitura */}
+    <div style={{ flex: 1, overflowY: 'auto' }}>
+      <Trilha modoVisualizacao />
+    </div>
+  </div>
+);
+
 // ── Admin Principal ───────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
   const [aba, setAba] = useState('aulas');
+  const [modoAluno, setModoAluno] = useState(false);
 
   const handleLogout = async () => { await signOut(); navigate('/login'); };
 
@@ -463,6 +505,8 @@ const AdminDashboard = () => {
   ];
 
   return (
+    <>
+    {modoAluno && <ModoAluno onFechar={() => setModoAluno(false)}/>}
     <div className={styles.adminContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
@@ -474,6 +518,9 @@ const AdminDashboard = () => {
         </div>
         <div className={styles.navRight}>
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>
+          <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>
+            <GraduationCap size={16}/> Ver como Aluno
+          </button>
           <button className={styles.logoutBtn} onClick={handleLogout}><LogOut size={18}/> Sair</button>
         </div>
       </nav>
@@ -497,6 +544,7 @@ const AdminDashboard = () => {
         {aba === 'alunos' && <GerenciarAlunos />}
       </main>
     </div>
+    </>
   );
 };
 
