@@ -499,3 +499,36 @@
   .saveBar { flex-direction: column; }
 }
 
+
+/* ── Agente IA Feedback Card ─────────────────────────────────────────────── */
+.agenteCard {
+  margin-top: 1.25rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(168,85,247,.08));
+  border: 1px solid rgba(139,92,246,.35);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  animation: fadeIn .5s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.agenteHeader {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .85rem; color: #a78bfa; margin-bottom: .5rem;
+}
+.agenteResumo {
+  font-size: .88rem; color: #e2e8f0; margin: .4rem 0;
+}
+.agenteList {
+  margin: .4rem 0 .4rem 1.1rem; padding: 0;
+  font-size: .82rem; color: #cbd5e1;
+}
+.agenteSugestao {
+  font-size: .82rem; color: #94a3b8; margin-top: .5rem; font-style: italic;
+}
+.agenteTags {
+  display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .6rem;
+}
+.agenteTag {
+  background: rgba(139,92,246,.25); color: #c4b5fd;
+  border: 1px solid rgba(139,92,246,.4);
+  border-radius: 999px; padding: .15rem .6rem; font-size: .75rem;
+}
