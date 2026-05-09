@@ -4,16 +4,35 @@ import {
   Mic, LogOut, Users, ToggleLeft, ToggleRight, Search,
   Plus, Eye, X, Upload, FileText, Loader2,
   MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
+  CreditCard, Crown, Zap, Bot,
 } from 'lucide-react';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
+import Planos from './Planos';
+import VideoEducacional from '../components/VideoEducacional';
 import { SecaoDialogo }    from '../components/SecaoDialogo';
 import { SecaoVerbos }     from '../components/SecaoVerbos';
 import { SecaoVocabulario }from '../components/SecaoVocabulario';
 import { SecaoExercicios } from '../components/SecaoExercicios';
 import styles from './AdminDashboard.module.css';
+
+// ── Agente IA: registra atividade automaticamente ────────────────────────────
+const EDGE_URL = 'https://ppzvwhkvwupmfmijrkkl.supabase.co/functions/v1/registrar-atividade';
+
+const dispararAgenteRegistro = async ({ aula_id, professor_id, titulo, subtitulo, tag, secoes, origem }) => {
+  try {
+    const resp = await fetch(EDGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aula_id, professor_id, titulo, subtitulo, tag, secoes, origem }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.registro || null;
+  } catch { return null; }
+};
 
 // ── Pílulas de seção ──────────────────────────────────────────────────────────
 const PILL_INFO = {
@@ -24,7 +43,7 @@ const PILL_INFO = {
 };
 
 // ── Preview de aulas ──────────────────────────────────────────────────────────
-const PreviewAulas = () => {
+const PreviewAulas = ({ plano = 'basico' }) => {
   const [aulas, setAulas]         = useState([]);
   const [aulaAberta, setAulaAberta] = useState(null);
   const [secAberta, setSecAberta]   = useState(null); // tipo de seção aberta individualmente
@@ -41,15 +60,28 @@ const PreviewAulas = () => {
     })();
   }, []);
 
-  const renderSecao = (sec, idx) => {
+  const renderSecao = (sec, idx, tituloAula) => {
     const dados = { ...sec.conteudo, titulo: sec.titulo };
-    switch (sec.tipo) {
-      case 'dialogo':     return <SecaoDialogo     key={idx} section={dados}/>;
-      case 'verbos':      return <SecaoVerbos      key={idx} section={dados}/>;
-      case 'vocabulario': return <SecaoVocabulario key={idx} section={dados}/>;
-      case 'exercicios':  return <SecaoExercicios  key={idx} section={dados}/>;
-      default: return null;
-    }
+    return (
+      <div key={idx}>
+        {/* Vídeo educacional gerado por IA para cada seção */}
+        <VideoEducacional
+          tituloAula={tituloAula}
+          tipoSecao={sec.tipo}
+          conteudoSecao={sec.conteudo}
+          plano={plano}
+        />
+        {(() => {
+          switch (sec.tipo) {
+            case 'dialogo':     return <SecaoDialogo     section={dados}/>;
+            case 'verbos':      return <SecaoVerbos      section={dados}/>;
+            case 'vocabulario': return <SecaoVocabulario section={dados}/>;
+            case 'exercicios':  return <SecaoExercicios  section={dados}/>;
+            default: return null;
+          }
+        })()}
+      </div>
+    );
   };
 
   const abrirSecao = (aula, tipo, e) => {
@@ -141,7 +173,7 @@ const PreviewAulas = () => {
               </button>
             </div>
             <div className={styles.modalBody}>
-              {secoesModal.map((sec, idx) => renderSecao(sec, idx))}
+              {secoesModal.map((sec, idx) => renderSecao(sec, idx, aulaAberta.titulo))}
             </div>
           </div>
         </div>
@@ -152,12 +184,14 @@ const PreviewAulas = () => {
 
 // ── Upload de Documento ───────────────────────────────────────────────────────
 const UploadDocumento = ({ onSalvo }) => {
+  const { user } = useAuth();
   const [arquivo, setArquivo]     = useState(null);
   const [convertendo, setConvert] = useState(false);
   const [resultado, setResultado] = useState(null); // estrutura convertida
   const [erro, setErro]           = useState('');
   const [salvando, setSalvando]   = useState(false);
   const [sucesso, setSucesso]     = useState('');
+  const [registroIA, setRegistroIA] = useState(null);
 
   const handleFile = (e) => {
     const f = e.target.files?.[0];
@@ -288,6 +322,17 @@ ${texto.slice(0, 8000)}`;
       const { error: secErr } = await supabase.from('secoes').insert(secoesData);
       if (secErr) throw secErr;
 
+      // ── Agente IA registra a atividade importada automaticamente ─────────
+      dispararAgenteRegistro({
+        aula_id: aula.id,
+        professor_id: user?.id,
+        titulo: resultado.titulo,
+        subtitulo: resultado.subtitulo || '',
+        tag: 'Iniciante',
+        secoes: secoesData,
+        origem: 'upload',
+      }).then(reg => { if (reg) setRegistroIA(reg); });
+
       setSucesso(publicar ? 'Aula publicada!' : 'Salva como rascunho!');
       setTimeout(() => { setSucesso(''); onSalvo?.(); }, 2000);
     } catch (e) {
@@ -374,6 +419,27 @@ ${texto.slice(0, 8000)}`;
               <X size={15}/> Recomeçar
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Feedback do Agente IA após salvar */}
+      {registroIA && (
+        <div className={styles.agenteCard}>
+          <div className={styles.agenteHeader}>
+            <Bot size={16} style={{ color: '#8b5cf6' }} />
+            <strong>Agente IA registrou sua atividade importada</strong>
+          </div>
+          <p className={styles.agenteResumo}>{registroIA.resumo}</p>
+          {registroIA.sugestao_uso && (
+            <p className={styles.agenteSugestao}>💡 {registroIA.sugestao_uso}</p>
+          )}
+          {registroIA.tags_automaticas?.length > 0 && (
+            <div className={styles.agenteTags}>
+              {registroIA.tags_automaticas.map((t, i) => (
+                <span key={i} className={styles.agenteTag}>{t}</span>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -495,6 +561,9 @@ const AdminDashboard = () => {
   const [aba, setAba] = useState('aulas');
   const [modoAluno, setModoAluno] = useState(false);
 
+  // Plano lido diretamente do perfil Supabase (persiste entre sessões)
+  const plano = profile?.plano || 'basico';
+
   const handleLogout = async () => { await signOut(); navigate('/login'); };
 
   const ABAS = [
@@ -502,7 +571,15 @@ const AdminDashboard = () => {
     { id: 'nova',    label: 'Nova Aula',     icon: <Plus size={16}/> },
     { id: 'upload',  label: 'Importar Doc',  icon: <Upload size={16}/> },
     { id: 'alunos',  label: 'Alunos',        icon: <Users size={16}/> },
+    { id: 'planos',  label: 'Planos',        icon: <CreditCard size={16}/> },
   ];
+
+  // Badge visual do plano na navbar
+  const planoBadgeInfo = {
+    basico: { label: 'Grátis', cor: '#64748b', icone: <Mic size={12}/> },
+    pro:    { label: 'Pro',    cor: '#8b5cf6', icone: <Zap size={12}/> },
+    escola: { label: 'Escola', cor: '#f59e0b', icone: <Crown size={12}/> },
+  }[plano] || { label: 'Grátis', cor: '#64748b', icone: <Mic size={12}/> };
 
   return (
     <>
@@ -517,6 +594,16 @@ const AdminDashboard = () => {
           </div>
         </div>
         <div className={styles.navRight}>
+          {/* Badge clicável do plano atual */}
+          <button
+            className={styles.planoBadgeBtn}
+            style={{ '--plano-cor': planoBadgeInfo.cor }}
+            onClick={() => setAba('planos')}
+            title="Gerenciar plano"
+          >
+            {planoBadgeInfo.icone}
+            <span>{planoBadgeInfo.label}</span>
+          </button>
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>
           <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>
             <GraduationCap size={16}/> Ver como Aluno
@@ -534,14 +621,23 @@ const AdminDashboard = () => {
               onClick={() => setAba(a.id)}
             >
               {a.icon} {a.label}
+              {/* Ponto de notificação para upgrade */}
+              {a.id === 'planos' && plano === 'basico' && (
+                <span className={styles.upgradeDot} />
+              )}
             </button>
           ))}
         </div>
 
-        {aba === 'aulas'  && <PreviewAulas />}
+        {aba === 'aulas'  && <PreviewAulas plano={plano} />}
         {aba === 'nova'   && <NovaAula onSalvo={() => setAba('aulas')} />}
         {aba === 'upload' && <UploadDocumento onSalvo={() => setAba('aulas')} />}
         {aba === 'alunos' && <GerenciarAlunos />}
+        {aba === 'planos' && (
+          <Planos
+            onMudarPlano={() => setAba('aulas')}
+          />
+        )}
       </main>
     </div>
     </>
