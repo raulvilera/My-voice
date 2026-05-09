@@ -1,7 +1,26 @@
 import { useState } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronUp, Save, Eye, MessageCircle, BookMarked, Grid3x3, PenLine } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Save, Eye, MessageCircle, BookMarked, Grid3x3, PenLine, Bot } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './NovaAula.module.css';
+
+// ── Agente IA: registra atividade automaticamente após salvar ─────────────────
+const EDGE_URL = 'https://ppzvwhkvwupmfmijrkkl.supabase.co/functions/v1/registrar-atividade';
+
+const dispararAgenteRegistro = async ({ aula_id, professor_id, titulo, subtitulo, tag, secoes, origem }) => {
+  try {
+    const resp = await fetch(EDGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aula_id, professor_id, titulo, subtitulo, tag, secoes, origem }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.registro || null;
+  } catch {
+    return null; // falha silenciosa — não bloqueia o fluxo principal
+  }
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2);
@@ -165,6 +184,7 @@ const SecaoCard = ({ secao, onUpdate, onRemove, onMove, isFirst, isLast }) => {
 
 // ── Nova Aula Principal ───────────────────────────────────────────────────────
 const NovaAula = ({ onSalvo }) => {
+  const { user } = useAuth();
   const [titulo,    setTitulo]    = useState('');
   const [subtitulo, setSubtitulo] = useState('');
   const [tag,       setTag]       = useState('Iniciante');
@@ -172,6 +192,7 @@ const NovaAula = ({ onSalvo }) => {
   const [salvando,  setSalvando]  = useState(false);
   const [erro,      setErro]      = useState('');
   const [sucesso,   setSucesso]   = useState('');
+  const [registroIA, setRegistroIA] = useState(null); // feedback do agente
 
   const addSecao = (tipo) => {
     const defaults = {
@@ -227,6 +248,17 @@ const NovaAula = ({ onSalvo }) => {
       }));
       const { error: secErr } = await supabase.from('secoes').insert(secoesData);
       if (secErr) throw secErr;
+
+      // ── Dispara o agente de IA para registrar a atividade (assíncrono) ────
+      dispararAgenteRegistro({
+        aula_id: aula.id,
+        professor_id: user?.id,
+        titulo: titulo.trim(),
+        subtitulo: subtitulo.trim(),
+        tag,
+        secoes: secoesData,
+        origem: 'manual',
+      }).then(reg => { if (reg) setRegistroIA(reg); });
 
       setSucesso(publicar ? 'Aula publicada com sucesso!' : 'Aula salva como rascunho!');
       setTitulo(''); setSubtitulo(''); setSecoes([]);
@@ -296,6 +328,32 @@ const NovaAula = ({ onSalvo }) => {
       {erro    && <div className={styles.erro}>{erro}</div>}
       {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
 
+      {/* Feedback do Agente IA após salvar */}
+      {registroIA && (
+        <div className={styles.agenteCard}>
+          <div className={styles.agenteHeader}>
+            <Bot size={16} style={{ color: '#8b5cf6' }} />
+            <strong>Agente IA registrou sua atividade</strong>
+          </div>
+          <p className={styles.agenteResumo}>{registroIA.resumo}</p>
+          {registroIA.objetivos?.length > 0 && (
+            <ul className={styles.agenteList}>
+              {registroIA.objetivos.map((o: string, i: number) => <li key={i}>{o}</li>)}
+            </ul>
+          )}
+          {registroIA.sugestao_uso && (
+            <p className={styles.agenteSugestao}>💡 {registroIA.sugestao_uso}</p>
+          )}
+          {registroIA.tags_automaticas?.length > 0 && (
+            <div className={styles.agenteTags}>
+              {registroIA.tags_automaticas.map((t: string, i: number) => (
+                <span key={i} className={styles.agenteTag}>{t}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className={styles.saveBar}>
         <button className={styles.saveRascunhoBtn} onClick={() => salvar(false)} disabled={salvando}>
           <Save size={16}/> {salvando ? 'Salvando…' : 'Salvar Rascunho'}
@@ -309,4 +367,3 @@ const NovaAula = ({ onSalvo }) => {
 };
 
 export default NovaAula;
-
