@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons.svg', 'login-bg.png'],
+      includeAssets: ['favicon.png', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icons.svg', 'login-bg.png'],
       manifest: {
         name: 'My Voice – Inglês do Zero',
         short_name: 'My Voice',
@@ -22,19 +22,19 @@ export default defineConfig({
         lang: 'pt-BR',
         icons: [
           {
-            src: '/icons/icon-192.png',
+            src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: '/icons/icon-512.png',
+            src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: '/icons/icon-180.png',
+            src: '/icon-180.png',
             sizes: '180x180',
             type: 'image/png'
           }
@@ -50,23 +50,15 @@ export default defineConfig({
         ]
       },
       workbox: {
-        // Cacheia todos os assets do build
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        // Estratégia: Network First para páginas, Cache First para assets estáticos
         runtimeCaching: [
           {
-            // Google Fonts
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 ano
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] }
             }
           },
           {
@@ -74,37 +66,23 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] }
             }
           },
           {
-            // Supabase API — sempre Network First (dados em tempo real)
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'supabase-api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5 // 5 minutos
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              },
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 },
+              cacheableResponse: { statuses: [0, 200] },
               networkTimeoutSeconds: 10
             }
           }
         ]
       },
-      // Mostra prompt de atualização ao usuário
-      devOptions: {
-        enabled: true
-      }
+      devOptions: { enabled: true }
     })
   ],
 })
