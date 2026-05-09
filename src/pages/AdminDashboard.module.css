@@ -400,3 +400,59 @@
   .tabBtn { padding: 0.45rem 0.75rem; font-size: 0.78rem; }
   .uploadCard { padding: 1.5rem 1rem; }
 }
+
+/* ── Badge de plano na navbar ──────────────────────────────────────── */
+.planoBadgeBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: color-mix(in srgb, var(--plano-cor) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--plano-cor) 40%, transparent);
+  border-radius: var(--radius-full);
+  padding: 0.3rem 0.7rem;
+  color: var(--plano-cor);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.planoBadgeBtn:hover { opacity: 0.8; }
+
+/* ── Ponto de notificação na aba Planos ─────────────────────────────── */
+.upgradeDot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #f59e0b;
+  border-radius: 50%;
+  margin-left: 2px;
+  animation: piscar 1.4s ease-in-out infinite;
+}
+
+@keyframes piscar {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Agente IA Feedback Card ─────────────────────────────────────────────── */
+.agenteCard {
+  margin-top: 1.25rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(168,85,247,.08));
+  border: 1px solid rgba(139,92,246,.35);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  animation: fadeInAgent .5s ease;
+}
+@keyframes fadeInAgent { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.agenteHeader {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .85rem; color: #a78bfa; margin-bottom: .5rem;
+}
+.agenteResumo { font-size: .88rem; color: #e2e8f0; margin: .4rem 0; }
+.agenteSugestao { font-size: .82rem; color: #94a3b8; margin-top: .5rem; font-style: italic; }
+.agenteTags { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .6rem; }
+.agenteTag {
+  background: rgba(139,92,246,.25); color: #c4b5fd;
+  border: 1px solid rgba(139,92,246,.4);
+  border-radius: 999px; padding: .15rem .6rem; font-size: .75rem;
+}
