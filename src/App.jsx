@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Trilha from './pages/Trilha';
 import AdminDashboard from './pages/AdminDashboard';
+import PWAPrompt from './components/PWAPrompt';
 
 const Loader = () => (
   <div style={{
@@ -51,6 +52,8 @@ const App = () => (
   <AuthProvider>
     <Router>
       <AppRoutes />
+      {/* Banner de instalação/atualização PWA — aparece automaticamente quando aplicável */}
+      <PWAPrompt />
     </Router>
   </AuthProvider>
 );
