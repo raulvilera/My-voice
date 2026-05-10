@@ -1,5 +1,5 @@
 export const myVoiceData = {
-  basico: {
+basico: {
     nome: 'Inglês Básico',
     descricao: 'Do zero à conversação. Comece sua voz em inglês aqui.',
     cor: '#8b5cf6',
