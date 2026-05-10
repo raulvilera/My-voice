@@ -1,3 +1,4 @@
+
 /* ── Layout ──────────────────────────────────────────────────────────────── */
 .trilhaContainer {
   min-height: 100vh;
@@ -93,6 +94,29 @@
   padding: 1.25rem 1.5rem;
   cursor: pointer;
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.aulaCardBackground {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.25;
+  z-index: 0;
+}
+
+.aulaCardContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
 }
 
 .aulaCard:hover:not(.aulaBloqueada) {
