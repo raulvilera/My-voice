@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Mic, X, MessageCircle, BookMarked, Grid3x3, PenLine } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import capaDefault from '../assets/capa_padrao.jpg';
+const capaDefault = "/capa_padrao.jpg";
 import { SecaoDialogo }     from '../components/SecaoDialogo';
 import { SecaoVerbos }      from '../components/SecaoVerbos';
 import { SecaoVocabulario } from '../components/SecaoVocabulario';
