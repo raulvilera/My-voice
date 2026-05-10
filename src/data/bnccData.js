@@ -1,5 +1,5 @@
 export const bnccData = {
-  '6º Ano': {
+'6º Ano': {
     mat: {
       nome: 'Matemática',
       bimestres: [
@@ -168,4 +168,3 @@ export const bnccData = {
       ]
     }
   }
-};
