@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import capaDefault from '../assets/capa_padrao.jpg';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
@@ -15,7 +17,7 @@ const Dashboard = () => {
     const fetchAulas = async () => {
       const { data } = await supabase
         .from('aulas')
-        .select('id, numero, titulo, subtitulo, tag, publicada')
+        .select('id, numero, titulo, subtitulo, tag, publicada, imagem_url')
         .eq('publicada', true)
         .order('numero');
       setAulas(data || []);
@@ -50,23 +52,30 @@ const Dashboard = () => {
           <p style={{textAlign:'center', color:'var(--color-text-muted)'}}>Carregando aulas…</p>
         ) : (
           <div className={styles.aulasList}>
-            {aulas.map(aula => (
-              <div
-                key={aula.id}
-                className={`glass-panel ${styles.aulaCard}`}
-                onClick={() => navigate('/trilha', { state: { aulaId: aula.id } })}
-              >
-                <div className={styles.aulaNumero}>
-                  <span>{String(aula.numero).padStart(2,'0')}</span>
+            {aulas.map(aula => {
+              const imagemUrl = aula.imagem_url || capaDefault;
+              return (
+                <div
+                  key={aula.id}
+                  className={`glass-panel ${styles.aulaCard}`}
+                  onClick={() => navigate('/trilha', { state: { aulaId: aula.id } })}
+                  style={{ backgroundImage: `url(${imagemUrl})` }}
+                >
+                  <div className={styles.aulaCardBackground} style={{ backgroundImage: `url(${imagemUrl})` }} />
+                  <div className={styles.aulaCardContent}>
+                    <div className={styles.aulaNumero}>
+                      <span>{String(aula.numero).padStart(2,'0')}</span>
+                    </div>
+                    <div className={styles.aulaInfo}>
+                      <span className={styles.aulaTagSmall}>{aula.tag}</span>
+                      <h3>{aula.titulo}</h3>
+                      <p>{aula.subtitulo}</p>
+                    </div>
+                    <ChevronRight size={22} className={styles.aulaArrow}/>
+                  </div>
                 </div>
-                <div className={styles.aulaInfo}>
-                  <span className={styles.aulaTagSmall}>{aula.tag}</span>
-                  <h3>{aula.titulo}</h3>
-                  <p>{aula.subtitulo}</p>
-                </div>
-                <ChevronRight size={22} className={styles.aulaArrow}/>
-              </div>
-            ))}
+              );
+            })}
 
             {aulas.length === 0 && (
               <div className={styles.emptyState}>
@@ -85,4 +94,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard
