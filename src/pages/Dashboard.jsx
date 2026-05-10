@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import capaDefault from "../assets/capa_padrao.jpg";
 import styles from './Dashboard.module.css';
+
+const capaDefault = "/capa_padrao.jpg";
 
 const Dashboard = () => {
   const navigate = useNavigate();
