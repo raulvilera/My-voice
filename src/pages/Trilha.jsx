@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect }
+from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Mic, X, MessageCircle, BookMarked, Grid3x3, PenLine } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import capaDefault from '../assets/capa_padrao.jpg';
 import { SecaoDialogo }     from '../components/SecaoDialogo';
 import { SecaoVerbos }      from '../components/SecaoVerbos';
 import { SecaoVocabulario } from '../components/SecaoVocabulario';
 import { SecaoExercicios }  from '../components/SecaoExercicios';
 import styles from './Trilha.module.css';
-
 const PILL_LABELS = {
   dialogo:     { emoji: '💬', label: 'Diálogo' },
   verbos:      { emoji: '📘', label: 'Verbos' },
   vocabulario: { emoji: '📖', label: 'Vocab' },
   exercicios:  { emoji: '✏️', label: 'Exercícios' },
 };
-
 // ── Modal de seção ────────────────────────────────────────────────────────────
 const SecaoModal = ({ aula, secType, onClose }) => {
   if (!aula || !secType) return null;
   const secoes = (aula.secoes || []).sort((a, b) => a.ordem - b.ordem);
   const sectionsToShow = secType === 'dialogo' ? secoes : secoes.filter(s => s.tipo === secType);
-
   const renderSecao = (sec, idx) => {
     const dados = { ...sec.conteudo, titulo: sec.titulo };
     switch (sec.tipo) {
@@ -32,7 +32,6 @@ const SecaoModal = ({ aula, secType, onClose }) => {
       default: return null;
     }
   };
-
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -52,7 +51,6 @@ const SecaoModal = ({ aula, secType, onClose }) => {
     </div>
   );
 };
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const Trilha = ({ modoVisualizacao = false }) => {
   const navigate    = useNavigate();
@@ -61,7 +59,6 @@ const Trilha = ({ modoVisualizacao = false }) => {
   const [aulas, setAulas]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal]     = useState(null);
-
   useEffect(() => {
     const fetchAulas = async () => {
       const { data } = await supabase
@@ -71,7 +68,6 @@ const Trilha = ({ modoVisualizacao = false }) => {
         .order('numero');
       setAulas(data || []);
       setLoading(false);
-
       if (location.state?.aulaId && data) {
         const aula = data.find(a => a.id === location.state.aulaId);
         if (aula) setModal({ aula, secType: 'dialogo' });
@@ -79,14 +75,11 @@ const Trilha = ({ modoVisualizacao = false }) => {
     };
     fetchAulas();
   }, []);
-
   const handleLogout = async () => { await signOut(); navigate('/login'); };
-
   const openSec = (aula, secType, e) => {
     e.stopPropagation();
     setModal({ aula, secType });
   };
-
   return (
     <div className={styles.trilhaContainer}>
       <nav className={styles.navbar}>
@@ -101,13 +94,11 @@ const Trilha = ({ modoVisualizacao = false }) => {
           </button>
         )}
       </nav>
-
       <main className={styles.mainContent}>
         <header className={styles.header}>
           <h1 className="text-gradient">Inglês Básico</h1>
           <p>Do zero à conversação real. Comece sua voz em inglês aqui.</p>
         </header>
-
         {loading ? (
           <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Carregando aulas…</p>
         ) : aulas.length === 0 ? (
@@ -118,28 +109,36 @@ const Trilha = ({ modoVisualizacao = false }) => {
           <div className={styles.aulasList}>
             {aulas.map(aula => {
               const secoes = (aula.secoes || []).sort((a, b) => a.ordem - b.ordem);
+              const imagemUrl = aula.imagem_url || capaDefault;
               return (
-                <div key={aula.id} className={`glass-panel ${styles.aulaCard}`}>
-                  <div className={styles.aulaNumero}>
-                    <span>{String(aula.numero).padStart(2, '0')}</span>
-                  </div>
-                  <div className={styles.aulaInfo}>
-                    <span className={styles.aulaTagSmall}>{aula.tag}</span>
-                    <h3>{aula.titulo}</h3>
-                    <p>{aula.subtitulo}</p>
-                    <div className={styles.aulaSections}>
-                      {secoes.map((s, si) => {
-                        const pill = PILL_LABELS[s.tipo];
-                        return pill ? (
-                          <button
-                            key={si}
-                            className={styles.sectionPillBtn}
-                            onClick={e => openSec(aula, s.tipo, e)}
-                          >
-                            {pill.emoji} {pill.label}
-                          </button>
-                        ) : null;
-                      })}
+                <div 
+                  key={aula.id} 
+                  className={`glass-panel ${styles.aulaCard}`}
+                  style={{ backgroundImage: `url(${imagemUrl})` }}
+                >
+                  <div className={styles.aulaCardBackground} style={{ backgroundImage: `url(${imagemUrl})` }} />
+                  <div className={styles.aulaCardContent}>
+                    <div className={styles.aulaNumero}>
+                      <span>{String(aula.numero).padStart(2, '0')}</span>
+                    </div>
+                    <div className={styles.aulaInfo}>
+                      <span className={styles.aulaTagSmall}>{aula.tag}</span>
+                      <h3>{aula.titulo}</h3>
+                      <p>{aula.subtitulo}</p>
+                      <div className={styles.aulaSections}>
+                        {secoes.map((s, si) => {
+                          const pill = PILL_LABELS[s.tipo];
+                          return pill ? (
+                            <button
+                              key={si}
+                              className={styles.sectionPillBtn}
+                              onClick={e => openSec(aula, s.tipo, e)}
+                            >
+                              {pill.emoji} {pill.label}
+                            </button>
+                          ) : null;
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -148,7 +147,6 @@ const Trilha = ({ modoVisualizacao = false }) => {
           </div>
         )}
       </main>
-
       {modal && (
         <SecaoModal
           aula={modal.aula}
@@ -159,5 +157,4 @@ const Trilha = ({ modoVisualizacao = false }) => {
     </div>
   );
 };
-
 export default Trilha;
