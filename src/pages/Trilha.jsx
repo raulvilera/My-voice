@@ -11,25 +11,25 @@ const myVoiceData = {
       {
         id: 'aula1',
         numero: 1,
-        titulo: 'Linda & Glinda – Aula 1',
+        titulo: 'Linda & Glynda – Aula 1',
         subtitulo: 'Verbo To Be · Vocabulário do Dia a Dia',
         tag: 'Iniciante',
         sections: [
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            personagens: ['Linda', 'Glinda'],
+            personagens: ['Linda', 'Glynda'],
             falas: [
-              { personagem: 'Linda',  texto: 'Hi, Glinda. How are you?' },
-              { personagem: 'Glinda', texto: "Hi, Linda. I'm okay… just a little tired." },
+              { personagem: 'Linda',  texto: 'Hi, Glynda. How are you?' },
+              { personagem: 'Glynda', texto: "Hi, Linda. I'm okay… just a little tired." },
               { personagem: 'Linda',  texto: 'I understand. I love my job, but my days are busy.' },
-              { personagem: 'Glinda', texto: "I have a good job. I make a lot of money, but I'm not happy." },
+              { personagem: 'Glynda', texto: "I have a good job. I make a lot of money, but I'm not happy." },
               { personagem: 'Linda',  texto: 'Really? Why not?' },
-              { personagem: 'Glinda', texto: "I work a lot. I don't have much time for my son." },
+              { personagem: 'Glynda', texto: "I work a lot. I don't have much time for my son." },
               { personagem: 'Linda',  texto: 'I see… I have three children, and I spend a lot of time with them.' },
-              { personagem: 'Glinda', texto: 'That is very good. I have one son, and I want to spend more time with him.' },
+              { personagem: 'Glynda', texto: 'That is very good. I have one son, and I want to spend more time with him.' },
               { personagem: 'Linda',  texto: 'Maybe you can start with small changes.' },
-              { personagem: 'Glinda', texto: 'Yes… I think I need that.' },
+              { personagem: 'Glynda', texto: 'Yes… I think I need that.' },
             ]
           },
           {
@@ -116,29 +116,29 @@ const myVoiceData = {
       {
         id: 'aula2',
         numero: 2,
-        titulo: 'Linda & Glinda – Aula 2',
+        titulo: 'Linda & Glynda – Aula 2',
         subtitulo: 'Perguntas com To Be · Família · Profissões',
         tag: 'Iniciante',
         sections: [
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            personagens: ['Linda', 'Glinda'],
+            personagens: ['Linda', 'Glynda'],
             falas: [
-              { personagem: 'Glinda', texto: 'Hello, Linda. You are quiet today. Are you okay?' },
+              { personagem: 'Glynda', texto: 'Hello, Linda. You are quiet today. Are you okay?' },
               { personagem: 'Linda',  texto: 'No, I am not okay. I am sad.' },
-              { personagem: 'Glinda', texto: 'Why are you sad? Is everything ok?' },
+              { personagem: 'Glynda', texto: 'Why are you sad? Is everything ok?' },
               { personagem: 'Linda',  texto: "Today is a holiday and my family is here but my father can't come." },
-              { personagem: 'Glinda', texto: 'Really? Where is he?' },
+              { personagem: 'Glynda', texto: 'Really? Where is he?' },
               { personagem: 'Linda',  texto: 'He is in Salvador.' },
-              { personagem: 'Glinda', texto: 'Why is he there?' },
+              { personagem: 'Glynda', texto: 'Why is he there?' },
               { personagem: 'Linda',  texto: 'Because he is a businessman.' },
-              { personagem: 'Glinda', texto: 'What about your mother? Is she a businesswoman?' },
+              { personagem: 'Glynda', texto: 'What about your mother? Is she a businesswoman?' },
               { personagem: 'Linda',  texto: 'No, she is a teacher.' },
-              { personagem: 'Glinda', texto: 'Is she a good teacher?' },
+              { personagem: 'Glynda', texto: 'Is she a good teacher?' },
               { personagem: 'Linda',  texto: 'Yes, she is a very good teacher.' },
-              { personagem: 'Glinda', texto: 'I have to go now. See you later. Bye, Linda.' },
-              { personagem: 'Linda',  texto: 'Bye, Glinda.' },
+              { personagem: 'Glynda', texto: 'I have to go now. See you later. Bye, Linda.' },
+              { personagem: 'Linda',  texto: 'Bye, Glynda.' },
             ]
           },
           {
@@ -571,7 +571,7 @@ export default function Trilha() {
               </div>
               <div style={styles.aulaInfo}>
                 <span style={styles.aulaTagSmall}>Em breve</span>
-                <h3 style={{fontSize:'1rem',fontWeight:700,margin:'2px 0'}}>Aula {n} – Linda & Glinda</h3>
+                <h3 style={{fontSize:'1rem',fontWeight:700,margin:'2px 0'}}>Aula {n} – Linda & Glynda</h3>
                 <p style={{fontSize:'0.82rem',color:'#94a3b8'}}>Conteúdo sendo preparado…</p>
               </div>
               <Lock size={18} color="#94a3b8"/>
