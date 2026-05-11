@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Check, X, RotateCcw, MessageCircle, BookMarked, Grid3x3, PenLine, Play, Square, Volume2, Mic, LogOut, ChevronRight, Lock } from 'lucide-react';
+import { SecaoDialogo }     from '../components/SecaoDialogo';
+import { SecaoVerbos }      from '../components/SecaoVerbos';
+import { SecaoVocabulario } from '../components/SecaoVocabulario';
+import { SecaoExercicios }  from '../components/SecaoExercicios';
 
 // ── DATA ───────────────────────────────────────────────────────────────────────
 const myVoiceData = {
@@ -200,7 +203,6 @@ const myVoiceData = {
                   { pergunta: 'He is a businessman. → ___ he a businessman?', resposta: 'Is' },
                   { pergunta: 'They are here. → ___ they here?',           resposta: 'Are' },
                   { pergunta: 'You are okay. → ___ you okay?',             resposta: 'Are' },
-                  { pergunta: 'It is a holiday. → ___ it a holiday?',      resposta: 'Is'  },
                 ]
               },
               {
@@ -230,247 +232,7 @@ const myVoiceData = {
   }
 };
 
-// ── SecaoDialogo ──────────────────────────────────────────────────────────────
-const SecaoDialogo = ({ section }) => {
-  const [isPlaying, setIsPlaying]     = useState(false);
-  const [activeFala, setActiveFala]   = useState(-1);
-  const [activeWordIdx, setActiveWordIdx] = useState(-1);
-  const [speed, setSpeed]             = useState(0.9);
-  const [voicesReady, setVoicesReady] = useState(false);
-  const cancelledRef = useRef(false);
-  const timersRef    = useRef([]);
-
-  useEffect(() => {
-    const load = () => { if (window.speechSynthesis.getVoices().length > 0) setVoicesReady(true); };
-    load();
-    window.speechSynthesis.onvoiceschanged = load;
-    return () => { window.speechSynthesis.onvoiceschanged = null; };
-  }, []);
-
-  const clearTimers = () => { timersRef.current.forEach(t => clearTimeout(t)); timersRef.current = []; };
-
-  const getVoice = useCallback((personagem) => {
-    const voices   = window.speechSynthesis.getVoices();
-    const enVoices = voices.filter(v => v.lang.startsWith('en'));
-    if (!enVoices.length) return null;
-    const isFirst   = personagem === section.personagens[0];
-    const preferred = isFirst
-      ? ['Samantha','Karen','Victoria','Moira','Tessa','Zoe']
-      : ['Daniel','Alex','Fred','Fiona','Serena','Rishi'];
-    for (const name of preferred) {
-      const v = enVoices.find(v => v.name.includes(name));
-      if (v) return v;
-    }
-    return enVoices[isFirst ? 0 : Math.min(1, enVoices.length - 1)];
-  }, [section.personagens]);
-
-  const estimateWordDurations = (words, rate) => {
-    const BASE_CHAR_MS = 68, BASE_PAUSE = 55;
-    return words.map(w => {
-      const chars = w.replace(/[^a-zA-Z]/g, '').length || 1;
-      return Math.round((chars * BASE_CHAR_MS + BASE_PAUSE) / rate);
-    });
-  };
-
-  const stop = useCallback(() => {
-    cancelledRef.current = true;
-    clearTimers();
-    window.speechSynthesis.cancel();
-    setIsPlaying(false); setActiveFala(-1); setActiveWordIdx(-1);
-  }, []);
-
-  const playAll = useCallback(() => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel(); clearTimers();
-    cancelledRef.current = false; setIsPlaying(true);
-    let idx = 0;
-    const speakNext = () => {
-      if (cancelledRef.current || idx >= section.falas.length) {
-        setIsPlaying(false); setActiveFala(-1); setActiveWordIdx(-1); return;
-      }
-      const fala  = section.falas[idx];
-      const words = fala.texto.split(/\s+/);
-      const durs  = estimateWordDurations(words, speed);
-      setActiveFala(idx); setActiveWordIdx(-1);
-      let elapsed = 80;
-      words.forEach((_, wi) => {
-        const t = setTimeout(() => { if (!cancelledRef.current) setActiveWordIdx(wi); }, elapsed);
-        timersRef.current.push(t); elapsed += durs[wi];
-      });
-      const clearT = setTimeout(() => { if (!cancelledRef.current) setActiveWordIdx(-1); }, elapsed);
-      timersRef.current.push(clearT);
-      const utter    = new SpeechSynthesisUtterance(fala.texto);
-      utter.lang     = 'en-US'; utter.rate = speed;
-      utter.pitch    = fala.personagem === section.personagens[0] ? 1.1 : 0.95;
-      const voice    = getVoice(fala.personagem);
-      if (voice) utter.voice = voice;
-      utter.onboundary = (e) => {
-        if (e.name === 'word' && !cancelledRef.current) {
-          const soFar = fala.texto.slice(0, e.charIndex);
-          const wIdx  = soFar.trim() === '' ? 0 : soFar.trim().split(/\s+/).length;
-          clearTimers(); setActiveWordIdx(wIdx);
-        }
-      };
-      utter.onend  = () => { if (!cancelledRef.current) { clearTimers(); setActiveWordIdx(-1); idx++; setTimeout(speakNext, 350); } };
-      utter.onerror = () => { if (!cancelledRef.current) { clearTimers(); idx++; speakNext(); } };
-      window.speechSynthesis.speak(utter);
-    };
-    speakNext();
-  }, [section.falas, section.personagens, speed, getVoice]);
-
-  useEffect(() => () => { stop(); }, [stop]);
-
-  const s = styles;
-  return (
-    <div style={s.sectionBlock}>
-      <h3 style={s.sectionTitle}><MessageCircle size={18} style={{marginRight:6}}/>{section.titulo}</h3>
-      <div style={s.audioBar}>
-        <button style={{...s.playBtn, ...(isPlaying ? s.playBtnActive : {})}}
-          onClick={isPlaying ? stop : playAll} disabled={!voicesReady}>
-          {isPlaying ? <Square size={14}/> : <Play size={14}/>}
-          <span style={{marginLeft:6}}>{isPlaying ? 'Parar' : voicesReady ? 'Ouvir Diálogo' : 'Carregando…'}</span>
-        </button>
-        <div style={s.speedControl}>
-          <Volume2 size={13} style={{color:'#94a3b8'}}/>
-          {[0.75, 0.9, 1, 1.25].map(sp => (
-            <button key={sp} style={{...s.speedBtn, ...(speed===sp ? s.speedActive : {})}}
-              onClick={() => { setSpeed(sp); if (isPlaying) stop(); }}>
-              {sp===0.75?'0.75×':sp===0.9?'0.9×':sp===1?'1×':'1.25×'}
-            </button>
-          ))}
-        </div>
-        <span style={s.voiceInfo}>🎙 {section.personagens.join(' · ')}</span>
-      </div>
-      <div style={s.dialogBox}>
-        {section.falas.map((fala, fi) => {
-          const isA   = fala.personagem === section.personagens[0];
-          const active = activeFala === fi;
-          const words  = fala.texto.split(/\s+/);
-          return (
-            <div key={fi} style={{...s.bubble, ...(isA?s.bubbleA:s.bubbleB), ...(active?s.bubbleActiveStyle:{})}}>
-              <span style={s.bubbleName}>{fala.personagem}</span>
-              <p style={s.bubbleText}>
-                {active
-                  ? words.map((w, wi) => (
-                      <span key={wi} style={{...s.word, ...(wi===activeWordIdx?s.wordActive:{})}}>{w} </span>
-                    ))
-                  : fala.texto}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// ── SecaoVerbos ───────────────────────────────────────────────────────────────
-const SecaoVerbos = ({ section }) => (
-  <div style={styles.sectionBlock}>
-    <h3 style={styles.sectionTitle}><BookMarked size={18} style={{marginRight:6}}/>{section.titulo}</h3>
-    <div style={{overflowX:'auto'}}>
-      <table style={styles.verbTable}>
-        <thead>
-          <tr>
-            {['Verbo','Presente','Passado','Particípio'].map(h => (
-              <th key={h} style={styles.verbTh}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {section.verbos.map((v, i) => (
-            <tr key={i} style={i%2===0?styles.verbRowEven:{}}>
-              <td style={{...styles.verbTd, fontWeight:600, color:'#8b5cf6'}}>{v.verbo}</td>
-              <td style={styles.verbTd}>{v.presente}</td>
-              <td style={styles.verbTd}>{v.passado}</td>
-              <td style={styles.verbTd}>{v.participio}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
-
-// ── SecaoVocabulario ──────────────────────────────────────────────────────────
-const SecaoVocabulario = ({ section }) => (
-  <div style={styles.sectionBlock}>
-    <h3 style={styles.sectionTitle}><Grid3x3 size={18} style={{marginRight:6}}/>{section.titulo}</h3>
-    <div style={styles.vocabGrid}>
-      {section.palavras.map((p, i) => (
-        <div key={i} style={styles.vocabCard}>
-          <span style={styles.vocabEn}>{p.en}</span>
-          <span style={styles.vocabPt}>{p.pt}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-// ── SecaoExercicios ───────────────────────────────────────────────────────────
-const SecaoExercicios = ({ section }) => {
-  const [respostas, setRespostas]   = useState({});
-  const [resultados, setResultados] = useState({});
-  const [checked, setChecked]       = useState(false);
-
-  const handleInput = (gi, qi, val) => { setRespostas(p => ({...p,[`${gi}-${qi}`]:val})); setChecked(false); };
-  const verificar = () => {
-    const res = {};
-    section.grupos.forEach((g, gi) => g.questoes.forEach((q, qi) => {
-      res[`${gi}-${qi}`] = (respostas[`${gi}-${qi}`]||'').trim().toLowerCase() === q.resposta.toLowerCase();
-    }));
-    setResultados(res); setChecked(true);
-  };
-  const resetar = () => { setRespostas({}); setResultados({}); setChecked(false); };
-  const total   = section.grupos.reduce((acc,g) => acc + g.questoes.length, 0);
-  const acertos = checked ? Object.values(resultados).filter(Boolean).length : 0;
-
-  return (
-    <div style={styles.sectionBlock}>
-      <h3 style={styles.sectionTitle}><PenLine size={18} style={{marginRight:6}}/>{section.titulo}</h3>
-      {section.grupos.map((grupo, gi) => (
-        <div key={gi} style={styles.exercGrupo}>
-          <p style={styles.exercInstrucao}>{grupo.instrucao}</p>
-          <div>
-            {grupo.questoes.map((q, qi) => {
-              const chave  = `${gi}-${qi}`;
-              const status = checked ? (resultados[chave] ? 'certo' : 'errado') : '';
-              return (
-                <div key={qi} style={{...styles.exercItem, ...(status==='certo'?styles.exercCerto:status==='errado'?styles.exercErrado:{})}}>
-                  <span style={styles.exercNum}>{qi+1}.</span>
-                  <label style={styles.exercLabel}>
-                    {q.pergunta.split('___').map((part, pi, arr) => (
-                      <React.Fragment key={pi}>
-                        {part}
-                        {pi < arr.length-1 && (
-                          <input type="text" style={styles.exercInput}
-                            value={respostas[chave]||''} onChange={e => handleInput(gi, qi, e.target.value)} placeholder="?"/>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </label>
-                  {checked && <span style={{marginLeft:8}}>{resultados[chave] ? <Check size={15} color="#10b981"/> : <X size={15} color="#ef4444"/>}</span>}
-                  {checked && !resultados[chave] && <span style={styles.gabarito}>✓ {q.resposta}</span>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
-      {checked && (
-        <div style={{...styles.scoreBox, ...(acertos===total?styles.scorePerfect:{})}}>
-          {acertos===total?'🎉':acertos>=total/2?'👍':'💪'} {acertos}/{total} corretas{acertos===total&&' — Perfeito!'}
-        </div>
-      )}
-      <div style={styles.exercBtns}>
-        <button style={styles.checkBtn} onClick={verificar}><Check size={16}/><span style={{marginLeft:6}}>Verificar Respostas</span></button>
-        <button style={styles.resetBtn} onClick={resetar}><RotateCcw size={16}/><span style={{marginLeft:6}}>Reiniciar</span></button>
-      </div>
-    </div>
-  );
-};
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
+// ── Pílulas de seção ──────────────────────────────────────────────────────────
 const PILL_LABELS = {
   dialogo:     { emoji: '💬', label: 'Diálogo'    },
   verbos:      { emoji: '📘', label: 'Verbos'      },
@@ -478,11 +240,23 @@ const PILL_LABELS = {
   exercicios:  { emoji: '✏️', label: 'Exercícios' },
 };
 
+// ── Modal ─────────────────────────────────────────────────────────────────────
 const SecaoModal = ({ aula, secType, onClose }) => {
   if (!aula || !secType) return null;
-  const sec = aula.sections.find(s => s.type === secType);
+  
+  // ✅ CORREÇÃO: Suporta tanto dados hardcoded (sections) quanto dados do Supabase (secoes)
+  const sections = aula.sections || aula.secoes || [];
+  
+  // Adapta o tipo: 'type' (hardcoded) ou 'tipo' (Supabase)
+  const sec = sections.find(s => (s.type || s.tipo) === secType);
   if (!sec) return null;
-  const sectionsToShow = secType === 'dialogo' ? aula.sections : [sec];
+  
+  // Prepara os dados para os componentes
+  // Se vem do Supabase, o conteúdo está em sec.conteudo; se hardcoded, está achatado
+  const sectionData = sec.conteudo ? { ...sec.conteudo, titulo: sec.titulo } : sec;
+  
+  // Para diálogo: mostra TODAS as seções
+  const sectionsToShow = secType === 'dialogo' ? sections : [sec];
 
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
@@ -499,11 +273,15 @@ const SecaoModal = ({ aula, secType, onClose }) => {
         </div>
         <div style={styles.modalBody}>
           {sectionsToShow.map((s, idx) => {
-            switch (s.type) {
-              case 'dialogo':     return <SecaoDialogo     key={idx} section={s}/>;
-              case 'verbos':      return <SecaoVerbos      key={idx} section={s}/>;
-              case 'vocabulario': return <SecaoVocabulario key={idx} section={s}/>;
-              case 'exercicios':  return <SecaoExercicios  key={idx} section={s}/>;
+            // Adapta tipo: 'type' (hardcoded) ou 'tipo' (Supabase)
+            const sectionType = s.type || s.tipo;
+            const sectionContent = s.conteudo ? { ...s.conteudo, titulo: s.titulo } : s;
+            
+            switch (sectionType) {
+              case 'dialogo':     return <SecaoDialogo     key={idx} section={sectionContent}/>;
+              case 'verbos':      return <SecaoVerbos      key={idx} section={sectionContent}/>;
+              case 'vocabulario': return <SecaoVocabulario key={idx} section={sectionContent}/>;
+              case 'exercicios':  return <SecaoExercicios  key={idx} section={sectionContent}/>;
               default: return null;
             }
           })}
@@ -515,22 +293,15 @@ const SecaoModal = ({ aula, secType, onClose }) => {
 };
 
 // ── Trilha (Main Page) ────────────────────────────────────────────────────────
-export default function Trilha() {
+export default function Trilha({ modoVisualizacao = false }) {
   const [modal, setModal] = useState(null);
-  const location = useLocation();
-  const navigate = useNavigate();
   const curso = myVoiceData.basico;
 
-  // Se veio do Dashboard com um aulaId, abre automaticamente o diálogo daquela aula
-  useEffect(() => {
-    const aulaId = location.state?.aulaId;
-    if (aulaId) {
-      const aula = curso.aulas.find(a => a.id === aulaId);
-      if (aula) setModal({ aula, secType: 'dialogo' });
-    }
-  }, []);
-
-  const openSec = (aula, secType, e) => { e.stopPropagation(); setModal({ aula, secType }); };
+  // ✅ CORREÇÃO: Adiciona e.stopPropagation() para evitar borbulha de eventos
+  const openSec = (aula, secType, e) => {
+    e.stopPropagation();
+    setModal({ aula, secType });
+  };
 
   return (
     <div style={styles.trilhaContainer}>
@@ -539,9 +310,11 @@ export default function Trilha() {
           <Mic size={26} color="#8b5cf6"/>
           <h2 style={styles.logoTitle}>My Voice</h2>
         </div>
-        <button style={styles.logoutBtn} onClick={() => navigate(-1)}>
-          <LogOut size={18}/><span style={{marginLeft:6}}>Voltar</span>
-        </button>
+        {!modoVisualizacao && (
+          <button style={styles.logoutBtn}>
+            <LogOut size={18}/><span style={{marginLeft:6}}>Voltar</span>
+          </button>
+        )}
       </nav>
 
       <main style={styles.mainContent}>
@@ -561,11 +334,16 @@ export default function Trilha() {
                 <h3 style={{fontSize:'1rem',fontWeight:700,margin:'2px 0'}}>{aula.titulo}</h3>
                 <p style={{fontSize:'0.82rem',color:'#94a3b8',marginBottom:8}}>{aula.subtitulo}</p>
                 <div style={styles.aulaSections}>
-                  {aula.sections.map((s, si) => {
-                    const { emoji, label } = PILL_LABELS[s.type] || {};
+                  {(aula.sections || aula.secoes || []).map((s, si) => {
+                    // ✅ CORREÇÃO: Suporta tanto 'type' quanto 'tipo'
+                    const sectionType = s.type || s.tipo;
+                    const { emoji, label } = PILL_LABELS[sectionType] || {};
                     return (
-                      <button key={si} style={styles.sectionPillBtn}
-                        onClick={(e) => openSec(aula, s.type, e)}>
+                      <button 
+                        key={si} 
+                        style={styles.sectionPillBtn}
+                        onClick={(e) => openSec(aula, sectionType, e)}
+                      >
                         {emoji} {label}
                       </button>
                     );
@@ -632,9 +410,9 @@ const styles = {
     borderRadius:9999, color:'#cbd5e1', cursor:'pointer', transition:'all 0.15s',
     display:'flex', alignItems:'center', gap:4 },
 
-  // Modal
+  // ✅ CORREÇÃO: Aumenta z-index de 200 para 9999 para ficar acima do ModoAluno (zIndex 300/400)
   modalOverlay: { position:'fixed', inset:0, background:'rgba(0,0,0,0.75)', backdropFilter:'blur(6px)',
-    zIndex:200, display:'flex', alignItems:'flex-start', justifyContent:'center',
+    zIndex:9999, display:'flex', alignItems:'flex-start', justifyContent:'center',
     padding:'1rem', overflowY:'auto' },
   modalContent: { background:'#1e293b', border:'1px solid rgba(255,255,255,0.12)',
     borderRadius:20, width:'100%', maxWidth:680, maxHeight:'90vh', overflowY:'auto',
