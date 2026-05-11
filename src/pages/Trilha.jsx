@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Check, X, RotateCcw, MessageCircle, BookMarked, Grid3x3, PenLine, Play, Square, Volume2, Mic, LogOut, ChevronRight, Lock } from 'lucide-react';
 
 // ── DATA ───────────────────────────────────────────────────────────────────────
@@ -516,7 +517,18 @@ const SecaoModal = ({ aula, secType, onClose }) => {
 // ── Trilha (Main Page) ────────────────────────────────────────────────────────
 export default function Trilha() {
   const [modal, setModal] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
   const curso = myVoiceData.basico;
+
+  // Se veio do Dashboard com um aulaId, abre automaticamente o diálogo daquela aula
+  useEffect(() => {
+    const aulaId = location.state?.aulaId;
+    if (aulaId) {
+      const aula = curso.aulas.find(a => a.id === aulaId);
+      if (aula) setModal({ aula, secType: 'dialogo' });
+    }
+  }, []);
 
   const openSec = (aula, secType, e) => { e.stopPropagation(); setModal({ aula, secType }); };
 
@@ -527,7 +539,7 @@ export default function Trilha() {
           <Mic size={26} color="#8b5cf6"/>
           <h2 style={styles.logoTitle}>My Voice</h2>
         </div>
-        <button style={styles.logoutBtn}>
+        <button style={styles.logoutBtn} onClick={() => navigate(-1)}>
           <LogOut size={18}/><span style={{marginLeft:6}}>Voltar</span>
         </button>
       </nav>
