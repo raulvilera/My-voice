@@ -1,4 +1,3 @@
-const CACHE = 'myvoice-v1';
 const ASSETS = ['/'];
 
 self.addEventListener('install', e => {
@@ -34,4 +33,4 @@ self.addEventListener('fetch', e => {
       })
       .catch(() => caches.match(e.request))
   );
-}
+});
