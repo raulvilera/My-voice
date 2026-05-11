@@ -59,7 +59,6 @@ const Dashboard = () => {
                   key={aula.id}
                   className={`glass-panel ${styles.aulaCard}`}
                   onClick={() => navigate('/trilha', { state: { aulaId: aula.id } })}
-                  style={{ backgroundImage: `url(${imagemUrl})` }}
                 >
                   <div className={styles.aulaCardBackground} style={{ backgroundImage: `url(${imagemUrl})` }} />
                   <div className={styles.aulaCardContent}>
@@ -93,5 +92,3 @@ const Dashboard = () => {
     </div>
   );
 };
-
-export default Dashboard
