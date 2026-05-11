@@ -1,3 +1,4 @@
+const CACHE = 'myvoice-v1';
 const ASSETS = ['/'];
 
 self.addEventListener('install', e => {
