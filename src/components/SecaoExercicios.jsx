@@ -172,7 +172,7 @@ const Trilha = () => {
               <div className={`${styles.aulaNumero} ${styles.bloqueadoNum}`}><span>{String(n).padStart(2,'0')}</span></div>
               <div className={styles.aulaInfo}>
                 <span className={styles.aulaTagSmall}>Em breve</span>
-                <h3>Aula {n} – Linda & Glinda</h3>
+                <h3>Aula {n} – Linda & Glynda</h3>
                 <p>Conteúdo sendo preparado…</p>
               </div>
               <span className={styles.lockIcon}>🔒</span>
