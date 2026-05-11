@@ -42,16 +42,16 @@ const EditorDialogo = ({ dados, onChange }) => {
     <div className={styles.editorBlock}>
       <div className={styles.personagensRow}>
         <label>Personagem A:</label>
-        <input value={dados.personagens?.[0]||'Linda'} onChange={e => onChange({ ...dados, personagens: [e.target.value, dados.personagens?.[1]||'Glinda'] })} placeholder="Ex: Linda"/>
+        <input value={dados.personagens?.[0]||'Linda'} onChange={e => onChange({ ...dados, personagens: [e.target.value, dados.personagens?.[1]||'Glynda'] })} placeholder="Ex: Linda"/>
         <label>Personagem B:</label>
-        <input value={dados.personagens?.[1]||'Glinda'} onChange={e => onChange({ ...dados, personagens: [dados.personagens?.[0]||'Linda', e.target.value] })} placeholder="Ex: Glinda"/>
+        <input value={dados.personagens?.[1]||'Glynda'} onChange={e => onChange({ ...dados, personagens: [dados.personagens?.[0]||'Linda', e.target.value] })} placeholder="Ex: Glynda"/>
       </div>
       <div className={styles.falasList}>
         {(dados.falas||[]).map((fala, i) => (
           <div key={fala.id} className={styles.falaRow}>
             <select value={fala.personagem} onChange={e => updateFala(fala.id, 'personagem', e.target.value)}>
               <option>{dados.personagens?.[0]||'Linda'}</option>
-              <option>{dados.personagens?.[1]||'Glinda'}</option>
+              <option>{dados.personagens?.[1]||'Glynda'}</option>
             </select>
             <input value={fala.texto} onChange={e => updateFala(fala.id, 'texto', e.target.value)} placeholder={`Fala ${i+1}…`}/>
             <button className={styles.removeBtn} onClick={() => removeFala(fala.id)}><Trash2 size={14}/></button>
@@ -196,7 +196,7 @@ const NovaAula = ({ onSalvo }) => {
 
   const addSecao = (tipo) => {
     const defaults = {
-      dialogo:     { personagens: ['Linda', 'Glinda'], falas: [] },
+      dialogo:     { personagens: ['Linda', 'Glynda'], falas: [] },
       verbos:      { verbos: [] },
       vocabulario: { palavras: [] },
       exercicios:  { grupos: [] },
@@ -277,7 +277,7 @@ const NovaAula = ({ onSalvo }) => {
         <div className={styles.metaFields}>
           <div className={styles.metaField}>
             <label>Título *</label>
-            <input value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Ex: Linda & Glinda – Aula 3"/>
+            <input value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Ex: Linda & Glynda – Aula 3"/>
           </div>
           <div className={styles.metaField}>
             <label>Subtítulo</label>
