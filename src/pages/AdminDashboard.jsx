@@ -230,10 +230,10 @@ Retorne APENAS um JSON válido, sem markdown, sem explicações, no formato:
       "tipo": "dialogo",
       "titulo": "Título da seção",
       "conteudo": {
-        "personagens": ["Linda", "Glinda"],
+        "personagens": ["Linda", "Glynda"],
         "falas": [
           { "personagem": "Linda", "texto": "Hello!" },
-          { "personagem": "Glinda", "texto": "Hi there!" }
+          { "personagem": "Glynda", "texto": "Hi there!" }
         ]
       }
     },
