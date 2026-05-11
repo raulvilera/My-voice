@@ -187,4 +187,3 @@ const Trilha = () => {
 };
 
 export default Trilha;
-
