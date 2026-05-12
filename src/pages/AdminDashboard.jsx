@@ -53,12 +53,19 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from('aulas')
-        .select('*, secoes(*)')
-        .order('numero');
-      setAulas(data || []);
-      setLoading(false);
+      try {
+        const { data, error } = await supabase
+          .from('aulas')
+          .select('*, secoes(*)')
+          .order('numero');
+        if (error) console.error('[PreviewAulas] Supabase error:', error);
+        setAulas(data || []);
+      } catch (err) {
+        console.error('[PreviewAulas] Fetch failed:', err);
+        setAulas([]);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -456,9 +463,16 @@ const GerenciarAlunos = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from('profiles').select('*').eq('role', 'aluno').order('created_at', { ascending: false });
-      setAlunos(data || []);
-      setLoading(false);
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').eq('role', 'aluno').order('created_at', { ascending: false });
+        if (error) console.error('[GerenciarAlunos] Supabase error:', error);
+        setAlunos(data || []);
+      } catch (err) {
+        console.error('[GerenciarAlunos] Fetch failed:', err);
+        setAlunos([]);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
