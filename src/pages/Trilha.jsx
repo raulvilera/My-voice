@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, X, RotateCcw, MessageCircle, BookMarked, Grid3x3, PenLine, Play, Square, Volume2, Mic, LogOut, ChevronRight, Lock } from 'lucide-react';
 import { SecaoDialogo }     from '../components/SecaoDialogo';
 import { SecaoVerbos }      from '../components/SecaoVerbos';
@@ -370,7 +371,10 @@ export default function Trilha({ modoVisualizacao = false }) {
         </div>
       </main>
 
-      {modal && <SecaoModal aula={modal.aula} secType={modal.secType} onClose={() => setModal(null)}/>}
+      {modal && createPortal(
+        <SecaoModal aula={modal.aula} secType={modal.secType} onClose={() => setModal(null)}/>,
+        document.body
+      )}
     </div>
   );
 }
