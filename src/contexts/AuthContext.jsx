@@ -10,57 +10,34 @@ export const AuthProvider = ({ children }) => {
 
   const fetchProfile = async (userId) => {
     try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 15000)
-      );
-      const fetchPromise = supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-      if (error) throw error;
-      setProfile(data);
+      if (data) setProfile(data);
     } catch (e) {
       console.warn('fetchProfile falhou:', e.message);
-      setProfile(null); // não assume role — deixa o PrivateRoute aguardar
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    let mounted = true;
+    // Loading some em no máximo 3 segundos — sem exceção
+    const safetyTimer = setTimeout(() => setLoading(false), 3000);
 
-    const safetyTimer = setTimeout(() => {
-      if (mounted) {
-        console.warn('Auth timeout — forçando carregamento');
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
         setLoading(false);
       }
-    }, 18000);
-
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!mounted) return;
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Erro ao inicializar auth:', error);
-        if (mounted) setLoading(false);
-      }
-    };
-
-    initAuth();
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        if (!mounted) return;
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchProfile(session.user.id);
@@ -72,7 +49,6 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => {
-      mounted = false;
       clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
