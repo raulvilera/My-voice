@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -13,7 +13,9 @@ import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
 import Planos from './Planos';
 import VideoEducacional from '../components/VideoEducacional';
-import GravacaoAula from '../components/GravacaoAula';
+const GravacaoAula = lazy(() =>
+  import('../components/GravacaoAula').catch(() => ({ default: () => <p style={{color:'#94a3b8',padding:'2rem'}}>Componente de gravação não encontrado. Verifique se GravacaoAula.jsx está em src/components/.</p> }))
+);
 import { SecaoDialogo }    from '../components/SecaoDialogo';
 import { SecaoVerbos }     from '../components/SecaoVerbos';
 import { SecaoVocabulario }from '../components/SecaoVocabulario';
@@ -53,19 +55,12 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
   useEffect(() => {
     (async () => {
-      try {
-        const { data, error } = await supabase
-          .from('aulas')
-          .select('*, secoes(*)')
-          .order('numero');
-        if (error) console.error('[PreviewAulas] Supabase error:', error);
-        setAulas(data || []);
-      } catch (err) {
-        console.error('[PreviewAulas] Fetch failed:', err);
-        setAulas([]);
-      } finally {
-        setLoading(false);
-      }
+      const { data } = await supabase
+        .from('aulas')
+        .select('*, secoes(*)')
+        .order('numero');
+      setAulas(data || []);
+      setLoading(false);
     })();
   }, []);
 
@@ -463,16 +458,9 @@ const GerenciarAlunos = () => {
 
   useEffect(() => {
     (async () => {
-      try {
-        const { data, error } = await supabase.from('profiles').select('*').eq('role', 'aluno').order('created_at', { ascending: false });
-        if (error) console.error('[GerenciarAlunos] Supabase error:', error);
-        setAlunos(data || []);
-      } catch (err) {
-        console.error('[GerenciarAlunos] Fetch failed:', err);
-        setAlunos([]);
-      } finally {
-        setLoading(false);
-      }
+      const { data } = await supabase.from('profiles').select('*').eq('role', 'aluno').order('created_at', { ascending: false });
+      setAlunos(data || []);
+      setLoading(false);
     })();
   }, []);
 
@@ -649,7 +637,11 @@ const AdminDashboard = () => {
         {aba === 'aulas'  && <PreviewAulas plano={plano} />}
         {aba === 'nova'   && <NovaAula onSalvo={() => setAba('aulas')} />}
         {aba === 'upload' && <UploadDocumento onSalvo={() => setAba('aulas')} />}
-        {aba === 'gravar' && <GravacaoAula />}
+        {aba === 'gravar' && (
+          <Suspense fallback={<p style={{color:'#94a3b8',padding:'2rem'}}>Carregando gravador…</p>}>
+            <GravacaoAula />
+          </Suspense>
+        )}
         {aba === 'alunos' && <GerenciarAlunos />}
         {aba === 'planos' && (
           <Planos
