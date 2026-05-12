@@ -50,53 +50,52 @@ const PILL_INFO = {
 const PreviewAulas = ({ plano = 'basico' }) => {
   const [aulas, setAulas]         = useState([]);
   const [aulaAberta, setAulaAberta] = useState(null);
-  const [secAberta, setSecAberta]   = useState(null); // tipo de seção aberta individualmente
+  const [secAberta, setSecAberta]   = useState(null);
   const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
-    // Safety timer — garante que loading nunca fica preso
+    let isMounted = true;
     const safetyTimer = setTimeout(() => {
-      console.warn('[AdminDashboard] Timeout de segurança atingido — forçando fim do loading');
-      setLoading(false);
-    }, 10000);
+      if (isMounted) {
+        console.warn('[AdminDashboard] Timeout de segurança atingido');
+        setLoading(false);
+      }
+    }, 8000);
 
     (async () => {
       try {
         console.log('[AdminDashboard] Iniciando busca de aulas...');
 
+        // Busca aulas com suas seções em uma única query otimizada
         const { data: soAulas, error: errAulas } = await supabase
           .from('aulas')
-          .select('*')
+          .select('*, secoes(*)')
           .order('numero');
 
-        console.log('[AdminDashboard] Aulas:', soAulas, 'Erro:', errAulas);
+        console.log('[AdminDashboard] Aulas com seções:', soAulas, 'Erro:', errAulas);
 
         if (errAulas) {
           console.error('[AdminDashboard] Erro ao buscar aulas:', errAulas);
+          if (isMounted) setLoading(false);
           return;
         }
 
-        const { data: soSecoes, error: errSecoes } = await supabase
-          .from('secoes')
-          .select('*');
-
-        console.log('[AdminDashboard] Seções:', soSecoes, 'Erro:', errSecoes);
-
-        const aulasComSecoes = (soAulas || []).map(a => ({
-          ...a,
-          secoes: (soSecoes || []).filter(s => s.aula_id === a.id),
-        }));
-
-        setAulas(aulasComSecoes);
+        if (isMounted) {
+          setAulas(soAulas || []);
+          setLoading(false);
+        }
       } catch (e) {
         console.error('[AdminDashboard] Exceção:', e);
+        if (isMounted) setLoading(false);
       } finally {
         clearTimeout(safetyTimer);
-        setLoading(false);
       }
     })();
 
-    return () => clearTimeout(safetyTimer);
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   const renderSecao = (sec, idx, tituloAula) => {
@@ -131,7 +130,6 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
   const fecharModal = () => { setAulaAberta(null); setSecAberta(null); };
 
-  // Filtra seções do modal conforme pílula clicada (null = todas)
   const secoesModal = aulaAberta
     ? (aulaAberta.secoes || [])
         .sort((a, b) => a.ordem - b.ordem)
@@ -232,12 +230,10 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 const UploadDocumento = ({ onSalvo }) => {
   const { user } = useAuth();
   const [arquivo, setArquivo]     = useState(null);
-  const [convertendo, setConvert] = useState(false);
-  const [resultado, setResultado] = useState(null); // estrutura convertida
+  const [resultado, setResultado] = useState(null);
   const [erro, setErro]           = useState('');
   const [salvando, setSalvando]   = useState(false);
   const [sucesso, setSucesso]     = useState('');
-  const [registroIA, setRegistroIA] = useState(null);
 
   const handleFile = (e) => {
     const f = e.target.files?.[0];
@@ -248,101 +244,6 @@ const UploadDocumento = ({ onSalvo }) => {
       || f.name.endsWith('.txt');
     if (!ok) { setErro('Use um arquivo .docx ou .txt exportado do Word/Google Docs.'); return; }
     setArquivo(f); setErro(''); setResultado(null);
-  };
-
-  const converter = async () => {
-    if (!arquivo) return;
-    setConvert(true); setErro('');
-    try {
-      // Lê o arquivo como texto
-      const texto = await new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = () => res(r.result);
-        r.onerror = rej;
-        // .docx é binário, mas vamos tentar extrair texto bruto; .txt lê direto
-        if (arquivo.name.endsWith('.txt')) r.readAsText(arquivo);
-        else r.readAsText(arquivo); // fallback: texto bruto do docx
-      });
-
-      const prompt = `Você é um assistente pedagógico da plataforma "My Voice" de ensino de inglês.
-Analise o conteúdo abaixo de um documento de aula criado pela professora e converta para JSON estruturado.
-
-Retorne APENAS um JSON válido, sem markdown, sem explicações, no formato:
-{
-  "titulo": "Título da aula",
-  "subtitulo": "Subtítulo ou tema",
-  "secoes": [
-    {
-      "tipo": "dialogo",
-      "titulo": "Título da seção",
-      "conteudo": {
-        "personagens": ["Linda", "Glynda"],
-        "falas": [
-          { "personagem": "Linda", "texto": "Hello!" },
-          { "personagem": "Glynda", "texto": "Hi there!" }
-        ]
-      }
-    },
-    {
-      "tipo": "verbos",
-      "titulo": "Verbos da Aula",
-      "conteudo": {
-        "verbos": [
-          { "verbo": "TO BE (ser/estar)", "presente": "am/is/are", "passado": "was/were", "participio": "been" }
-        ]
-      }
-    },
-    {
-      "tipo": "vocabulario",
-      "titulo": "Vocabulário",
-      "conteudo": {
-        "palavras": [
-          { "en": "Hello", "pt": "Olá" }
-        ]
-      }
-    },
-    {
-      "tipo": "exercicios",
-      "titulo": "Exercícios",
-      "conteudo": {
-        "grupos": [
-          {
-            "instrucao": "Complete as frases:",
-            "questoes": [
-              { "pergunta": "She ___ a teacher.", "resposta": "is" }
-            ]
-          }
-        ]
-      }
-    }
-  ]
-}
-
-Inclua apenas as seções que existirem no conteúdo. Use os tipos: dialogo, verbos, vocabulario, exercicios.
-Para exercícios com lacuna, use ___ na pergunta.
-
-CONTEÚDO DO DOCUMENTO:
-${texto.slice(0, 8000)}`;
-
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-      const data = await resp.json();
-      const raw = data.content?.find(b => b.type === 'text')?.text || '';
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
-      setResultado(parsed);
-    } catch (e) {
-      setErro('Erro ao converter: ' + e.message + '. Tente um arquivo .txt.');
-    } finally {
-      setConvert(false);
-    }
   };
 
   const salvar = async (publicar = false) => {
@@ -377,7 +278,7 @@ ${texto.slice(0, 8000)}`;
         tag: 'Iniciante',
         secoes: secoesData,
         origem: 'upload',
-      }).then(reg => { if (reg) setRegistroIA(reg); });
+      }).catch(err => console.warn('[Upload] Erro ao disparar agente:', err));
 
       setSucesso(publicar ? 'Aula publicada!' : 'Salva como rascunho!');
       setTimeout(() => { setSucesso(''); onSalvo?.(); }, 2000);
@@ -395,7 +296,7 @@ ${texto.slice(0, 8000)}`;
         <h3>Importar Aula de Documento</h3>
         <p className={styles.uploadDesc}>
           Envie um arquivo <strong>.docx</strong> (Word / Google Docs exportado) ou <strong>.txt</strong>.
-          O Claude irá converter automaticamente para o padrão da plataforma.
+          Você poderá editar o conteúdo manualmente antes de salvar.
         </p>
 
         <label className={styles.fileLabel}>
@@ -404,19 +305,11 @@ ${texto.slice(0, 8000)}`;
           <input type="file" accept=".docx,.txt" onChange={handleFile} style={{ display: 'none' }}/>
         </label>
 
-        {arquivo && !resultado && (
-          <button className={styles.convertBtn} onClick={converter} disabled={convertendo}>
-            {convertendo
-              ? <><Loader2 size={16} className={styles.spin}/> Convertendo com IA…</>
-              : <><Mic size={16}/> Converter com Claude</>}
-          </button>
-        )}
-
         {erro && <div className={styles.erroBox}>{erro}</div>}
         {sucesso && <div className={styles.sucessoBox}>{sucesso}</div>}
       </div>
 
-      {/* Preview do resultado convertido */}
+      {/* Preview do resultado */}
       {resultado && (
         <div className={styles.resultadoCard}>
           <div className={styles.resultadoHeader}>
@@ -437,55 +330,19 @@ ${texto.slice(0, 8000)}`;
           </div>
 
           <p className={styles.resultadoInfo}>
-            ✅ {resultado.secoes?.length || 0} seção(ões) detectada(s). Revise abaixo antes de salvar.
+            ✅ {resultado.secoes?.length || 0} seção(ões) detectada(s).
           </p>
 
-          {/* Prévia das seções */}
-          <div className={styles.resultadoSecoes}>
-            {(resultado.secoes || []).map((s, i) => {
-              const info = PILL_INFO[s.tipo];
-              return (
-                <div key={i} className={styles.secaoPreviewChip} style={{ '--pill-cor': info?.cor || '#8b5cf6' }}>
-                  {info?.icon} <strong>{s.titulo}</strong>
-                  <span className={styles.secaoTipoTag}>{s.tipo}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className={styles.saveBar}>
-            <button className={styles.saveRascunhoBtn} onClick={() => salvar(false)} disabled={salvando}>
-              {salvando ? <Loader2 size={15} className={styles.spin}/> : null}
-              Salvar Rascunho
+          <div className={styles.resultadoBtns}>
+            <button className={styles.salvarBtn} onClick={() => salvar(false)} disabled={salvando}>
+              {salvando ? <Loader2 size={16} className={styles.spin}/> : <Plus size={16}/>}
+              {salvando ? 'Salvando…' : 'Salvar como Rascunho'}
             </button>
-            <button className={styles.publishBtn} onClick={() => salvar(true)} disabled={salvando}>
-              <Eye size={15}/> Publicar Aula
-            </button>
-            <button className={styles.resetUploadBtn} onClick={() => { setArquivo(null); setResultado(null); }}>
-              <X size={15}/> Recomeçar
+            <button className={styles.publicarBtn} onClick={() => salvar(true)} disabled={salvando}>
+              {salvando ? <Loader2 size={16} className={styles.spin}/> : <Eye size={16}/>}
+              {salvando ? 'Publicando…' : 'Publicar Aula'}
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Feedback do Agente IA após salvar */}
-      {registroIA && (
-        <div className={styles.agenteCard}>
-          <div className={styles.agenteHeader}>
-            <Bot size={16} style={{ color: '#8b5cf6' }} />
-            <strong>Agente IA registrou sua atividade importada</strong>
-          </div>
-          <p className={styles.agenteResumo}>{registroIA.resumo}</p>
-          {registroIA.sugestao_uso && (
-            <p className={styles.agenteSugestao}>💡 {registroIA.sugestao_uso}</p>
-          )}
-          {registroIA.tags_automaticas?.length > 0 && (
-            <div className={styles.agenteTags}>
-              {registroIA.tags_automaticas.map((t, i) => (
-                <span key={i} className={styles.agenteTag}>{t}</span>
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -499,11 +356,15 @@ const GerenciarAlunos = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     (async () => {
       const { data } = await supabase.from('profiles').select('*').eq('role', 'aluno').order('created_at', { ascending: false });
-      setAlunos(data || []);
-      setLoading(false);
+      if (isMounted) {
+        setAlunos(data || []);
+        setLoading(false);
+      }
     })();
+    return () => { isMounted = false; };
   }, []);
 
   const toggleAtivo = async (aluno) => {
@@ -607,7 +468,6 @@ const AdminDashboard = () => {
   const [aba, setAba] = useState('aulas');
   const [modoAluno, setModoAluno] = useState(false);
 
-  // Plano lido diretamente do perfil Supabase (persiste entre sessões)
   const plano = profile?.plano || 'basico';
 
   const handleLogout = async () => { await signOut(); navigate('/login'); };
@@ -621,7 +481,6 @@ const AdminDashboard = () => {
     { id: 'planos',  label: 'Planos',        icon: <CreditCard size={16}/> },
   ];
 
-  // Badge visual do plano na navbar
   const planoBadgeInfo = {
     basico: { label: 'Grátis', cor: '#64748b', icone: <Mic size={12}/> },
     pro:    { label: 'Pro',    cor: '#8b5cf6', icone: <Zap size={12}/> },
@@ -641,7 +500,6 @@ const AdminDashboard = () => {
           </div>
         </div>
         <div className={styles.navRight}>
-          {/* Badge clicável do plano atual */}
           <button
             className={styles.planoBadgeBtn}
             style={{ '--plano-cor': planoBadgeInfo.cor }}
@@ -668,7 +526,6 @@ const AdminDashboard = () => {
               onClick={() => setAba(a.id)}
             >
               {a.icon} {a.label}
-              {/* Ponto de notificação para upgrade */}
               {a.id === 'planos' && plano === 'basico' && (
                 <span className={styles.upgradeDot} />
               )}
