@@ -2,7 +2,15 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, Play, Square, Volume2 } from 'lucide-react';
 
 // ── Diálogo com Áudio + Destaque Sincronizado ─────────────────────────────────
-export const SecaoDialogo = ({ section }) => {
+export const SecaoDialogo = ({ section: rawSection }) => {
+  // Normaliza dados — suporta estrutura hardcoded e dados vindos do Supabase
+  const section = {
+    ...rawSection,
+    personagens: rawSection?.personagens ?? rawSection?.conteudo?.personagens ?? [],
+    falas:       rawSection?.falas       ?? rawSection?.conteudo?.falas       ?? [],
+    titulo:      rawSection?.titulo      ?? '',
+  };
+
   const [isPlaying, setIsPlaying]         = useState(false);
   const [activeFala, setActiveFala]       = useState(-1);
   const [activeWordIdx, setActiveWordIdx] = useState(-1);
