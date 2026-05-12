@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const fetchProfile = async (userId) => {
     try {
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 5000)
+        setTimeout(() => reject(new Error('timeout')), 15000)
       );
       const fetchPromise = supabase
         .from('profiles')
@@ -23,8 +23,8 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error;
       setProfile(data);
     } catch (e) {
-      console.warn('fetchProfile falhou, usando perfil básico:', e.message);
-      setProfile({ id: userId, role: 'aluno', name: '' });
+      console.warn('fetchProfile falhou:', e.message);
+      setProfile(null); // não assume role — deixa o PrivateRoute aguardar
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
         console.warn('Auth timeout — forçando carregamento');
         setLoading(false);
       }
-    }, 8000);
+    }, 18000);
 
     const initAuth = async () => {
       try {
