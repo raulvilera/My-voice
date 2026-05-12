@@ -1,5 +1,4 @@
-import { useState, useEffect } from
-'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -94,4 +93,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard
+export default Dashboard;
