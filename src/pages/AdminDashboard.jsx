@@ -55,12 +55,31 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from('aulas')
-        .select('*, secoes(*)')
-        .order('numero');
-      setAulas(data || []);
-      setLoading(false);
+      try {
+        // Tenta com join (requer FK secoes.aula_id → aulas.id)
+        const { data: aulasData, error: aulasError } = await supabase
+          .from('aulas')
+          .select('*, secoes(*)')
+          .order('numero');
+
+        if (aulasError) {
+          console.error('[AdminDashboard] Erro join:', aulasError);
+          // Fallback: busca aulas e secoes separadamente
+          const { data: soAulas } = await supabase.from('aulas').select('*').order('numero');
+          const { data: soSecoes } = await supabase.from('secoes').select('*');
+          const aulasComSecoes = (soAulas || []).map(a => ({
+            ...a,
+            secoes: (soSecoes || []).filter(s => s.aula_id === a.id),
+          }));
+          setAulas(aulasComSecoes);
+        } else {
+          setAulas(aulasData || []);
+        }
+      } catch (e) {
+        console.error('[AdminDashboard] Exceção:', e);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
