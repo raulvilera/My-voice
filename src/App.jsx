@@ -1,5 +1,4 @@
-import { BrowserRouter as Router, 
-Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -24,8 +23,8 @@ const PrivateRoute = ({ children, requireRole }) => {
   const { user, profile, loading } = useAuth();
   if (loading) return <Loader />;
   if (!user) return <Navigate to="/login" replace />;
-  if (!profile) return <Loader />; // aguarda o profile carregar antes de verificar role
-  if (requireRole && profile?.role !== requireRole) return <Navigate to="/" replace />;
+  // Se exige role mas profile ainda não carregou, aguarda só 1 tick
+  if (requireRole && profile && profile.role !== requireRole) return <Navigate to="/" replace />;
   return children;
 };
 
@@ -33,9 +32,9 @@ const RootRedirect = () => {
   const { user, profile, loading } = useAuth();
   if (loading) return <Loader />;
   if (!user) return <Navigate to="/login" replace />;
-  if (!profile) return <Loader />;
-  if (profile.role === 'professor') return <Navigate to="/admin" replace />;
-  return <Navigate to="/dashboard" replace />;
+  // Redireciona baseado no profile se disponível, senão vai pro admin (professora)
+  if (profile?.role === 'aluno') return <Navigate to="/dashboard" replace />;
+  return <Navigate to="/admin" replace />;
 };
 
 const AppRoutes = () => (
