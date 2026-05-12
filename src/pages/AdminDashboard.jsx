@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   Mic, LogOut, Users, ToggleLeft, ToggleRight, Search,
@@ -157,8 +158,8 @@ const PreviewAulas = ({ plano = 'basico' }) => {
         </div>
       ))}
 
-      {/* ── Modal ── */}
-      {aulaAberta && (
+      {/* ── Modal via Portal (evita bloqueio do backdrop-filter do glass-panel) ── */}
+      {aulaAberta && createPortal(
         <div className={styles.modalOverlay} onClick={fecharModal}>
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
@@ -168,7 +169,6 @@ const PreviewAulas = ({ plano = 'basico' }) => {
                 <p>{aulaAberta.subtitulo}</p>
                 <p className={styles.modalSubtitleSec}>{subtituloModal}</p>
               </div>
-              {/* ── Botão fechar estilizado ── */}
               <button className={styles.closeBtnModal} onClick={fecharModal} aria-label="Fechar">
                 <X size={20}/>
               </button>
@@ -177,7 +177,8 @@ const PreviewAulas = ({ plano = 'basico' }) => {
               {secoesModal.map((sec, idx) => renderSecao(sec, idx, aulaAberta.titulo))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
