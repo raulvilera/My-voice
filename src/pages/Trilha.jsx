@@ -281,7 +281,7 @@ const SecaoModal = ({ aula, secType, onClose }) => {
               case 'dialogo':     return <SecaoDialogo     key={idx} section={sectionContent}/>;
               case 'verbos':      return <SecaoVerbos      key={idx} section={sectionContent}/>;
               case 'vocabulario': return <SecaoVocabulario key={idx} section={sectionContent}/>;
-              case 'exercicios':  return <SecaoExercicios  key={idx} section={sectionContent}/>;
+              case 'exercicios':  return <SecaoExercicios  key={idx} section={sectionContent} aulaId={aula.id}/>;
               default: return null;
             }
           })}
