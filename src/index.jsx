@@ -4,14 +4,22 @@ import './index.css'
 import App from './App.jsx'
 
 // Registro do Service Worker para funcionalidade PWA
-if ('serviceWorker' in navigator) {
+// Registra apenas em produção para evitar problemas em desenvolvimento
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
       .then(registration => {
-        console.log('Service Worker registrado com sucesso:', registration.scope);
+        console.log('[PWA] Service Worker registrado com sucesso:', registration.scope);
+        
+        // Verifica por atualizações a cada 6 horas
+        setInterval(() => {
+          registration.update().catch(err => {
+            console.warn('[PWA] Erro ao verificar atualizações:', err);
+          });
+        }, 6 * 60 * 60 * 1000);
       })
       .catch(error => {
-        console.error('Falha no registro do Service Worker:', error);
+        console.warn('[PWA] Falha no registro do Service Worker:', error);
       });
   });
 }
@@ -21,4 +29,3 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
-
