@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mic, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 import styles from './Login.module.css';
 
 const Login = () => {
-  const navigate          = useNavigate();
+  const navigate           = useNavigate();
   const { signIn, signUp } = useAuth();
 
-  const [tab, setTab]         = useState('entrar'); // 'entrar' | 'cadastrar'
+  const [tab, setTab]         = useState('entrar');
   const [nome, setNome]       = useState('');
   const [email, setEmail]     = useState('');
   const [senha, setSenha]     = useState('');
@@ -22,9 +23,19 @@ const Login = () => {
     setErro(''); setLoading(true);
     try {
       const { user } = await signIn(email, senha);
-      // redireciona após fetchProfile (feito no AuthContext)
-      // pequena espera para o profile carregar
-      setTimeout(() => navigate('/'), 300);
+
+      // Busca o perfil diretamente para saber para onde redirecionar
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role === 'professor') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setErro(err.message === 'Invalid login credentials'
         ? 'E-mail ou senha incorretos.'
@@ -54,14 +65,12 @@ const Login = () => {
   return (
     <div className={styles.loginPage}>
       <div className={styles.card}>
-        {/* Logo */}
         <div className={styles.logoArea}>
           <div className={styles.logoIcon}><Mic size={32} /></div>
           <h1>My Voice</h1>
           <p>Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem.</p>
         </div>
 
-        {/* Tabs */}
         <div className={styles.tabs}>
           <button className={`${styles.tab} ${tab === 'entrar' ? styles.tabActive : ''}`} onClick={() => { setTab('entrar'); setErro(''); setSucesso(''); }}>
             Entrar
@@ -71,7 +80,6 @@ const Login = () => {
           </button>
         </div>
 
-        {/* Form Login */}
         {tab === 'entrar' && (
           <form onSubmit={handleLogin} className={styles.form}>
             <div className={styles.field}>
@@ -92,7 +100,6 @@ const Login = () => {
           </form>
         )}
 
-        {/* Form Cadastro */}
         {tab === 'cadastrar' && (
           <form onSubmit={handleCadastro} className={styles.form}>
             <div className={styles.field}>
