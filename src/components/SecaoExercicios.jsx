@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Check, X, RotateCcw, PenLine } from 'lucide-react';
-import { VideoAulaProfessora } from './VideoAulaProfessora';
+
+const VideoAulaProfessora = lazy(() =>
+  import('./VideoAulaProfessora')
+    .then(m => ({ default: m.VideoAulaProfessora }))
+    .catch(() => ({ default: () => null }))
+);
 
 // ── Exercícios ────────────────────────────────────────────────────────────────
 // aulaId: opcional — quando fornecido, exibe o vídeo da professora acima dos exercícios
@@ -67,7 +72,11 @@ export const SecaoExercicios = ({ section, aulaId }) => {
   return (
     <div style={styles.sectionBlock}>
       {/* Vídeo da professora (aparece quando aulaId é fornecido e há vídeo publicado) */}
-      {aulaId && <VideoAulaProfessora aulaId={aulaId} />}
+      {aulaId && (
+        <Suspense fallback={null}>
+          <VideoAulaProfessora aulaId={aulaId} />
+        </Suspense>
+      )}
 
       <h3 style={styles.sectionTitle}><PenLine size={18} style={{marginRight:6}}/> {section.titulo}</h3>
       {(section.grupos || []).map((grupo, gi) => (
