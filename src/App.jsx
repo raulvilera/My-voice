@@ -24,6 +24,7 @@ const PrivateRoute = ({ children, requireRole }) => {
   const { user, profile, loading } = useAuth();
   if (loading) return <Loader />;
   if (!user) return <Navigate to="/login" replace />;
+  if (!profile) return <Loader />; // aguarda o profile carregar antes de verificar role
   if (requireRole && profile?.role !== requireRole) return <Navigate to="/" replace />;
   return children;
 };
