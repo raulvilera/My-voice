@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Check, X, RotateCcw, PenLine } from 'lucide-react';
+import { VideoAulaProfessora } from './VideoAulaProfessora';
 
 // ── Exercícios ────────────────────────────────────────────────────────────────
-export const SecaoExercicios = ({ section }) => {
+// aulaId: opcional — quando fornecido, exibe o vídeo da professora acima dos exercícios
+export const SecaoExercicios = ({ section, aulaId }) => {
   const [respostas, setRespostas]   = useState({});
   const [resultados, setResultados] = useState({});
   const [checked, setChecked]       = useState(false);
@@ -64,6 +66,9 @@ export const SecaoExercicios = ({ section }) => {
 
   return (
     <div style={styles.sectionBlock}>
+      {/* Vídeo da professora (aparece quando aulaId é fornecido e há vídeo publicado) */}
+      {aulaId && <VideoAulaProfessora aulaId={aulaId} />}
+
       <h3 style={styles.sectionTitle}><PenLine size={18} style={{marginRight:6}}/> {section.titulo}</h3>
       {(section.grupos || []).map((grupo, gi) => (
         <div key={gi} style={styles.exercGrupo}>
