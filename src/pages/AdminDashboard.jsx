@@ -54,33 +54,49 @@ const PreviewAulas = ({ plano = 'basico' }) => {
   const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
+    // Safety timer — garante que loading nunca fica preso
+    const safetyTimer = setTimeout(() => {
+      console.warn('[AdminDashboard] Timeout de segurança atingido — forçando fim do loading');
+      setLoading(false);
+    }, 10000);
+
     (async () => {
       try {
-        // Tenta com join (requer FK secoes.aula_id → aulas.id)
-        const { data: aulasData, error: aulasError } = await supabase
+        console.log('[AdminDashboard] Iniciando busca de aulas...');
+
+        const { data: soAulas, error: errAulas } = await supabase
           .from('aulas')
-          .select('*, secoes(*)')
+          .select('*')
           .order('numero');
 
-        if (aulasError) {
-          console.error('[AdminDashboard] Erro join:', aulasError);
-          // Fallback: busca aulas e secoes separadamente
-          const { data: soAulas } = await supabase.from('aulas').select('*').order('numero');
-          const { data: soSecoes } = await supabase.from('secoes').select('*');
-          const aulasComSecoes = (soAulas || []).map(a => ({
-            ...a,
-            secoes: (soSecoes || []).filter(s => s.aula_id === a.id),
-          }));
-          setAulas(aulasComSecoes);
-        } else {
-          setAulas(aulasData || []);
+        console.log('[AdminDashboard] Aulas:', soAulas, 'Erro:', errAulas);
+
+        if (errAulas) {
+          console.error('[AdminDashboard] Erro ao buscar aulas:', errAulas);
+          return;
         }
+
+        const { data: soSecoes, error: errSecoes } = await supabase
+          .from('secoes')
+          .select('*');
+
+        console.log('[AdminDashboard] Seções:', soSecoes, 'Erro:', errSecoes);
+
+        const aulasComSecoes = (soAulas || []).map(a => ({
+          ...a,
+          secoes: (soSecoes || []).filter(s => s.aula_id === a.id),
+        }));
+
+        setAulas(aulasComSecoes);
       } catch (e) {
         console.error('[AdminDashboard] Exceção:', e);
       } finally {
+        clearTimeout(safetyTimer);
         setLoading(false);
       }
     })();
+
+    return () => clearTimeout(safetyTimer);
   }, []);
 
   const renderSecao = (sec, idx, tituloAula) => {
@@ -126,7 +142,14 @@ const PreviewAulas = ({ plano = 'basico' }) => {
     ? (PILL_INFO[secAberta]?.emoji + ' ' + PILL_INFO[secAberta]?.label)
     : '📋 Aula completa';
 
-  if (loading) return <p className={styles.loadingMsg}>Carregando aulas…</p>;
+  if (loading) return (
+    <div>
+      <p className={styles.loadingMsg}>Carregando aulas…</p>
+      <p style={{color:'#64748b',fontSize:'0.75rem',textAlign:'center',marginTop:'0.5rem'}}>
+        Se esta mensagem persistir por mais de 5 segundos, abra o Console (F12) e verifique os erros.
+      </p>
+    </div>
+  );
   if (aulas.length === 0) return <p className={styles.emptyMsg}>Nenhuma aula cadastrada ainda.</p>;
 
   return (
