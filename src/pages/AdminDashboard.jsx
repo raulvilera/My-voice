@@ -4,7 +4,7 @@ import {
   Mic, LogOut, Users, ToggleLeft, ToggleRight, Search,
   Plus, Eye, X, Upload, FileText, Loader2,
   MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
-  CreditCard, Crown, Zap, Bot,
+  CreditCard, Crown, Zap, Bot, Video,
 } from 'lucide-react';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
 import Planos from './Planos';
 import VideoEducacional from '../components/VideoEducacional';
+import GravacaoAula from '../components/GravacaoAula';
 import { SecaoDialogo }    from '../components/SecaoDialogo';
 import { SecaoVerbos }     from '../components/SecaoVerbos';
 import { SecaoVocabulario }from '../components/SecaoVocabulario';
@@ -76,7 +77,7 @@ const PreviewAulas = ({ plano = 'basico' }) => {
             case 'dialogo':     return <SecaoDialogo     section={dados}/>;
             case 'verbos':      return <SecaoVerbos      section={dados}/>;
             case 'vocabulario': return <SecaoVocabulario section={dados}/>;
-            case 'exercicios':  return <SecaoExercicios  section={dados}/>;
+            case 'exercicios':  return <SecaoExercicios  section={dados} aulaId={aulaAberta?.id}/>;
             default: return null;
           }
         })()}
@@ -570,6 +571,7 @@ const AdminDashboard = () => {
     { id: 'aulas',   label: 'Aulas',        icon: <Eye size={16}/> },
     { id: 'nova',    label: 'Nova Aula',     icon: <Plus size={16}/> },
     { id: 'upload',  label: 'Importar Doc',  icon: <Upload size={16}/> },
+    { id: 'gravar',  label: 'Gravar Aula',   icon: <Video size={16}/> },
     { id: 'alunos',  label: 'Alunos',        icon: <Users size={16}/> },
     { id: 'planos',  label: 'Planos',        icon: <CreditCard size={16}/> },
   ];
@@ -632,6 +634,7 @@ const AdminDashboard = () => {
         {aba === 'aulas'  && <PreviewAulas plano={plano} />}
         {aba === 'nova'   && <NovaAula onSalvo={() => setAba('aulas')} />}
         {aba === 'upload' && <UploadDocumento onSalvo={() => setAba('aulas')} />}
+        {aba === 'gravar' && <GravacaoAula />}
         {aba === 'alunos' && <GerenciarAlunos />}
         {aba === 'planos' && (
           <Planos
