@@ -7,6 +7,25 @@ import styles from './Dashboard.module.css';
 
 const capaDefault = "/capa_padrao.jpg";
 
+// ── Bandeira dos EUA SVG inline ───────────────────────────────────────────────
+const BandeiraEUA = ({ size = 42 }) => (
+  <svg width={size} height={size * 0.526} viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" style={{ borderRadius: 3, display: 'block' }}>
+    {[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => (
+      <rect key={i} x="0" y={i * 400/13} width="760" height={400/13}
+        fill={i % 2 === 0 ? '#B22234' : '#FFFFFF'} />
+    ))}
+    <rect x="0" y="0" width="303" height={400 * 7/13} fill="#3C3B6E" />
+    {Array.from({ length: 50 }).map((_, idx) => {
+      const isOddRow = Math.floor(idx / 6) % 2 !== 0;
+      const col = idx % (isOddRow ? 5 : 6);
+      const cx = isOddRow ? 30 + col * 50 + 25 : 30 + col * 50;
+      const cy = Math.floor(idx / (isOddRow ? 5 : 6)) * 26 + (isOddRow ? 13 : 0) + 16;
+      return <polygon key={idx} points="0,-9 2.6,-4 9,-4 4,0 6,6 0,3 -6,6 -4,0 -9,-4 -2.6,-4"
+        transform={`translate(${cx},${cy})`} fill="white" />;
+    })}
+  </svg>
+);
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
@@ -32,7 +51,12 @@ const Dashboard = () => {
     <div className={styles.dashboardContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <Mic className={styles.logoIcon} size={26}/>
+          <div className={styles.logoMicWrapper}>
+            <div className={styles.logoBandeira}>
+              <BandeiraEUA size={42} />
+            </div>
+            <Mic className={styles.logoIcon} size={26}/>
+          </div>
           <h2>My Voice</h2>
         </div>
         <button className={styles.logoutBtn} onClick={handleLogout}>
