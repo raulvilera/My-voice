@@ -9,6 +9,29 @@ import {
 } from 'lucide-react';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
+
+// ── Bandeira dos EUA SVG inline ───────────────────────────────────────────────
+const BandeiraEUA = ({ size = 32 }) => (
+  <svg width={size} height={size * 0.526} viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" style={{ borderRadius: 3, display: 'block' }}>
+    {/* Listras */}
+    {[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => (
+      <rect key={i} x="0" y={i * 400/13} width="760" height={400/13}
+        fill={i % 2 === 0 ? '#B22234' : '#FFFFFF'} />
+    ))}
+    {/* Cantão azul */}
+    <rect x="0" y="0" width="303" height={400 * 7/13} fill="#3C3B6E" />
+    {/* Estrelas */}
+    {Array.from({ length: 50 }).map((_, idx) => {
+      const row = Math.floor(idx / 6) % 2 === 0 ? Math.floor(idx / 6) : Math.floor(idx / 5);
+      const col = idx % (Math.floor(idx / 6) % 2 === 0 ? 6 : 5);
+      const isOddRow = Math.floor(idx / 6) % 2 !== 0;
+      const cx = isOddRow ? 30 + col * 50 + 25 : 30 + col * 50;
+      const cy = Math.floor(idx / (isOddRow ? 5 : 6)) * 26 + (isOddRow ? 13 : 0) + 16;
+      return <polygon key={idx} points="0,-9 2.6,-4 9,-4 4,0 6,6 0,3 -6,6 -4,0 -9,-4 -2.6,-4"
+        transform={`translate(${cx},${cy})`} fill="white" />;
+    })}
+  </svg>
+);
 import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
 import Planos from './Planos';
@@ -473,12 +496,13 @@ const AdminDashboard = () => {
   const handleLogout = async () => { await signOut(); navigate('/login'); };
 
   const ABAS = [
-    { id: 'aulas',   label: 'Aulas',        icon: <Eye size={16}/> },
-    { id: 'nova',    label: 'Nova Aula',     icon: <Plus size={16}/> },
-    { id: 'upload',  label: 'Importar Doc',  icon: <Upload size={16}/> },
-    { id: 'gravar',  label: 'Gravar Aula',   icon: <Video size={16}/> },
-    { id: 'alunos',  label: 'Alunos',        icon: <Users size={16}/> },
-    { id: 'planos',  label: 'Planos',        icon: <CreditCard size={16}/> },
+    { id: 'aulas',   label: 'Aulas',          icon: <Eye size={16}/> },
+    { id: 'trilha',  label: 'Trilha do Aluno', icon: <GraduationCap size={16}/> },
+    { id: 'nova',    label: 'Nova Aula',       icon: <Plus size={16}/> },
+    { id: 'upload',  label: 'Importar Doc',    icon: <Upload size={16}/> },
+    { id: 'gravar',  label: 'Gravar Aula',     icon: <Video size={16}/> },
+    { id: 'alunos',  label: 'Alunos',          icon: <Users size={16}/> },
+    { id: 'planos',  label: 'Planos',          icon: <CreditCard size={16}/> },
   ];
 
   const planoBadgeInfo = {
@@ -493,7 +517,12 @@ const AdminDashboard = () => {
     <div className={styles.adminContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <Mic size={26} className={styles.logoIcon}/>
+          <div className={styles.logoMicWrapper}>
+            <div className={styles.logoBandeira}>
+              <BandeiraEUA size={42} />
+            </div>
+            <Mic size={26} className={styles.logoIcon}/>
+          </div>
           <div>
             <h2>My Voice</h2>
             <span className={styles.roleTag}>Área da Professora</span>
@@ -534,6 +563,20 @@ const AdminDashboard = () => {
         </div>
 
         {aba === 'aulas'  && <PreviewAulas plano={plano} />}
+        {aba === 'trilha' && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              marginBottom: '1rem', padding: '0.65rem 1rem',
+              background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)',
+              borderRadius: '12px', fontSize: '0.82rem', color: '#a78bfa', fontWeight: 600,
+            }}>
+              <GraduationCap size={16}/>
+              Você está visualizando a Trilha exatamente como o aluno vê
+            </div>
+            <Trilha modoVisualizacao />
+          </div>
+        )}
         {aba === 'nova'   && <NovaAula onSalvo={() => setAba('aulas')} />}
         {aba === 'upload' && <UploadDocumento onSalvo={() => setAba('aulas')} />}
         {aba === 'gravar' && (
