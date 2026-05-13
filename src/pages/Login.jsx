@@ -25,18 +25,7 @@ const Login = () => {
       // signIn já busca o profile internamente (AuthContext atualizado)
       await signIn(email, senha);
 
-      // Após signIn, o profile já está no contexto — usa ele para navegar
-      // Pequeno delay para o estado React propagar
-      setTimeout(() => {
-        // Lê role direto do localStorage/profile atualizado
-        // Estratégia: tenta pegar do contexto, fallback para /dashboard
-        const savedRole = localStorage.getItem('mv_role');
-        if (savedRole === 'professor') {
-          navigate('/admin', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
-      }, 100);
+
     } catch (err) {
       setErro(
         err.message === 'Invalid login credentials'
