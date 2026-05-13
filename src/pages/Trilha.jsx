@@ -6,6 +6,26 @@ import { SecaoVerbos }      from '../components/SecaoVerbos';
 import { SecaoVocabulario } from '../components/SecaoVocabulario';
 import { SecaoExercicios }  from '../components/SecaoExercicios';
 
+// ── Bandeira dos EUA SVG inline ───────────────────────────────────────────────
+const BandeiraEUA = ({ size = 36 }) => (
+  <svg width={size} height={size * 0.526} viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" style={{ borderRadius: 3, display: 'block' }}>
+    {[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => (
+      <rect key={i} x="0" y={i * 400/13} width="760" height={400/13}
+        fill={i % 2 === 0 ? '#B22234' : '#FFFFFF'} />
+    ))}
+    <rect x="0" y="0" width="303" height={400 * 7/13} fill="#3C3B6E" />
+    {Array.from({ length: 50 }).map((_, idx) => {
+      const row = Math.floor(idx / 6) % 2 === 0 ? Math.floor(idx / 6) : Math.floor(idx / 5);
+      const col = idx % (Math.floor(idx / 6) % 2 === 0 ? 6 : 5);
+      const isOddRow = Math.floor(idx / 6) % 2 !== 0;
+      const cx = isOddRow ? 30 + col * 50 + 25 : 30 + col * 50;
+      const cy = Math.floor(idx / (isOddRow ? 5 : 6)) * 26 + (isOddRow ? 13 : 0) + 16;
+      return <polygon key={idx} points="0,-9 2.6,-4 9,-4 4,0 6,6 0,3 -6,6 -4,0 -9,-4 -2.6,-4"
+        transform={`translate(${cx},${cy})`} fill="white" />;
+    })}
+  </svg>
+);
+
 // ── DATA ───────────────────────────────────────────────────────────────────────
 const myVoiceData = {
   basico: {
@@ -308,7 +328,12 @@ export default function Trilha({ modoVisualizacao = false }) {
     <div style={styles.trilhaContainer}>
       <nav style={styles.navbar}>
         <div style={styles.logoInfo}>
-          <Mic size={26} color="#8b5cf6"/>
+          <div style={styles.logoMicWrapper}>
+            <div style={styles.logoBandeira}>
+              <BandeiraEUA size={42} />
+            </div>
+            <Mic size={26} color="#8b5cf6" style={{ position: 'relative', zIndex: 1 }}/>
+          </div>
           <h2 style={styles.logoTitle}>My Voice</h2>
         </div>
         {!modoVisualizacao && (
@@ -388,6 +413,8 @@ const styles = {
     padding:'1rem 2rem', background:'rgba(15,23,42,0.9)', backdropFilter:'blur(20px)',
     borderBottom:'1px solid rgba(255,255,255,0.1)' },
   logoInfo: { display:'flex', alignItems:'center', gap:'0.75rem' },
+  logoMicWrapper: { position:'relative', display:'flex', alignItems:'center', justifyContent:'center', width:42, height:42 },
+  logoBandeira: { position:'absolute', inset:0, borderRadius:8, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 0 0 1.5px rgba(255,255,255,0.18)' },
   logoTitle: { fontSize:'1.2rem', fontWeight:800, background:'linear-gradient(to right,#8b5cf6,#ec4899)',
     WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' },
   logoutBtn: { display:'flex', alignItems:'center', color:'#94a3b8', fontSize:'0.88rem',
