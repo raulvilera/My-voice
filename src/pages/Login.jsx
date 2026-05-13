@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mic, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabaseClient';
 import styles from './Login.module.css';
 
 const Login = () => {
   const navigate           = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, profile } = useAuth();
 
   const [tab, setTab]         = useState('entrar');
   const [nome, setNome]       = useState('');
@@ -20,31 +19,30 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErro(''); setLoading(true);
+    setErro('');
+    setLoading(true);
     try {
-      const data = await signIn(email, senha);
-      // signIn retorna { user, session } — extrair user corretamente
-      const user = data?.user ?? data;
+      // signIn já busca o profile internamente (AuthContext atualizado)
+      await signIn(email, senha);
 
-      if (!user?.id) throw new Error('Usuário não encontrado após login.');
-
-      // Busca o perfil para saber para onde redirecionar
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (profile?.role === 'professor') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      // Após signIn, o profile já está no contexto — usa ele para navegar
+      // Pequeno delay para o estado React propagar
+      setTimeout(() => {
+        // Lê role direto do localStorage/profile atualizado
+        // Estratégia: tenta pegar do contexto, fallback para /dashboard
+        const savedRole = localStorage.getItem('mv_role');
+        if (savedRole === 'professor') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
+      }, 100);
     } catch (err) {
-      setErro(err.message === 'Invalid login credentials'
-        ? 'E-mail ou senha incorretos.'
-        : err.message);
-    } finally {
+      setErro(
+        err.message === 'Invalid login credentials'
+          ? 'E-mail ou senha incorretos.'
+          : err.message || 'Erro ao fazer login. Tente novamente.'
+      );
       setLoading(false);
     }
   };
@@ -52,15 +50,21 @@ const Login = () => {
   const handleCadastro = async (e) => {
     e.preventDefault();
     setErro(''); setSucesso(''); setLoading(true);
-    if (senha.length < 6) { setErro('A senha deve ter pelo menos 6 caracteres.'); setLoading(false); return; }
+    if (senha.length < 6) {
+      setErro('A senha deve ter pelo menos 6 caracteres.');
+      setLoading(false);
+      return;
+    }
     try {
       await signUp(email, senha, nome);
       setSucesso('Cadastro realizado! Verifique seu e-mail para confirmar o acesso.');
       setNome(''); setEmail(''); setSenha('');
     } catch (err) {
-      setErro(err.message.includes('already registered')
-        ? 'Este e-mail já está cadastrado.'
-        : err.message);
+      setErro(
+        err.message?.includes('already registered')
+          ? 'Este e-mail já está cadastrado.'
+          : err.message || 'Erro ao cadastrar.'
+      );
     } finally {
       setLoading(false);
     }
@@ -76,10 +80,16 @@ const Login = () => {
         </div>
 
         <div className={styles.tabs}>
-          <button className={`${styles.tab} ${tab === 'entrar' ? styles.tabActive : ''}`} onClick={() => { setTab('entrar'); setErro(''); setSucesso(''); }}>
+          <button
+            className={`${styles.tab} ${tab === 'entrar' ? styles.tabActive : ''}`}
+            onClick={() => { setTab('entrar'); setErro(''); setSucesso(''); }}
+          >
             Entrar
           </button>
-          <button className={`${styles.tab} ${tab === 'cadastrar' ? styles.tabActive : ''}`} onClick={() => { setTab('cadastrar'); setErro(''); setSucesso(''); }}>
+          <button
+            className={`${styles.tab} ${tab === 'cadastrar' ? styles.tabActive : ''}`}
+            onClick={() => { setTab('cadastrar'); setErro(''); setSucesso(''); }}
+          >
             Cadastrar
           </button>
         </div>
@@ -88,11 +98,25 @@ const Login = () => {
           <form onSubmit={handleLogin} className={styles.form}>
             <div className={styles.field}>
               <Mail size={18} className={styles.fieldIcon} />
-              <input type="email" placeholder="Seu e-mail" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
+              <input
+                type="email"
+                placeholder="Seu e-mail"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
             </div>
             <div className={styles.field}>
               <Lock size={18} className={styles.fieldIcon} />
-              <input type={showPwd ? 'text' : 'password'} placeholder="Sua senha" value={senha} onChange={e => setSenha(e.target.value)} required autoComplete="current-password" />
+              <input
+                type={showPwd ? 'text' : 'password'}
+                placeholder="Sua senha"
+                value={senha}
+                onChange={e => setSenha(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
               <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(p => !p)}>
                 {showPwd ? <EyeOff size={16}/> : <Eye size={16}/>}
               </button>
@@ -108,15 +132,35 @@ const Login = () => {
           <form onSubmit={handleCadastro} className={styles.form}>
             <div className={styles.field}>
               <User size={18} className={styles.fieldIcon} />
-              <input type="text" placeholder="Seu nome completo" value={nome} onChange={e => setNome(e.target.value)} required />
+              <input
+                type="text"
+                placeholder="Seu nome completo"
+                value={nome}
+                onChange={e => setNome(e.target.value)}
+                required
+              />
             </div>
             <div className={styles.field}>
               <Mail size={18} className={styles.fieldIcon} />
-              <input type="email" placeholder="Seu e-mail" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
+              <input
+                type="email"
+                placeholder="Seu e-mail"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
             </div>
             <div className={styles.field}>
               <Lock size={18} className={styles.fieldIcon} />
-              <input type={showPwd ? 'text' : 'password'} placeholder="Crie uma senha (mín. 6 caracteres)" value={senha} onChange={e => setSenha(e.target.value)} required autoComplete="new-password" />
+              <input
+                type={showPwd ? 'text' : 'password'}
+                placeholder="Crie uma senha (mín. 6 caracteres)"
+                value={senha}
+                onChange={e => setSenha(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
               <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(p => !p)}>
                 {showPwd ? <EyeOff size={16}/> : <Eye size={16}/>}
               </button>
