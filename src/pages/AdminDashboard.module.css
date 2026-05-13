@@ -11,7 +11,34 @@
 }
 
 .logoInfo { display: flex; align-items: center; gap: 0.75rem; }
-.logoIcon { color: var(--color-primary); }
+
+.logoMicWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.logoBandeira {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,0.2);
+}
+
+.logoIcon {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  filter: drop-shadow(0 1px 5px rgba(0,0,0,0.8));
+}
 .logoInfo h2 {
   font-size: 1.15rem; font-weight: 800; line-height: 1.2;
   background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
