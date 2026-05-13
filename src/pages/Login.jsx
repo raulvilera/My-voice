@@ -22,9 +22,13 @@ const Login = () => {
     e.preventDefault();
     setErro(''); setLoading(true);
     try {
-      const { user } = await signIn(email, senha);
+      const data = await signIn(email, senha);
+      // signIn retorna { user, session } — extrair user corretamente
+      const user = data?.user ?? data;
 
-      // Busca o perfil diretamente para saber para onde redirecionar
+      if (!user?.id) throw new Error('Usuário não encontrado após login.');
+
+      // Busca o perfil para saber para onde redirecionar
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
