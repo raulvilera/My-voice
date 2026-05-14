@@ -32,5 +32,14 @@
 <body>
     <div id="root"></div>
     <script type="module" src="/src/index.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.warn('SW falhou:', err));
+        });
+      }
+    </script>
 </body>
 </html>
