@@ -1,8 +1,8 @@
-import React, { useRef, useState,
-useEffect } from "react";
+
+import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, Mic, Square, Play, Download } from "lucide-react";
+import { Mic, Square, Play, Download } from "lucide-react";
 
 interface VideoRecorderProps {
   onRecordingComplete?: (blob: Blob, duration: number) => void;
@@ -16,17 +16,20 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  // FIX: usar ref para o stream, evitando stale closure no cleanup
+  const streamRef = useRef<MediaStream | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const startTimeRef = useRef<number>(0);
 
   // Inicializar câmera e microfone
   useEffect(() => {
+    let cancelled = false;
+
     const initializeMedia = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -34,38 +37,52 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({
           audio: true,
         });
 
-        setStream(mediaStream);
+        if (cancelled) {
+          // componente desmontado antes de resolver — liberar imediatamente
+          mediaStream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+
+        streamRef.current = mediaStream;
 
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
       } catch (err) {
-        setError(
-          "Não foi possível acessar câmera/microfone. Verifique as permissões."
-        );
-        console.error("Erro ao acessar mídia:", err);
+        if (!cancelled) {
+          setError(
+            "Não foi possível acessar câmera/microfone. Verifique as permissões."
+          );
+          console.error("Erro ao acessar mídia:", err);
+        }
       }
     };
 
     initializeMedia();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      cancelled = true;
+      // FIX: agora usa a ref, não o state — sem stale closure
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
       }
     };
   }, []);
 
   const startRecording = () => {
-    if (!stream) {
+    if (!streamRef.current) {
       setError("Câmera/microfone não inicializados");
       return;
     }
 
     chunksRef.current = [];
-    const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: "video/webm;codecs=vp9",
-    });
+
+    const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+      ? "video/webm;codecs=vp9"
+      : "video/webm";
+
+    const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType });
 
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
@@ -89,7 +106,9 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      const recordedDuration = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const recordedDuration = Math.floor(
+        (Date.now() - startTimeRef.current) / 1000
+      );
       setDuration(recordedDuration);
     }
   };
@@ -129,9 +148,7 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({
         </h2>
 
         {error && (
-          <div className="p-4 bg-red-100 text-red-800 rounded-lg">
-            {error}
-          </div>
+          <div className="p-4 bg-red-100 text-red-800 rounded-lg">{error}</div>
         )}
 
         {!isPreviewing ? (
@@ -193,8 +210,9 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({
                 Duração: <span className="font-semibold">{duration}s</span>
               </p>
               <p className="text-sm text-muted-foreground">
-                Tamanho: <span className="font-semibold">
-                  {(recordedBlob?.size || 0) / 1024 / 1024}MB
+                Tamanho:{" "}
+                <span className="font-semibold">
+                  {((recordedBlob?.size ?? 0) / 1024 / 1024).toFixed(2)}MB
                 </span>
               </p>
             </div>
@@ -216,24 +234,15 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({
                 <Download size={18} />
                 Baixar Vídeo
               </Button>
-              <Button
-                onClick={resetRecording}
-                variant="outline"
-                className="gap-2"
-              >
+              <Button onClick={resetRecording} variant="outline" className="gap-2">
                 Gravar Novamente
               </Button>
             </div>
           </>
         )}
 
-        {/* Botão fechar */}
         {onClose && (
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            className="w-full"
-          >
+          <Button onClick={onClose} variant="ghost" className="w-full">
             Fechar
           </Button>
         )}
@@ -243,4 +252,3 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({
 };
 
 export default VideoRecorder;
-
