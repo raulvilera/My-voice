@@ -22,10 +22,9 @@ const Login = () => {
     setErro('');
     setLoading(true);
     try {
-      // signIn já busca o profile internamente (AuthContext atualizado)
       await signIn(email, senha);
-
-
+      // Redirecionamento automático via AuthContext
+      setTimeout(() => navigate('/dashboard'), 500);
     } catch (err) {
       setErro(
         err.message === 'Invalid login credentials'
