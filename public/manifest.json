@@ -9,6 +9,14 @@
   "scope": "/",
   "start_url": "/",
   "lang": "pt-BR",
+  "screenshots": [
+    {
+      "src": "/assets/hero.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
