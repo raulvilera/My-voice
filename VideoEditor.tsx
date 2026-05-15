@@ -1,5 +1,5 @@
-import React, { useRef, useState,
-useEffect } from "react";
+
+import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,6 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
   onCancel,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -39,11 +38,17 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
   useEffect(() => {
     const url = URL.createObjectURL(videoBlob);
     setVideoUrl(url);
-
     return () => {
       URL.revokeObjectURL(url);
     };
   }, [videoBlob]);
+
+  // Sincronizar volume do elemento <video> com o slider
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = Math.min(volume / 100, 1);
+    }
+  }, [volume]);
 
   const handleMetadataLoaded = () => {
     if (videoRef.current) {
@@ -53,17 +58,13 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
   const handleSave = async () => {
     setIsSaving(true);
-
     try {
-      // Aplicar ajustes de volume
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const arrayBuffer = await videoBlob.arrayBuffer();
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-      // Criar novo blob com metadados
       const metadata: VideoMetadata = {
         titulo,
         descricao,
+        // FIX: volume > 100 é apenas representação visual do slider;
+        // para a API de áudio real seria necessário Web Audio API + OfflineAudioContext.
+        // Por ora, salva o valor numérico como metadado e aplica no <video> via useEffect.
         volume,
         legenda,
       };
@@ -79,6 +80,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
   };
 
   const formatTime = (seconds: number) => {
+    if (!isFinite(seconds) || seconds < 0) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -104,8 +106,16 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
         {/* Informações do vídeo */}
         <div className="p-4 bg-muted rounded-lg text-sm text-muted-foreground">
-          <p>Duração: <span className="font-semibold">{formatTime(videoDuration)}</span></p>
-          <p>Tamanho: <span className="font-semibold">{(videoBlob.size / 1024 / 1024).toFixed(2)}MB</span></p>
+          <p>
+            Duração:{" "}
+            <span className="font-semibold">{formatTime(videoDuration)}</span>
+          </p>
+          <p>
+            Tamanho:{" "}
+            <span className="font-semibold">
+              {(videoBlob.size / 1024 / 1024).toFixed(2)}MB
+            </span>
+          </p>
         </div>
 
         {/* Formulário de metadados */}
@@ -139,7 +149,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
           {/* Legenda */}
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
               <Type size={16} />
               Legenda (opcional)
             </label>
@@ -153,7 +163,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
           {/* Controle de volume */}
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
               <Volume2 size={16} />
               Volume: {volume}%
             </label>
@@ -170,15 +180,12 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
         {/* Controles de ação */}
         <div className="flex gap-3 justify-end flex-wrap">
-          <Button
-            onClick={onCancel}
-            variant="outline"
-          >
+          <Button onClick={onCancel} variant="outline">
             Cancelar
           </Button>
           <Button
             onClick={handleSave}
-            disabled={isSaving || !titulo}
+            disabled={isSaving || !titulo.trim()}
             className="gap-2 bg-blue-600 hover:bg-blue-700"
           >
             {isSaving ? (
@@ -200,4 +207,3 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 };
 
 export default VideoEditor;
-
