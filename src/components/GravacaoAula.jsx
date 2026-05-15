@@ -64,11 +64,24 @@ export default function GravacaoAula() {
 
   // ── Busca aulas cadastradas ──────────────────────────────────────────────
   useEffect(() => {
-    supabase
-      .from('aulas')
-      .select('id, numero, titulo')
-      .order('numero')
-      .then(({ data }) => setAulas(data || []));
+    (async () => {
+      try {
+        console.log('[GravacaoAula] Buscando aulas...');
+        const { data, error } = await supabase
+          .from('aulas')
+          .select('id, numero, titulo')
+          .order('numero', { ascending: true });
+        
+        if (error) {
+          console.error('[GravacaoAula] Erro ao buscar aulas:', error);
+        } else {
+          console.log('[GravacaoAula] Aulas carregadas:', data);
+          setAulas(data || []);
+        }
+      } catch (e) {
+        console.error('[GravacaoAula] Exceção:', e);
+      }
+    })();
   }, []);
 
   // ── Inicia câmera ────────────────────────────────────────────────────────
@@ -77,17 +90,38 @@ export default function GravacaoAula() {
     setErro('');
     try {
       const constraints = {
-        video: !semCamera ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } : false,
+        video: !semCamera ? { 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 }, 
+          facingMode: 'user' 
+        } : false,
         audio: !semMic,
       };
+      
       const s = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(s);
+      
       if (videoRef.current) {
         videoRef.current.srcObject = s;
-        await videoRef.current.play().catch(() => {});
+        try {
+          await videoRef.current.play();
+        } catch (e) {
+          console.warn('[GravacaoAula] Erro ao reproduzir preview:', e);
+        }
       }
     } catch (e) {
-      setErro('Não foi possível acessar câmera/microfone. Verifique as permissões do navegador.');
+      console.error('[GravacaoAula] Erro ao acessar dispositivos:', e);
+      
+      let mensagem = 'Não foi possível acessar câmera/microfone.';
+      if (e.name === 'NotAllowedError') {
+        mensagem = 'Permissão negada. Verifique as configurações do navegador.';
+      } else if (e.name === 'NotFoundError') {
+        mensagem = 'Nenhum dispositivo de câmera/microfone encontrado.';
+      } else if (e.name === 'NotReadableError') {
+        mensagem = 'Dispositivo já está em uso por outro aplicativo.';
+      }
+      
+      setErro(mensagem);
     } finally {
       setIniciando(false);
     }
@@ -114,58 +148,83 @@ export default function GravacaoAula() {
   const iniciarGravacao = () => {
     if (!stream) return;
     chunksRef.current = [];
+    
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
       ? 'video/webm;codecs=vp9'
       : MediaRecorder.isTypeSupported('video/webm')
         ? 'video/webm'
         : 'video/mp4';
 
-    const rec = new MediaRecorder(stream, { mimeType });
-    rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    rec.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: mimeType });
-      setBlobGravado(blob);
-      const url = URL.createObjectURL(blob);
-      setUrlPreview(url);
-      setEtapa('revisar');
-    };
-    rec.start(1000);
-    recorderRef.current = rec;
+    try {
+      const rec = new MediaRecorder(stream, { mimeType });
+      
+      rec.ondataavailable = (e) => { 
+        if (e.data.size > 0) chunksRef.current.push(e.data); 
+      };
+      
+      rec.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        setBlobGravado(blob);
+        const url = URL.createObjectURL(blob);
+        setUrlPreview(url);
+        setEtapa('revisar');
+      };
+      
+      rec.onerror = (e) => {
+        console.error('[GravacaoAula] Erro no MediaRecorder:', e);
+        setErro('Erro ao gravar: ' + e.error);
+      };
+      
+      rec.start(1000);
+      recorderRef.current = rec;
 
-    setGravando(true);
-    setPausado(false);
-    setDuracao(0);
-    timerRef.current = setInterval(() => {
-      setDuracao(d => {
-        if (d + 1 >= MAX_DURACAO_SEG) {
-          pararGravacao();
+      setGravando(true);
+      setPausado(false);
+      setDuracao(0);
+      timerRef.current = setInterval(() => {
+        setDuracao(d => {
+          if (d + 1 >= MAX_DURACAO_SEG) {
+            pararGravacao();
+            return d + 1;
+          }
           return d + 1;
-        }
-        return d + 1;
-      });
-    }, 1000);
+        });
+      }, 1000);
+    } catch (e) {
+      console.error('[GravacaoAula] Erro ao iniciar gravação:', e);
+      setErro('Erro ao iniciar gravação: ' + e.message);
+    }
   };
 
   // ── Pausar / Retomar ─────────────────────────────────────────────────────
   const togglePausa = () => {
     if (!recorderRef.current) return;
-    if (pausado) {
-      recorderRef.current.resume();
-      timerRef.current = setInterval(() => setDuracao(d => d + 1), 1000);
-    } else {
-      recorderRef.current.pause();
-      clearInterval(timerRef.current);
+    try {
+      if (pausado) {
+        recorderRef.current.resume();
+        timerRef.current = setInterval(() => setDuracao(d => d + 1), 1000);
+      } else {
+        recorderRef.current.pause();
+        clearInterval(timerRef.current);
+      }
+      setPausado(p => !p);
+    } catch (e) {
+      console.error('[GravacaoAula] Erro ao pausar/retomar:', e);
+      setErro('Erro ao pausar/retomar gravação');
     }
-    setPausado(p => !p);
   };
 
   // ── Parar gravação ───────────────────────────────────────────────────────
   const pararGravacao = () => {
-    clearInterval(timerRef.current);
-    recorderRef.current?.stop();
-    setGravando(false);
-    stream?.getTracks().forEach(t => t.stop());
-    setStream(null);
+    try {
+      clearInterval(timerRef.current);
+      recorderRef.current?.stop();
+      setGravando(false);
+      stream?.getTracks().forEach(t => t.stop());
+      setStream(null);
+    } catch (e) {
+      console.error('[GravacaoAula] Erro ao parar gravação:', e);
+    }
   };
 
   // ── Descartar e regravar ─────────────────────────────────────────────────
@@ -180,43 +239,82 @@ export default function GravacaoAula() {
 
   // ── Publicar vídeo ───────────────────────────────────────────────────────
   const publicar = async () => {
-    if (!blobGravado) return;
-    if (!aulaSelecionada) { setErro('Selecione a aula para vincular o vídeo.'); return; }
-    if (!tituloVideo.trim()) { setErro('Informe um título para o vídeo.'); return; }
+    if (!blobGravado) {
+      setErro('Nenhuma gravação encontrada.');
+      return;
+    }
+    if (!aulaSelecionada) {
+      setErro('Selecione a aula para vincular o vídeo.');
+      return;
+    }
+    if (!tituloVideo.trim()) {
+      setErro('Informe um título para o vídeo.');
+      return;
+    }
+    if (!user?.id) {
+      setErro('Usuário não autenticado.');
+      return;
+    }
 
     setPublicando(true);
     setErro('');
+    
     try {
       // 1. Upload para Supabase Storage
       const ext = blobGravado.type.includes('mp4') ? 'mp4' : 'webm';
       const nomeArquivo = `aula-${aulaSelecionada}-${Date.now()}.${ext}`;
       const caminho = `videos_aulas/${nomeArquivo}`;
 
+      console.log('[GravacaoAula] Iniciando upload:', caminho);
+
       const { error: uploadErr } = await supabase.storage
         .from('videos')
-        .upload(caminho, blobGravado, { contentType: blobGravado.type, upsert: false });
-      if (uploadErr) throw uploadErr;
+        .upload(caminho, blobGravado, { 
+          contentType: blobGravado.type, 
+          upsert: false 
+        });
+      
+      if (uploadErr) {
+        console.error('[GravacaoAula] Erro de upload:', uploadErr);
+        throw new Error('Erro ao fazer upload: ' + uploadErr.message);
+      }
 
       // 2. Obtém URL pública
-      const { data: urlData } = supabase.storage.from('videos').getPublicUrl(caminho);
+      const { data: urlData } = supabase.storage
+        .from('videos')
+        .getPublicUrl(caminho);
+      
       const videoUrl = urlData?.publicUrl;
-      if (!videoUrl) throw new Error('URL do vídeo não gerada.');
+      if (!videoUrl) {
+        throw new Error('URL do vídeo não foi gerada.');
+      }
+
+      console.log('[GravacaoAula] URL gerada:', videoUrl);
 
       // 3. Registra na tabela `videos_aulas`
-      const { error: dbErr } = await supabase.from('videos_aulas').insert({
-        aula_id: aulaSelecionada,
-        professor_id: user?.id,
-        titulo: tituloVideo.trim(),
-        url: videoUrl,
-        duracao_seg: duracao,
-        publicado: true,
-      });
-      if (dbErr) throw dbErr;
+      const { error: dbErr } = await supabase
+        .from('videos_aulas')
+        .insert({
+          aula_id: parseInt(aulaSelecionada),
+          professor_id: user.id,
+          titulo: tituloVideo.trim(),
+          url: videoUrl,
+          duracao_seg: duracao,
+          publicado: true,
+        });
+      
+      if (dbErr) {
+        console.error('[GravacaoAula] Erro ao registrar no banco:', dbErr);
+        throw new Error('Erro ao registrar vídeo: ' + dbErr.message);
+      }
+
+      console.log('[GravacaoAula] Vídeo registrado com sucesso');
 
       setSucesso('Vídeo publicado com sucesso! Os alunos já podem assistir na área de exercícios.');
       setEtapa('concluido');
     } catch (e) {
-      setErro('Erro ao publicar: ' + e.message);
+      console.error('[GravacaoAula] Erro ao publicar:', e);
+      setErro(e.message || 'Erro ao publicar vídeo');
     } finally {
       setPublicando(false);
     }
@@ -371,7 +469,7 @@ export default function GravacaoAula() {
             <button className={styles.btnSecundario} onClick={descartar}>
               <Trash2 size={16} /> Descartar e Regravar
             </button>
-            <button className={styles.btnPrimary} onClick={() => { setEtapa('publicar'); setErro(''); }}>
+            <button className={styles.btnPublicar} onClick={() => setEtapa('publicar')}>
               <Upload size={16} /> Publicar este vídeo
             </button>
           </div>
