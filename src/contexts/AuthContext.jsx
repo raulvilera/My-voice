@@ -16,7 +16,14 @@ export const AuthProvider = ({ children }) => {
         .select('*')
         .eq('id', userId)
         .single();
-      if (data && !error) setProfile(data);
+      
+      if (data && !error) {
+        setProfile(data);
+      } else if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (normal para novo usuário)
+        console.warn('Erro ao buscar perfil:', error.message);
+      }
+      // Se não encontrou perfil, deixa como null (novo usuário)
     } catch (e) {
       console.warn('fetchProfile erro:', e.message);
     } finally {
@@ -25,21 +32,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Segurança absoluta: nunca trava mais de 5s
+    // Timeout de segurança: máximo 8 segundos
     const safetyTimer = setTimeout(() => {
-      console.warn('[Auth] Safety timeout atingido — forçando loading=false');
+      console.warn('[Auth] Safety timeout - forçando loading=false');
       setLoading(false);
-    }, 5000);
+    }, 8000);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (u) {
+      if (u && !profileFetched.current) {
+        profileFetched.current = true;
         fetchProfile(u.id).finally(() => clearTimeout(safetyTimer));
       } else {
         setLoading(false);
         clearTimeout(safetyTimer);
       }
+    }).catch(err => {
+      console.error('[Auth] getSession error:', err);
+      setLoading(false);
+      clearTimeout(safetyTimer);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -47,7 +59,6 @@ export const AuthProvider = ({ children }) => {
         const u = session?.user ?? null;
         setUser(u);
         if (u) {
-          // Evita busca duplicada se já buscou
           if (!profileFetched.current) {
             profileFetched.current = true;
             await fetchProfile(u.id);
@@ -62,37 +73,62 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       clearTimeout(safetyTimer);
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
   const signIn = async (email, password) => {
-    profileFetched.current = false;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    // Busca o profile imediatamente para ter role disponível
-    if (data?.user?.id) {
-      await fetchProfile(data.user.id);
-      profileFetched.current = true;
+    try {
+      profileFetched.current = false;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        throw new Error(error.message || 'Erro ao fazer login');
+      }
+
+      // Busca o perfil imediatamente
+      if (data?.user?.id) {
+        profileFetched.current = true;
+        await fetchProfile(data.user.id);
+      }
+
+      return data;
+    } catch (err) {
+      console.error('[Auth] signIn error:', err);
+      throw err;
     }
-    return data;
   };
 
   const signUp = async (email, password, nome) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { nome, role: 'aluno' } },
-    });
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nome, role: 'aluno' } },
+      });
+      
+      if (error) {
+        throw new Error(error.message || 'Erro ao cadastrar');
+      }
+
+      return data;
+    } catch (err) {
+      console.error('[Auth] signUp error:', err);
+      throw err;
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    profileFetched.current = false;
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('[Auth] signOut error:', err);
+    } finally {
+      setUser(null);
+      setProfile(null);
+      profileFetched.current = false;
+      setLoading(false);
+    }
   };
 
   return (
@@ -106,4 +142,4 @@ export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
-  };
+};
