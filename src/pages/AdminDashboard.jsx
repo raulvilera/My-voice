@@ -56,12 +56,28 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
   useEffect(() => {
     let isMounted = true;
+
+    // Sincroniza aulas do aluno (hardcoded)
+    const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
+      ...a,
+      id: `hc-${a.id}`,
+      publicada: true,
+      secoes: a.sections?.map((s, i) => ({
+        tipo: s.type || s.tipo,
+        titulo: s.titulo,
+        conteudo: s.conteudo || s,
+        ordem: i
+      })) || []
+    }));
+
+    // Timeout de segurança: se o Supabase travar/pausar/demorar, garante carregamento do fallback local
     const safetyTimer = setTimeout(() => {
       if (isMounted) {
-        console.warn('[AdminDashboard] Timeout de segurança atingido');
+        console.warn('[AdminDashboard] Timeout de segurança atingido, carregando fallback hardcoded...');
+        setAulas(prev => prev.length === 0 ? aulasHardcoded : prev);
         setLoading(false);
       }
-    }, 8000);
+    }, 6000);
 
     (async () => {
       try {
@@ -78,19 +94,6 @@ const PreviewAulas = ({ plano = 'basico' }) => {
         }
 
         if (isMounted) {
-          // Sincroniza aulas do aluno (hardcoded) com as do banco
-          const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
-            ...a,
-            id: `hc-${a.id}`,
-            publicada: true,
-            secoes: a.sections?.map((s, i) => ({
-              tipo: s.type,
-              titulo: s.titulo,
-              conteudo: s,
-              ordem: i
-            })) || []
-          }));
-
           // Evita duplicatas por número de aula
           const numerosDB = new Set(aulasDB.map(a => a.numero));
           const filtradas = aulasHardcoded.filter(a => !numerosDB.has(a.numero));
@@ -99,6 +102,9 @@ const PreviewAulas = ({ plano = 'basico' }) => {
         }
       } catch (e) {
         console.error('[AdminDashboard] Exceção:', e);
+        if (isMounted) {
+          setAulas(prev => prev.length === 0 ? aulasHardcoded : prev);
+        }
       } finally {
         if (isMounted) setLoading(false);
         clearTimeout(safetyTimer);
