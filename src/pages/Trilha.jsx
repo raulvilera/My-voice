@@ -317,8 +317,20 @@ const SecaoModal = ({ aula, secType, onClose }) => {
 // ── Trilha (Main Page) ────────────────────────────────────────────────────────
 export default function Trilha({ modoVisualizacao = false }) {
   const [modal, setModal] = useState(null);
-  const [aulas, setAulas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [aulas, setAulas] = useState(() => {
+    return myVoiceData.basico.aulas.map(a => ({
+      ...a,
+      id: `hc-${a.id}`,
+      publicada: true,
+      secoes: a.sections?.map((s, i) => ({
+        tipo: s.type || s.tipo,
+        titulo: s.titulo,
+        conteudo: s.conteudo || s,
+        ordem: i
+      })) || []
+    }));
+  });
+  const [loading, setLoading] = useState(false);
   const curso = myVoiceData.basico;
 
   // ✅ CORREÇÃO: Adiciona e.stopPropagation() para evitar borbulha de eventos
@@ -389,27 +401,6 @@ export default function Trilha({ modoVisualizacao = false }) {
       clearTimeout(safetyTimer);
     };
   }, []);
-
-  if (loading) {
-    return (
-      <div style={{
-        ...styles.trilhaContainer,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        color: '#8b5cf6',
-        fontFamily: "'Outfit', system-ui, sans-serif"
-      }}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}>
-          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
-            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-          </path>
-        </svg>
-        Carregando trilha de aulas…
-      </div>
-    );
-  }
 
   return (
     <div style={styles.trilhaContainer}>

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-import VideoEditor from './VideoEditor';
+import VideoEditor from '../../VideoEditor';
 import styles from './GravacaoAula.module.css';
 
 // ── Constantes ────────────────────────────────────────────────────────────────
@@ -90,6 +90,10 @@ export default function GravacaoAula() {
     setIniciando(true);
     setErro('');
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Seu navegador ou conexão (HTTP/origem não segura) não suporta gravação de mídia. Por favor, certifique-se de acessar via HTTPS.');
+      }
+
       const constraints = {
         video: !semCamera ? { 
           width: { ideal: 1280 }, 
@@ -113,13 +117,13 @@ export default function GravacaoAula() {
     } catch (e) {
       console.error('[GravacaoAula] Erro ao acessar dispositivos:', e);
       
-      let mensagem = 'Não foi possível acessar câmera/microfone.';
+      let mensagem = e.message || 'Não foi possível acessar câmera/microfone.';
       if (e.name === 'NotAllowedError') {
-        mensagem = 'Permissão negada. Verifique as configurações do navegador.';
+        mensagem = 'Permissão negada para acessar a câmera ou microfone. Verifique as configurações de permissão do navegador.';
       } else if (e.name === 'NotFoundError') {
-        mensagem = 'Nenhum dispositivo de câmera/microfone encontrado.';
+        mensagem = 'Nenhum dispositivo de câmera ou microfone físico foi encontrado.';
       } else if (e.name === 'NotReadableError') {
-        mensagem = 'Dispositivo já está em uso por outro aplicativo.';
+        mensagem = 'A câmera ou o microfone já está em uso por outro aplicativo ou aba.';
       }
       
       setErro(mensagem);
@@ -444,6 +448,12 @@ export default function GravacaoAula() {
               </>
             )}
           </div>
+
+          {erro && (
+            <div className={styles.erroBox} style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
+              <AlertCircle size={16} /> <span>{erro}</span>
+            </div>
+          )}
 
           <p className={styles.dica}>
             Dica: Certifique-se de estar em um ambiente iluminado e com pouco ruído.

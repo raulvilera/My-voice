@@ -49,10 +49,22 @@ const PILL_INFO = {
 
 // ── Preview de aulas ──────────────────────────────────────────────────────────
 const PreviewAulas = ({ plano = 'basico' }) => {
-  const [aulas, setAulas]         = useState([]);
+  const [aulas, setAulas]         = useState(() => {
+    return myVoiceData.basico.aulas.map(a => ({
+      ...a,
+      id: `hc-${a.id}`,
+      publicada: true,
+      secoes: a.sections?.map((s, i) => ({
+        tipo: s.type || s.tipo,
+        titulo: s.titulo,
+        conteudo: s.conteudo || s,
+        ordem: i
+      })) || []
+    }));
+  });
   const [aulaAberta, setAulaAberta] = useState(null);
   const [secAberta, setSecAberta]   = useState(null);
-  const [loading, setLoading]     = useState(true);
+  const [loading, setLoading]     = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -169,7 +181,6 @@ const PreviewAulas = ({ plano = 'basico' }) => {
     ? (PILL_INFO[secAberta]?.emoji + ' ' + PILL_INFO[secAberta]?.label)
     : '📋 Aula completa';
 
-  if (loading) return <p className={styles.loadingMsg}>Carregando aulas…</p>;
   if (aulas.length === 0) return <p className={styles.emptyMsg}>Nenhuma aula cadastrada ainda.</p>;
 
   return (
