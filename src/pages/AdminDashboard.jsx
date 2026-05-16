@@ -106,21 +106,26 @@ const PreviewAulas = ({ plano = 'basico' }) => {
   }, []);
 
   const renderSecao = (sec, idx, tituloAula) => {
-    const dados = { ...sec.conteudo, titulo: sec.titulo };
+    // Normaliza os dados: se vier do banco (Supabase), o conteúdo real está em .conteudo
+    // Se for hardcoded, o próprio 'sec' já é o objeto ou 'sec.conteudo' foi mapeado.
+    // Usamos a mesma lógica robusta da Trilha:
+    const sectionData = sec.conteudo ? { ...sec.conteudo, titulo: sec.titulo, tipo: sec.tipo } : sec;
+    const sectionType = sec.tipo || sec.type;
+
     return (
       <div key={idx}>
         <VideoEducacional
           tituloAula={tituloAula}
-          tipoSecao={sec.tipo}
-          conteudoSecao={sec.conteudo}
+          tipoSecao={sectionType}
+          conteudoSecao={sectionData}
           plano={plano}
         />
         {(() => {
-          switch (sec.tipo) {
-            case 'dialogo':     return <SecaoDialogo     section={dados}/>;
-            case 'verbos':      return <SecaoVerbos      section={dados}/>;
-            case 'vocabulario': return <SecaoVocabulario section={dados}/>;
-            case 'exercicios':  return <SecaoExercicios  section={dados} aulaId={aulaAberta?.id}/>;
+          switch (sectionType) {
+            case 'dialogo':     return <SecaoDialogo     section={sectionData}/>;
+            case 'verbos':      return <SecaoVerbos      section={sectionData}/>;
+            case 'vocabulario': return <SecaoVocabulario section={sectionData}/>;
+            case 'exercicios':  return <SecaoExercicios  section={sectionData} aulaId={aulaAberta?.id}/>;
             default: return null;
           }
         })()}
