@@ -5,12 +5,11 @@ import {
   Mic, LogOut, Users, ToggleLeft, ToggleRight, Search,
   Plus, Eye, X, Upload, FileText, Loader2,
   MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
-  CreditCard, Crown, Zap, Bot, Video, Download,
+  CreditCard, Crown, Zap, Bot, Video,
 } from 'lucide-react';
 import { myVoiceData } from '../data/myvoiceData';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
-import { usePwa } from '../contexts/PwaContext';
 import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
 import Planos from './Planos';
@@ -71,29 +70,32 @@ const PreviewAulas = ({ plano = 'basico' }) => {
           .select('*, secoes(*)')
           .order('numero', { ascending: true });
 
+        let aulasDB = [];
         if (error) {
           console.error('[AdminDashboard] Erro ao buscar aulas:', error);
         } else {
-          if (isMounted) {
-            // Sincroniza aulas do aluno (hardcoded) com as do banco
-            const aulasDB = data || [];
-            const baseAulas = myVoiceData?.basico?.aulas || [];
-            
-            const aulasHardcoded = baseAulas.map(a => ({
-              ...a,
-              id: `hc-${a.id}`,
-              publicada: true,
-              secoes: a.sections?.map((s, i) => ({
-                tipo: s.type,
-                titulo: s.titulo,
-                conteudo: s,
-                ordem: i
-              })) || []
-            }));
+          aulasDB = data || [];
+        }
 
-            const listaFinal = [...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero);
-            setAulas(listaFinal);
-          }
+        if (isMounted) {
+          // Sincroniza aulas do aluno (hardcoded) com as do banco
+          const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
+            ...a,
+            id: `hc-${a.id}`,
+            publicada: true,
+            secoes: a.sections?.map((s, i) => ({
+              tipo: s.type,
+              titulo: s.titulo,
+              conteudo: s,
+              ordem: i
+            })) || []
+          }));
+
+          // Evita duplicatas por número de aula
+          const numerosDB = new Set(aulasDB.map(a => a.numero));
+          const filtradas = aulasHardcoded.filter(a => !numerosDB.has(a.numero));
+          
+          setAulas([...filtradas, ...aulasDB].sort((a, b) => a.numero - b.numero));
         }
       } catch (e) {
         console.error('[AdminDashboard] Exceção:', e);
@@ -110,26 +112,21 @@ const PreviewAulas = ({ plano = 'basico' }) => {
   }, []);
 
   const renderSecao = (sec, idx, tituloAula) => {
-    // Normaliza os dados: se vier do banco (Supabase), o conteúdo real está em .conteudo
-    // Se for hardcoded, o próprio 'sec' já é o objeto ou 'sec.conteudo' foi mapeado.
-    // Usamos a mesma lógica robusta da Trilha:
-    const sectionData = sec.conteudo ? { ...sec.conteudo, titulo: sec.titulo, tipo: sec.tipo } : sec;
-    const sectionType = sec.tipo || sec.type;
-
+    const dados = { ...sec.conteudo, titulo: sec.titulo };
     return (
       <div key={idx}>
         <VideoEducacional
           tituloAula={tituloAula}
-          tipoSecao={sectionType}
-          conteudoSecao={sectionData}
+          tipoSecao={sec.tipo}
+          conteudoSecao={sec.conteudo}
           plano={plano}
         />
         {(() => {
-          switch (sectionType) {
-            case 'dialogo':     return <SecaoDialogo     section={sectionData}/>;
-            case 'verbos':      return <SecaoVerbos      section={sectionData}/>;
-            case 'vocabulario': return <SecaoVocabulario section={sectionData}/>;
-            case 'exercicios':  return <SecaoExercicios  section={sectionData} aulaId={aulaAberta?.id}/>;
+          switch (sec.tipo) {
+            case 'dialogo':     return <SecaoDialogo     section={dados}/>;
+            case 'verbos':      return <SecaoVerbos      section={dados}/>;
+            case 'vocabulario': return <SecaoVocabulario section={dados}/>;
+            case 'exercicios':  return <SecaoExercicios  section={dados} aulaId={aulaAberta?.id}/>;
             default: return null;
           }
         })()}
@@ -412,7 +409,6 @@ const ModoAluno = ({ onFechar }) => (
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
-  const { canInstall, installApp } = usePwa();
   const [aba, setAba] = useState('aulas');
   const [modoAluno, setModoAluno] = useState(false);
 
@@ -439,11 +435,6 @@ const AdminDashboard = () => {
           <div><h2>My Voice</h2><span>Área da Professora</span></div>
         </div>
         <div className={styles.navRight}>
-          {canInstall && (
-            <button className={styles.installBtn} onClick={installApp} title="Instalar Aplicativo">
-              <Download size={18} />
-            </button>
-          )}
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>
           <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>Ver como Aluno</button>
           <button className={styles.logoutBtn} onClick={handleLogout}>Sair</button>
