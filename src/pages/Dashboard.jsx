@@ -63,25 +63,34 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchAulas = async () => {
-      const { data } = await supabase
-        .from('aulas')
-        .select('id, numero, titulo, subtitulo, tag, publicada, imagem_url')
-        .eq('publicada', true)
-        .order('numero');
-      
-      const aulasDB = data || [];
-      const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
-        id: a.id,
-        numero: a.numero,
-        titulo: a.titulo,
-        subtitulo: a.subtitulo,
-        tag: a.tag,
-        publicada: true,
-        imagem_url: null
-      }));
+      try {
+        const { data, error } = await supabase
+          .from('aulas')
+          .select('id, numero, titulo, subtitulo, tag, publicada, imagem_url')
+          .eq('publicada', true)
+          .order('numero');
+        
+        if (error) console.error("Erro Supabase:", error);
 
-      setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
-      setLoading(false);
+        const aulasDB = data || [];
+        
+        // Proteção contra myVoiceData ausente ou malformado
+        const aulasHardcoded = (myVoiceData?.basico?.aulas || []).map(a => ({
+          id: a.id,
+          numero: a.numero,
+          titulo: a.titulo,
+          subtitulo: a.subtitulo,
+          tag: a.tag,
+          publicada: true,
+          imagem_url: null
+        }));
+
+        setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
+      } catch (err) {
+        console.error("Erro ao carregar aulas:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchAulas();
   }, []);

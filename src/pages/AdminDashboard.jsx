@@ -76,7 +76,7 @@ const PreviewAulas = ({ plano = 'basico' }) => {
           if (isMounted) {
             // Sincroniza aulas do aluno (hardcoded) com as do banco
             const aulasDB = data || [];
-            const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
+            const aulasHardcoded = (myVoiceData?.basico?.aulas || []).map(a => ({
               ...a,
               id: `hc-${a.id}`,
               publicada: true,

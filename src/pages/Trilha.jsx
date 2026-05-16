@@ -99,27 +99,34 @@ export default function Trilha({ modoVisualizacao = false }) {
 
   useEffect(() => {
     const fetchAulas = async () => {
-      const { data } = await supabase
-        .from('aulas')
-        .select('*, secoes(*)')
-        .eq('publicada', true)
-        .order('numero', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('aulas')
+          .select('*, secoes(*)')
+          .eq('publicada', true)
+          .order('numero', { ascending: true });
 
-      const aulasDB = data || [];
-      const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
-        ...a,
-        id: a.id,
-        publicada: true,
-        secoes: a.sections?.map((s, i) => ({
-          tipo: s.type,
-          titulo: s.titulo,
-          conteudo: s,
-          ordem: i
-        })) || []
-      }));
+        if (error) console.error("Erro Supabase:", error);
 
-      setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
-      setLoading(false);
+        const aulasDB = data || [];
+        const aulasHardcoded = (myVoiceData?.basico?.aulas || []).map(a => ({
+          ...a,
+          id: a.id,
+          publicada: true,
+          secoes: a.sections?.map((s, i) => ({
+            tipo: s.type,
+            titulo: s.titulo,
+            conteudo: s,
+            ordem: i
+          })) || []
+        }));
+
+        setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
+      } catch (err) {
+        console.error("Erro ao carregar trilha:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchAulas();
@@ -151,8 +158,8 @@ export default function Trilha({ modoVisualizacao = false }) {
 
       <main style={styles.mainContent}>
         <header style={styles.header}>
-          <h1 style={styles.headerTitle}>{curso.nome}</h1>
-          <p style={{color:'#94a3b8',fontSize:'0.95rem'}}>{curso.descricao}</p>
+          <h1 style={styles.headerTitle}>{curso?.nome || 'Carregando...'}</h1>
+          <p style={{color:'#94a3b8',fontSize:'0.95rem'}}>{curso?.descricao || ''}</p>
         </header>
 
         <div style={styles.aulasList}>
