@@ -80,21 +80,6 @@
 }
 .logoutBtn:hover { color: var(--color-text-main); background: rgba(255,255,255,0.07); }
 
-.installBtn {
-  display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 50%;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  color: var(--color-primary);
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-.installBtn:hover {
-  background: rgba(139, 92, 246, 0.25);
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
-}
-
 .mainContent {
   flex: 1; padding: 2rem; max-width: 960px;
   margin: 0 auto; width: 100%;
@@ -198,7 +183,7 @@
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.78);
   backdrop-filter: blur(8px);
-  z-index: 200; display: flex;
+  z-index: 9999; display: flex;
   align-items: flex-start; justify-content: center;
   padding: 1rem; overflow-y: auto;
 }

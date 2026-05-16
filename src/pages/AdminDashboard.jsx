@@ -142,6 +142,17 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
   const fecharModal = () => { setAulaAberta(null); setSecAberta(null); };
 
+  const excluirAula = async (id) => {
+    if (!String(id).startsWith('hc-') && window.confirm('Deseja mesmo excluir esta aula?')) {
+      try {
+        await supabase.from('aulas').delete().eq('id', id);
+        setAulas(prev => prev.filter(a => a.id !== id));
+      } catch (e) {
+        console.error('Erro ao excluir:', e);
+      }
+    }
+  };
+
   const secoesModal = aulaAberta
     ? (aulaAberta.secoes || [])
         .sort((a, b) => a.ordem - b.ordem)
@@ -192,13 +203,26 @@ const PreviewAulas = ({ plano = 'basico' }) => {
               )}
             </div>
 
-            <button
-              className={styles.previewBtn}
-              onClick={() => { setAulaAberta(aula); setSecAberta(null); }}
-            >
-              <Eye size={15}/>
-              <span>Ver tudo</span>
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+              <button
+                className={styles.previewBtn}
+                onClick={() => { setAulaAberta(aula); setSecAberta(null); }}
+              >
+                <Eye size={15}/>
+                <span>Ver tudo</span>
+              </button>
+              {!String(aula.id).startsWith('hc-') && (
+                <button
+                  className={styles.previewBtn}
+                  style={{ background: 'rgba(239,68,68,0.15)', borderColor: 'rgba(239,68,68,0.4)', color: '#f87171' }}
+                  onClick={() => excluirAula(aula.id)}
+                  title="Excluir aula"
+                >
+                  <X size={15}/>
+                  <span>Excluir</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       ))}
@@ -298,9 +322,9 @@ const UploadDocumento = ({ onSalvo }) => {
 
       const secoesData = (resultado.secoes || []).map((s, i) => ({
         aula_id: aula.id,
-        tipo: s.tipo,
+        tipo: s.tipo || s.type,
         titulo: s.titulo,
-        conteudo: s.conteudo,
+        conteudo: s.conteudo || s,
         ordem: i,
       }));
       await supabase.from('secoes').insert(secoesData);
