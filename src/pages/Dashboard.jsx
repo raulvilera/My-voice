@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star } from 'lucide-react';
+import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import styles from './Dashboard.module.css';
+
+import { myVoiceData } from '../data/myvoiceData';
 
 const capaDefault = "/capa_padrao.jpg";
 
@@ -31,6 +33,33 @@ const Dashboard = () => {
   const { profile, signOut } = useAuth();
   const [aulas, setAulas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('Usuário aceitou a instalação');
+    }
+    setDeferredPrompt(null);
+    setShowInstallBtn(false);
+  };
 
   useEffect(() => {
     const fetchAulas = async () => {
@@ -39,7 +68,19 @@ const Dashboard = () => {
         .select('id, numero, titulo, subtitulo, tag, publicada, imagem_url')
         .eq('publicada', true)
         .order('numero');
-      setAulas(data || []);
+      
+      const aulasDB = data || [];
+      const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
+        id: a.id,
+        numero: a.numero,
+        titulo: a.titulo,
+        subtitulo: a.subtitulo,
+        tag: a.tag,
+        publicada: true,
+        imagem_url: null
+      }));
+
+      setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
       setLoading(false);
     };
     fetchAulas();
@@ -70,6 +111,12 @@ const Dashboard = () => {
             Olá, {profile?.name?.split(' ')[0] || 'bem-vindo'} 👋
           </h1>
           <p>Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem.</p>
+          
+          {showInstallBtn && (
+            <button className={styles.installAppBtn} onClick={handleInstallClick}>
+              <Download size={18} /> Instalar Aplicativo My Voice
+            </button>
+          )}
         </header>
 
         {loading ? (

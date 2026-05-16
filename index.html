@@ -24,9 +24,8 @@
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/assets/hero.png" />
 
-    <!-- App Download Links -->
-    <link rel="alternate" href="https://seu-dominio.com/download/ios" hreflang="x-default" />
-    <meta name="apple-itunes-app" content="app-id=seu-app-id, app-argument=https://seu-dominio.com" />
+    <!-- App Download Links (PWA Install) -->
+    <!-- O botão de instalação é gerenciado dinamicamente via JavaScript -->
 
     <!-- Manifest Link -->
     <link rel="manifest" href="/manifest.json" />
@@ -38,6 +37,7 @@
     <div id="root"></div>
     <script type="module" src="/src/index.jsx"></script>
     <script>
+      // Registra o Service Worker para funcionalidade PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
@@ -45,6 +45,19 @@
             .catch(err => console.warn('SW falhou:', err));
         });
       }
+
+      // Captura o evento de instalação do PWA
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('PWA pronto para instalação');
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA instalado com sucesso');
+        deferredPrompt = null;
+      });
     </script>
 </body>
 </html>

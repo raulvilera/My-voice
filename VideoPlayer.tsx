@@ -1,5 +1,5 @@
-
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState,
+useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Volume2, VolumeX, Maximize, Loader2 } from "lucide-react";
@@ -23,7 +23,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const controlsTimeoutRef = useRef<number | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -33,53 +33,34 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [showControls, setShowControls] = useState(true);
 
   const handlePlayPause = () => {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.pause();
-    } else {
-      videoRef.current.play();
-      if (onPlay) onPlay();
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+        if (onPlay) onPlay();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
   const handleMuteToggle = () => {
-    if (!videoRef.current) return;
-    const next = !isMuted;
-    videoRef.current.muted = next;
-    setIsMuted(next);
-  };
-
-  // FIX: fullscreen cross-browser com vendor prefixes
-  const handleFullscreen = async () => {
-    if (!containerRef.current) return;
-    try {
-      if (!document.fullscreenElement) {
-        await (
-          containerRef.current.requestFullscreen?.() ??
-          (containerRef.current as any).webkitRequestFullscreen?.()
-        );
-      } else {
-        await (
-          document.exitFullscreen?.() ??
-          (document as any).webkitExitFullscreen?.()
-        );
-      }
-    } catch {
-      // silenciar erros de fullscreen em ambientes restritos
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
     }
   };
 
-  useEffect(() => {
-    const onFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", onFsChange);
-    document.addEventListener("webkitfullscreenchange", onFsChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", onFsChange);
-      document.removeEventListener("webkitfullscreenchange", onFsChange);
-    };
-  }, []);
+  const handleFullscreen = () => {
+    if (containerRef.current) {
+      if (!isFullscreen) {
+        (containerRef.current.requestFullscreen as any)?.().catch(() => {});
+      } else {
+        (document.exitFullscreen as any)?.().catch(() => {});
+      }
+      setIsFullscreen(!isFullscreen);
+    }
+  };
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
@@ -103,16 +84,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   const handleMouseMove = () => {
     setShowControls(true);
-    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
     if (isPlaying) {
-      controlsTimeoutRef.current = setTimeout(() => {
+      controlsTimeoutRef.current = window.setTimeout(() => {
         setShowControls(false);
       }, 3000);
     }
   };
 
   const formatTime = (seconds: number) => {
-    if (!isFinite(seconds) || seconds < 0) return "0:00";
+    if (!isFinite(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -120,7 +103,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   useEffect(() => {
     return () => {
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -164,9 +149,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           <div className="mb-3">
             <input
               type="range"
-              min={0}
+              min="0"
               max={duration || 0}
-              step={0.1}
               value={currentTime}
               onChange={handleProgressChange}
               className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-600"
@@ -183,7 +167,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 variant="ghost"
                 className="text-white hover:bg-white/20"
               >
-                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                {isPlaying ? (
+                  <Pause size={20} />
+                ) : (
+                  <Play size={20} />
+                )}
               </Button>
 
               {/* Mute */}
@@ -193,7 +181,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 variant="ghost"
                 className="text-white hover:bg-white/20"
               >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                {isMuted ? (
+                  <VolumeX size={20} />
+                ) : (
+                  <Volume2 size={20} />
+                )}
               </Button>
 
               {/* Tempo */}
@@ -225,11 +217,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         )}
       </div>
 
-      {/* Informações do vídeo */}
+      {/* Informacoes do video */}
       {(titulo || descricao) && (
         <div className="p-4 space-y-2">
           {titulo && (
-            <h3 className="text-lg font-semibold text-foreground">{titulo}</h3>
+            <h3 className="text-lg font-semibold text-foreground">
+              {titulo}
+            </h3>
           )}
           {descricao && (
             <p className="text-sm text-muted-foreground line-clamp-2">
@@ -242,7 +236,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       {/* Legenda */}
       {legenda && (
         <div className="p-4 bg-muted border-t border-border">
-          <p className="text-sm text-foreground whitespace-pre-wrap">{legenda}</p>
+          <p className="text-sm text-foreground whitespace-pre-wrap">
+            {legenda}
+          </p>
         </div>
       )}
     </Card>
@@ -250,3 +246,4 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 };
 
 export default VideoPlayer;
+

@@ -2,21 +2,22 @@
  * GravacaoAula.jsx
  * Sistema de gravação de vídeo-aula pela professora.
  * Permite gravar diretamente pelo navegador (câmera/microfone),
- * revisar, e publicar vinculado a uma aula específica.
+ * revisar, editar e publicar vinculado a uma aula específica.
  * O vídeo é salvo no Supabase Storage e a URL é registrada na
  * tabela `videos_aulas`.
  *
  * Funciona tanto na plataforma web quanto no PWA (app).
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import {
   Video, StopCircle, Play, Pause, Trash2, Upload,
   CheckCircle, Loader2, Camera, Mic, MicOff, VideoOff,
-  ChevronDown, BookOpen, AlertCircle, RefreshCw, Eye,
+  ChevronDown, BookOpen, AlertCircle, RefreshCw, Eye, Edit3,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import VideoEditor from '../../VideoEditor';
 import styles from './GravacaoAula.module.css';
 
 // ── Constantes ────────────────────────────────────────────────────────────────
@@ -53,7 +54,7 @@ export default function GravacaoAula() {
   const [publicando, setPublicando] = useState(false);
   const [sucesso, setSucesso] = useState('');
   const [erro, setErro] = useState('');
-  const [etapa, setEtapa] = useState('gravar'); // 'gravar' | 'revisar' | 'publicar' | 'concluido'
+  const [etapa, setEtapa] = useState('gravar'); // 'gravar' | 'revisar' | 'editar' | 'publicar' | 'concluido'
 
   // Refs
   const videoRef = useRef(null);         // preview ao vivo
@@ -237,6 +238,12 @@ export default function GravacaoAula() {
     setErro('');
   };
 
+  const handleEditorSave = (editedBlob, metadata) => {
+    setBlobGravado(editedBlob);
+    setTituloVideo(metadata.titulo);
+    setEtapa('publicar');
+  };
+
   // ── Publicar vídeo ───────────────────────────────────────────────────────
   const publicar = async () => {
     if (!blobGravado) {
@@ -339,17 +346,17 @@ export default function GravacaoAula() {
         <div>
           <h2 className={styles.headerTitle}>Gravar Vídeo-Aula</h2>
           <p className={styles.headerDesc}>
-            Grave, revise e publique sua aula. O vídeo aparecerá ao lado dos exercícios na área do aluno.
+            Grave, revise, edite e publique sua aula. O vídeo aparecerá ao lado dos exercícios na área do aluno.
           </p>
         </div>
       </div>
 
       {/* ── Indicador de Etapas ── */}
       <div className={styles.etapas}>
-        {['gravar', 'revisar', 'publicar', 'concluido'].map((e, i) => {
-          const labels = ['1. Gravar', '2. Revisar', '3. Publicar', '✓ Concluído'];
+        {['gravar', 'revisar', 'editar', 'publicar', 'concluido'].map((e, i) => {
+          const labels = ['1. Gravar', '2. Revisar', '3. Editar', '4. Publicar', '✓ Concluído'];
           const ativo = etapa === e;
-          const feito = ['gravar', 'revisar', 'publicar', 'concluido'].indexOf(etapa) > i;
+          const feito = ['gravar', 'revisar', 'editar', 'publicar', 'concluido'].indexOf(etapa) > i;
           return (
             <div key={e} className={`${styles.etapaItem} ${ativo ? styles.etapaAtiva : ''} ${feito ? styles.etapaFeita : ''}`}>
               {labels[i]}
@@ -396,58 +403,50 @@ export default function GravacaoAula() {
               <video
                 ref={videoRef}
                 className={styles.videoEl}
+                autoPlay
                 muted
                 playsInline
-                autoPlay
               />
             )}
 
-            {/* Overlay de status durante gravação */}
             {gravando && (
               <div className={styles.recBadge}>
-                <span className={styles.recDot} />
-                {pausado ? 'PAUSADO' : 'GRAVANDO'} — {formatarTempo(duracao)}
+                <div className={styles.recDot} />
+                <span>REC {formatarTempo(duracao)}</span>
               </div>
             )}
           </div>
 
-          {/* Mensagem de erro de dispositivo */}
-          {erro && (
-            <div className={styles.erroBox}>
-              <AlertCircle size={15} /> {erro}
-            </div>
-          )}
-
-          {/* Botões de controle */}
+          {/* Controles */}
           <div className={styles.controles}>
             {!stream && !gravando && (
               <button className={styles.btnPrimary} onClick={iniciarCamera} disabled={iniciando}>
-                {iniciando
-                  ? <><Loader2 size={16} className={styles.spin} /> Iniciando câmera…</>
-                  : <><Camera size={16} /> Iniciar Câmera</>}
+                {iniciando ? <Loader2 size={18} className={styles.spin} /> : <Camera size={18} />}
+                {iniciando ? 'Iniciando...' : 'Ligar Câmera'}
               </button>
             )}
 
             {stream && !gravando && (
               <button className={styles.btnRec} onClick={iniciarGravacao}>
-                <Video size={16} /> Iniciar Gravação
+                <Mic size={18} /> Iniciar Gravação
               </button>
             )}
 
             {gravando && (
               <>
                 <button className={styles.btnPause} onClick={togglePausa}>
-                  {pausado ? <><Play size={16} /> Retomar</> : <><Pause size={16} /> Pausar</>}
+                  {pausado ? <Play size={18} /> : <Pause size={18} />}
+                  {pausado ? 'Retomar' : 'Pausar'}
                 </button>
                 <button className={styles.btnStop} onClick={pararGravacao}>
-                  <StopCircle size={16} /> Parar e Revisar
+                  <StopCircle size={18} /> Parar e Revisar
                 </button>
               </>
             )}
           </div>
 
           <p className={styles.dica}>
-            💡 Limite máximo: {formatarTempo(MAX_DURACAO_SEG)}. Você poderá revisar antes de publicar.
+            Dica: Certifique-se de estar em um ambiente iluminado e com pouco ruído.
           </p>
         </div>
       )}
@@ -455,116 +454,125 @@ export default function GravacaoAula() {
       {/* ════════════ ETAPA 2: REVISAR ════════════ */}
       {etapa === 'revisar' && urlPreview && (
         <div className={styles.secao}>
-          <h3 className={styles.subTitle}>Revise o vídeo gravado ({formatarTempo(duracao)})</h3>
+          <h3 className={styles.subTitle}>Revisar Gravação</h3>
+          
           <div className={styles.videoBox}>
             <video
               ref={previewRef}
               src={urlPreview}
               className={styles.videoEl}
               controls
-              playsInline
             />
           </div>
+
+          <div className={styles.miniInfo}>
+            <Video size={14} />
+            <span>Duração: {formatarTempo(duracao)}</span>
+          </div>
+
           <div className={styles.controles}>
-            <button className={styles.btnSecundario} onClick={descartar}>
-              <Trash2 size={16} /> Descartar e Regravar
+            <button className={styles.btnPrimary} onClick={() => setEtapa('editar')}>
+              <Edit3 size={18} /> Editar vídeo
             </button>
-            <button className={styles.btnPublicar} onClick={() => setEtapa('publicar')}>
-              <Upload size={16} /> Publicar este vídeo
+            <button className={styles.btnSecundario} onClick={() => setEtapa('publicar')}>
+              <CheckCircle size={18} /> Pular edição e publicar
+            </button>
+            <button className={styles.btnSecundario} onClick={descartar}>
+              <Trash2 size={18} /> Descartar e regravar
             </button>
           </div>
         </div>
       )}
 
-      {/* ════════════ ETAPA 3: PUBLICAR ════════════ */}
+      {/* ════════════ ETAPA 3: EDITAR ════════════ */}
+      {etapa === 'editar' && blobGravado && (
+        <div className={styles.secao}>
+          <VideoEditor 
+            videoBlob={blobGravado} 
+            onSave={handleEditorSave}
+            onCancel={() => setEtapa('revisar')}
+          />
+        </div>
+      )}
+
+      {/* ════════════ ETAPA 4: PUBLICAR ════════════ */}
       {etapa === 'publicar' && (
         <div className={styles.secao}>
-          <h3 className={styles.subTitle}>Configurar Publicação</h3>
+          <h3 className={styles.subTitle}>Vincular à Aula</h3>
 
-          {/* Replay compacto */}
-          {urlPreview && (
-            <div className={styles.miniPreview}>
-              <video src={urlPreview} className={styles.miniVideoEl} controls playsInline />
-              <div className={styles.miniInfo}>
-                <Eye size={14} />
-                <span>Duração: {formatarTempo(duracao)}</span>
-              </div>
+          <div className={styles.miniPreview}>
+            <video src={urlPreview} className={styles.miniVideoEl} />
+            <div>
+              <p style={{fontWeight:700, fontSize:'0.9rem', marginBottom:'4px'}}>Sua gravação</p>
+              <p style={{fontSize:'0.75rem', color:'#94a3b8'}}>{formatarTempo(duracao)} • { (blobGravado.size / (1024*1024)).toFixed(1) } MB</p>
             </div>
-          )}
+          </div>
 
-          {/* Formulário de publicação */}
           <div className={styles.formPublicacao}>
             <div className={styles.campo}>
-              <label className={styles.label}>
-                <BookOpen size={14} /> Vincular à aula *
-              </label>
+              <label className={styles.label}>Selecione a Aula</label>
               <div className={styles.selectWrapper}>
-                <select
+                <select 
                   className={styles.select}
                   value={aulaSelecionada}
                   onChange={e => setAulaSelecionada(e.target.value)}
                 >
-                  <option value="">— Selecione a aula —</option>
+                  <option value="">Escolha uma aula...</option>
                   {aulas.map(a => (
-                    <option key={a.id} value={a.id}>
-                      Aula {String(a.numero).padStart(2, '0')} — {a.titulo}
-                    </option>
+                    <option key={a.id} value={a.id}>Aula {a.numero}: {a.titulo}</option>
                   ))}
                 </select>
-                <ChevronDown size={14} className={styles.selectIcon} />
+                <ChevronDown className={styles.selectIcon} size={18} />
               </div>
             </div>
 
             <div className={styles.campo}>
-              <label className={styles.label}>
-                <Video size={14} /> Título do vídeo *
-              </label>
-              <input
+              <label className={styles.label}>Título do Vídeo</label>
+              <input 
+                type="text" 
                 className={styles.input}
-                type="text"
-                placeholder="Ex: Explicação – Verbo To Be com exemplos"
+                placeholder="Ex: Explicação do Diálogo - Aula 1"
                 value={tituloVideo}
                 onChange={e => setTituloVideo(e.target.value)}
-                maxLength={120}
               />
             </div>
-          </div>
 
-          {erro && (
-            <div className={styles.erroBox}>
-              <AlertCircle size={15} /> {erro}
+            {erro && <div className={styles.erroBox}><AlertCircle size={16}/> {erro}</div>}
+
+            <div className={styles.controles} style={{marginTop:'1rem'}}>
+              <button 
+                className={styles.btnPublicar} 
+                onClick={publicar}
+                disabled={publicando}
+              >
+                {publicando ? <Loader2 size={18} className={styles.spin} /> : <Upload size={18} />}
+                {publicando ? 'Publicando...' : 'Publicar Vídeo'}
+              </button>
+              <button className={styles.btnSecundario} onClick={() => setEtapa('revisar')} disabled={publicando}>
+                Voltar
+              </button>
             </div>
-          )}
-
-          <div className={styles.controles}>
-            <button className={styles.btnSecundario} onClick={() => setEtapa('revisar')}>
-              ← Voltar
-            </button>
-            <button className={styles.btnPublicar} onClick={publicar} disabled={publicando}>
-              {publicando
-                ? <><Loader2 size={16} className={styles.spin} /> Publicando…</>
-                : <><CheckCircle size={16} /> Publicar para Alunos</>}
-            </button>
           </div>
         </div>
       )}
 
-      {/* ════════════ ETAPA 4: CONCLUÍDO ════════════ */}
+      {/* ════════════ ETAPA 5: CONCLUÍDO ════════════ */}
       {etapa === 'concluido' && (
         <div className={styles.secao}>
           <div className={styles.sucessoCard}>
-            <CheckCircle size={40} className={styles.sucessoIcon} />
+            <div className={styles.sucessoIcon}><CheckCircle size={64} /></div>
             <h3>Vídeo Publicado!</h3>
             <p>{sucesso}</p>
             <p className={styles.sucessoDetalhe}>
-              Os alunos verão o vídeo ao lado dos exercícios da aula selecionada.
+              O vídeo foi vinculado à aula selecionada e já está disponível para os alunos na seção de exercícios.
             </p>
-            <button className={styles.btnPrimary} onClick={novaGravacao}>
-              <RefreshCw size={16} /> Gravar outro vídeo
+            <button className={styles.btnPrimary} onClick={novaGravacao} style={{marginTop:'1.5rem'}}>
+              <RefreshCw size={18} /> Gravar outro vídeo
             </button>
           </div>
         </div>
       )}
+
     </div>
   );
 }

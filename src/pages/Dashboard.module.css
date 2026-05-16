@@ -441,3 +441,30 @@
   padding: 0.3rem 0.7rem;
   border-radius: var(--radius-full);
 }
+
+.installAppBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+  transition: all var(--transition-fast);
+  border: none;
+  cursor: pointer;
+}
+
+.installAppBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  filter: brightness(1.1);
+}
+
+.installAppBtn:active {
+  transform: translateY(0);
+}

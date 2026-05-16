@@ -7,6 +7,7 @@ import {
   MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
   CreditCard, Crown, Zap, Bot, Video,
 } from 'lucide-react';
+import { myVoiceData } from '../data/myvoiceData';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
@@ -72,7 +73,23 @@ const PreviewAulas = ({ plano = 'basico' }) => {
         if (error) {
           console.error('[AdminDashboard] Erro ao buscar aulas:', error);
         } else {
-          if (isMounted) setAulas(data || []);
+          if (isMounted) {
+            // Sincroniza aulas do aluno (hardcoded) com as do banco
+            const aulasDB = data || [];
+            const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
+              ...a,
+              id: `hc-${a.id}`,
+              publicada: true,
+              secoes: a.sections?.map((s, i) => ({
+                tipo: s.type,
+                titulo: s.titulo,
+                conteudo: s,
+                ordem: i
+              })) || []
+            }));
+
+            setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
+          }
         }
       } catch (e) {
         console.error('[AdminDashboard] Exceção:', e);
@@ -394,11 +411,12 @@ const AdminDashboard = () => {
   const handleLogout = async () => { await signOut(); navigate('/login', { replace: true }); };
 
   const ABAS = [
-    { id: 'aulas',   label: 'Aulas',        icon: <Eye size={16}/> },
-    { id: 'nova',    label: 'Nova Aula',     icon: <Plus size={16}/> },
-    { id: 'upload',  label: 'Importar Doc',  icon: <Upload size={16}/> },
-    { id: 'alunos',  label: 'Alunos',        icon: <Users size={16}/> },
-    { id: 'planos',  label: 'Planos',        icon: <CreditCard size={16}/> },
+    { id: 'aulas',    label: 'Aulas',        icon: <Eye size={16}/> },
+    { id: 'nova',     label: 'Nova Aula',     icon: <Plus size={16}/> },
+    { id: 'gravacao', label: 'Gravar Aula',   icon: <Video size={16}/> },
+    { id: 'upload',   label: 'Importar Doc',  icon: <Upload size={16}/> },
+    { id: 'alunos',   label: 'Alunos',        icon: <Users size={16}/> },
+    { id: 'planos',   label: 'Planos',        icon: <CreditCard size={16}/> },
   ];
 
   return (
@@ -426,11 +444,16 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {aba === 'aulas'  && <PreviewAulas plano={plano} />}
-        {aba === 'nova'   && <NovaAula onSalvo={() => setAba('aulas')} />}
-        {aba === 'upload' && <UploadDocumento onSalvo={() => setAba('aulas')} />}
-        {aba === 'alunos' && <GerenciarAlunos />}
-        {aba === 'planos' && <Planos onMudarPlano={() => setAba('aulas')} />}
+        {aba === 'aulas'    && <PreviewAulas plano={plano} />}
+        {aba === 'nova'     && <NovaAula onSalvo={() => setAba('aulas')} />}
+        {aba === 'gravacao' && (
+          <Suspense fallback={<div className={styles.loadingMsg}><Loader2 size={24} className={styles.spin}/> Carregando gravador...</div>}>
+            <GravacaoAula />
+          </Suspense>
+        )}
+        {aba === 'upload'   && <UploadDocumento onSalvo={() => setAba('aulas')} />}
+        {aba === 'alunos'   && <GerenciarAlunos />}
+        {aba === 'planos'   && <Planos onMudarPlano={() => setAba('aulas')} />}
       </main>
     </div>
     </>

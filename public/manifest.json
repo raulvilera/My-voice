@@ -11,7 +11,7 @@
   "lang": "pt-BR",
   "screenshots": [
     {
-      "src": "/assets/hero.png",
+      "src": "/hero.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
