@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { PwaProvider } from './contexts/PwaContext';
 import Login from './pages/Login';
 
 // Lazy loading das páginas principais
@@ -68,9 +69,11 @@ const AppRoutes = () => (
 
 const App = () => (
   <AuthProvider>
-    <Router>
-      <AppRoutes />
-    </Router>
+    <PwaProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </PwaProvider>
   </AuthProvider>
 );
 export default App;

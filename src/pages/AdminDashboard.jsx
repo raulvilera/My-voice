@@ -5,11 +5,12 @@ import {
   Mic, LogOut, Users, ToggleLeft, ToggleRight, Search,
   Plus, Eye, X, Upload, FileText, Loader2,
   MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
-  CreditCard, Crown, Zap, Bot, Video,
+  CreditCard, Crown, Zap, Bot, Video, Download,
 } from 'lucide-react';
 import { myVoiceData } from '../data/myvoiceData';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
+import { usePwa } from '../contexts/PwaContext';
 import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
 import Planos from './Planos';
@@ -411,6 +412,7 @@ const ModoAluno = ({ onFechar }) => (
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
+  const { canInstall, installApp } = usePwa();
   const [aba, setAba] = useState('aulas');
   const [modoAluno, setModoAluno] = useState(false);
 
@@ -437,6 +439,11 @@ const AdminDashboard = () => {
           <div><h2>My Voice</h2><span>Área da Professora</span></div>
         </div>
         <div className={styles.navRight}>
+          {canInstall && (
+            <button className={styles.installBtn} onClick={installApp} title="Instalar Aplicativo">
+              <Download size={18} />
+            </button>
+          )}
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>
           <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>Ver como Aluno</button>
           <button className={styles.logoutBtn} onClick={handleLogout}>Sair</button>

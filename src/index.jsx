@@ -5,7 +5,7 @@ import App from './App.jsx'
 
 // Registro do Service Worker para funcionalidade PWA
 // Registra apenas em produção para evitar problemas em desenvolvimento
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js', { scope: '/' })
       .then(registration => {

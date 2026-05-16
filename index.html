@@ -31,33 +31,28 @@
     <link rel="manifest" href="/manifest.json" />
 
     <title>My Voice</title>
+
+    <!-- PWA Install Helper: Captura o evento cedo para não perdê-lo -->
+    <script>
+      window.deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e;
+        console.log('[PWA] Evento captured cedo');
+        // Notifica o React se ele já estiver ouvindo
+        window.dispatchEvent(new CustomEvent('pwa-prompt-available'));
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('[PWA] Instalado com sucesso');
+        window.deferredPrompt = null;
+        window.dispatchEvent(new CustomEvent('pwa-installed'));
+      });
+    </script>
 </head>
 
 <body>
     <div id="root"></div>
     <script type="module" src="/src/index.jsx"></script>
-    <script>
-      // Registra o Service Worker para funcionalidade PWA
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW registrado:', reg.scope))
-            .catch(err => console.warn('SW falhou:', err));
-        });
-      }
-
-      // Captura o evento de instalação do PWA
-      let deferredPrompt;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        console.log('PWA pronto para instalação');
-      });
-
-      window.addEventListener('appinstalled', () => {
-        console.log('PWA instalado com sucesso');
-        deferredPrompt = null;
-      });
-    </script>
 </body>
 </html>

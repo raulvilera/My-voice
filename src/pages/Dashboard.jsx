@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePwa } from '../contexts/PwaContext';
 import { supabase } from '../lib/supabaseClient';
 import styles from './Dashboard.module.css';
 
@@ -33,33 +34,7 @@ const Dashboard = () => {
   const { profile, signOut } = useAuth();
   const [aulas, setAulas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showInstallBtn, setShowInstallBtn] = useState(false);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallBtn(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('Usuário aceitou a instalação');
-    }
-    setDeferredPrompt(null);
-    setShowInstallBtn(false);
-  };
+  const { canInstall, installApp } = usePwa();
 
   useEffect(() => {
     let isMounted = true;
@@ -132,8 +107,8 @@ const Dashboard = () => {
           </h1>
           <p>Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem.</p>
           
-          {showInstallBtn && (
-            <button className={styles.installAppBtn} onClick={handleInstallClick}>
+          {canInstall && (
+            <button className={styles.installAppBtn} onClick={installApp}>
               <Download size={18} /> Instalar Aplicativo My Voice
             </button>
           )}
