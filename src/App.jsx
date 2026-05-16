@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Trilha from './pages/Trilha';
-import AdminDashboard from './pages/AdminDashboard';
+
+// Lazy loading das páginas principais
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Trilha = lazy(() => import('./pages/Trilha'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 const Loader = () => (
   <div style={{
@@ -51,14 +54,16 @@ const RootRedirect = () => {
 };
 
 const AppRoutes = () => (
-  <Routes>
-    <Route path="/login"     element={<Login />} />
-    <Route path="/"          element={<RootRedirect />} />
-    <Route path="/dashboard" element={<PrivateRoute requireRole="aluno"><Dashboard /></PrivateRoute>} />
-    <Route path="/trilha"    element={<PrivateRoute requireRole="aluno"><Trilha /></PrivateRoute>} />
-    <Route path="/admin"     element={<PrivateRoute requireRole="professor"><AdminDashboard /></PrivateRoute>} />
-    <Route path="*"          element={<Navigate to="/" replace />} />
-  </Routes>
+  <Suspense fallback={<Loader />}>
+    <Routes>
+      <Route path="/login"     element={<Login />} />
+      <Route path="/"          element={<RootRedirect />} />
+      <Route path="/dashboard" element={<PrivateRoute requireRole="aluno"><Dashboard /></PrivateRoute>} />
+      <Route path="/trilha"    element={<PrivateRoute requireRole="aluno"><Trilha /></PrivateRoute>} />
+      <Route path="/admin"     element={<PrivateRoute requireRole="professor"><AdminDashboard /></PrivateRoute>} />
+      <Route path="*"          element={<Navigate to="/" replace />} />
+    </Routes>
+  </Suspense>
 );
 
 const App = () => (

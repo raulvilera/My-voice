@@ -5,7 +5,12 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser]       = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => {
+    try {
+      const cached = localStorage.getItem('mv_profile');
+      return cached ? JSON.parse(cached) : null;
+    } catch { return null; }
+  });
   const [loading, setLoading] = useState(true);
   const profileFetched = useRef(false);
 
@@ -19,11 +24,10 @@ export const AuthProvider = ({ children }) => {
       
       if (data && !error) {
         setProfile(data);
+        localStorage.setItem('mv_profile', JSON.stringify(data));
       } else if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned (normal para novo usuário)
         console.warn('Erro ao buscar perfil:', error.message);
       }
-      // Se não encontrou perfil, deixa como null (novo usuário)
     } catch (e) {
       console.warn('fetchProfile erro:', e.message);
     } finally {
@@ -32,24 +36,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Timeout de segurança: máximo 8 segundos
+    // Timeout de segurança reduzido para 5s
     const safetyTimer = setTimeout(() => {
-      console.warn('[Auth] Safety timeout - forçando loading=false');
       setLoading(false);
-    }, 8000);
+    }, 5000);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (u && !profileFetched.current) {
-        profileFetched.current = true;
-        fetchProfile(u.id).finally(() => clearTimeout(safetyTimer));
+      if (u) {
+        // Se já temos cache, podemos liberar o loading mais cedo
+        if (profile) setLoading(false);
+        if (!profileFetched.current) {
+          profileFetched.current = true;
+          fetchProfile(u.id).finally(() => clearTimeout(safetyTimer));
+        }
       } else {
         setLoading(false);
         clearTimeout(safetyTimer);
       }
     }).catch(err => {
-      console.error('[Auth] getSession error:', err);
       setLoading(false);
       clearTimeout(safetyTimer);
     });
@@ -65,6 +71,7 @@ export const AuthProvider = ({ children }) => {
           }
         } else {
           setProfile(null);
+          localStorage.removeItem('mv_profile');
           setLoading(false);
           profileFetched.current = false;
         }
