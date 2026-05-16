@@ -76,7 +76,9 @@ const PreviewAulas = ({ plano = 'basico' }) => {
           if (isMounted) {
             // Sincroniza aulas do aluno (hardcoded) com as do banco
             const aulasDB = data || [];
-            const aulasHardcoded = (myVoiceData?.basico?.aulas || []).map(a => ({
+            const baseAulas = myVoiceData?.basico?.aulas || [];
+            
+            const aulasHardcoded = baseAulas.map(a => ({
               ...a,
               id: `hc-${a.id}`,
               publicada: true,
@@ -88,7 +90,8 @@ const PreviewAulas = ({ plano = 'basico' }) => {
               })) || []
             }));
 
-            setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
+            const listaFinal = [...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero);
+            setAulas(listaFinal);
           }
         }
       } catch (e) {

@@ -78,9 +78,12 @@ const Dashboard = () => {
         if (error) console.error("Erro Supabase:", error);
 
         const aulasDB = data || [];
+        const baseAulas = myVoiceData?.basico?.aulas || [];
         
-        // Proteção contra myVoiceData ausente ou malformado
-        const aulasHardcoded = (myVoiceData?.basico?.aulas || []).map(a => ({
+        console.log("Aulas Hardcoded encontradas:", baseAulas.length);
+        console.log("Aulas DB encontradas:", aulasDB.length);
+
+        const aulasHardcoded = baseAulas.map(a => ({
           id: a.id,
           numero: a.numero,
           titulo: a.titulo,
@@ -90,7 +93,8 @@ const Dashboard = () => {
           imagem_url: null
         }));
 
-        if (isMounted) setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
+        const listaFinal = [...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero);
+        if (isMounted) setAulas(listaFinal);
       } catch (err) {
         console.error("Erro ao carregar aulas:", err);
       } finally {

@@ -28,6 +28,30 @@ const FlagBackground = () => (
   </div>
 );
 
+// ── Logo Premium com Bandeira e Microfone ────────────────────────────────
+const LogoPrincipal = () => (
+  <div style={{
+    width: 80, height: 80, borderRadius: 20, margin: '0 auto 20px',
+    background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    position: 'relative', overflow: 'hidden',
+    boxShadow: '0 10px 25px -5px rgba(139, 92, 246, 0.4)'
+  }}>
+    {/* Bandeira sutil ao fundo do logo */}
+    <div style={{ position: 'absolute', inset: 0, opacity: 0.35 }}>
+      <svg width="100%" height="100%" viewBox="0 0 760 400" preserveAspectRatio="xMidYMid slice">
+        {[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => (
+          <rect key={i} x="0" y={i * 400/13} width="760" height={400/13}
+            fill={i % 2 === 0 ? '#B22234' : '#FFFFFF'} />
+        ))}
+        <rect x="0" y="0" width="303" height={400 * 7/13} fill="#3C3B6E" />
+      </svg>
+    </div>
+    {/* Microfone Principal */}
+    <Mic size={42} color="white" style={{ position: 'relative', zIndex: 2, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+  </div>
+);
+
 const Login = () => {
   const navigate = useNavigate();
   const { signIn, signUp, user, loading: authLoading } = useAuth();
@@ -127,7 +151,7 @@ const Login = () => {
       <FlagBackground />
       <div className={styles.card}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon}><Mic size={32} /></div>
+          <LogoPrincipal />
           <h1>My Voice</h1>
           <p>Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem.</p>
         </div>
