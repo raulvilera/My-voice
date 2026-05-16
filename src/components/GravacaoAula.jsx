@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-import VideoEditor from '../../VideoEditor';
+import VideoEditor from './VideoEditor';
 import styles from './GravacaoAula.module.css';
 
 // ── Constantes ────────────────────────────────────────────────────────────────
