@@ -62,6 +62,11 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 5000);
+
     const fetchAulas = async () => {
       try {
         const { data, error } = await supabase
@@ -85,14 +90,16 @@ const Dashboard = () => {
           imagem_url: null
         }));
 
-        setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
+        if (isMounted) setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
       } catch (err) {
         console.error("Erro ao carregar aulas:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
+        clearTimeout(safetyTimer);
       }
     };
     fetchAulas();
+    return () => { isMounted = false; clearTimeout(safetyTimer); };
   }, []);
 
   const handleLogout = async () => { await signOut(); navigate('/login'); };

@@ -98,6 +98,11 @@ export default function Trilha({ modoVisualizacao = false }) {
   const curso = myVoiceData.basico;
 
   useEffect(() => {
+    let isMounted = true;
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 5000);
+
     const fetchAulas = async () => {
       try {
         const { data, error } = await supabase
@@ -121,15 +126,17 @@ export default function Trilha({ modoVisualizacao = false }) {
           })) || []
         }));
 
-        setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
+        if (isMounted) setAulas([...aulasHardcoded, ...aulasDB].sort((a, b) => a.numero - b.numero));
       } catch (err) {
         console.error("Erro ao carregar trilha:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
+        clearTimeout(safetyTimer);
       }
     };
 
     fetchAulas();
+    return () => { isMounted = false; clearTimeout(safetyTimer); };
   }, []);
 
   const openSec = (aula, secType, e) => {
