@@ -453,6 +453,12 @@ const AdminDashboard = () => {
   const [aba, setAba] = useState('aulas');
   const [modoAluno, setModoAluno] = useState(false);
 
+  useEffect(() => {
+    if (profile && profile.role === 'aluno') {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [profile, navigate]);
+
   const plano = profile?.plano || 'basico';
 
   const handleLogout = async () => { await signOut(); navigate('/login', { replace: true }); };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star, Download } from 'lucide-react';
+import { LogOut, Mic, BookOpen, ChevronRight, Sparkles, Star, Download, GraduationCap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { myVoiceData } from '../data/myvoiceData';
@@ -96,6 +96,12 @@ const Dashboard = () => {
     fetchAulas();
   }, []);
 
+  useEffect(() => {
+    if (profile && profile.role === 'professor') {
+      navigate('/admin', { replace: true });
+    }
+  }, [profile, navigate]);
+
   const handleLogout = async () => { await signOut(); navigate('/login'); };
 
   return (
@@ -110,9 +116,34 @@ const Dashboard = () => {
           </div>
           <h2>My Voice</h2>
         </div>
-        <button className={styles.logoutBtn} onClick={handleLogout}>
-          <LogOut size={20}/> Sair
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {profile?.role === 'professor' && (
+            <button 
+              onClick={() => navigate('/admin')}
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed, #db2777)',
+                color: '#fff',
+                border: 'none',
+                padding: '0.45rem 1.2rem',
+                borderRadius: '20px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.88rem',
+                transition: 'transform 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <GraduationCap size={16} /> Área da Professora
+            </button>
+          )}
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            <LogOut size={20}/> Sair
+          </button>
+        </div>
       </nav>
 
       <main className={styles.mainContent}>
