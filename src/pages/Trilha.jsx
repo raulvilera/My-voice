@@ -267,19 +267,16 @@ const PILL_LABELS = {
 const SecaoModal = ({ aula, secType, onClose }) => {
   if (!aula || !secType) return null;
   
-  // ✅ CORREÇÃO: Suporta tanto dados hardcoded (sections) quanto dados do Supabase (secoes)
   const sections = aula.sections || aula.secoes || [];
   
-  // Adapta o tipo: 'type' (hardcoded) ou 'tipo' (Supabase)
-  const sec = sections.find(s => (s.type || s.tipo) === secType);
-  if (!sec) return null;
-  
-  // Prepara os dados para os componentes
-  // Se vem do Supabase, o conteúdo está em sec.conteudo; se hardcoded, está achatado
-  const sectionData = sec.conteudo ? { ...sec.conteudo, titulo: sec.titulo } : sec;
-  
-  // Para diálogo: mostra TODAS as seções
-  const sectionsToShow = secType === 'dialogo' ? sections : [sec];
+  let sectionsToShow = [];
+  if (secType === 'tudo') {
+    sectionsToShow = [...sections].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  } else {
+    const sec = sections.find(s => (s.type || s.tipo) === secType);
+    if (!sec) return null;
+    sectionsToShow = [sec];
+  }
 
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
@@ -289,7 +286,7 @@ const SecaoModal = ({ aula, secType, onClose }) => {
             <span style={styles.aulaTagSmall}>Aula {aula.numero}</span>
             <h2 style={{fontSize:'1.15rem',fontWeight:800,marginTop:4}}>{aula.titulo}</h2>
             <p style={{color:'#94a3b8',fontSize:'0.82rem',marginTop:2}}>
-              {secType==='dialogo'?'💬 Diálogo completo':secType==='verbos'?'📘 Verbos':secType==='vocabulario'?'📖 Vocabulário':'✏️ Exercícios'}
+              {secType === 'tudo' ? '📋 Material completo' : secType==='dialogo'?'💬 Diálogo':secType==='verbos'?'📘 Verbos':secType==='vocabulario'?'📖 Vocabulário':'✏️ Exercícios'}
             </p>
           </div>
           <button style={styles.closeBtn} onClick={onClose}><X size={22}/></button>
@@ -431,7 +428,12 @@ export default function Trilha({ modoVisualizacao = false }) {
 
         <div style={styles.aulasList}>
           {aulas.map(aula => (
-            <div key={aula.id} style={styles.aulaCard}>
+            <div 
+              key={aula.id} 
+              style={styles.aulaCard}
+              onClick={(e) => openSec(aula, 'tudo', e)}
+              className="trilha-aula-card"
+            >
               <div style={styles.aulaNumero}>
                 <span>{String(aula.numero).padStart(2,'0')}</span>
               </div>
@@ -456,7 +458,38 @@ export default function Trilha({ modoVisualizacao = false }) {
                   })}
                 </div>
               </div>
-              <ChevronRight size={20} color="#94a3b8"/>
+              <button 
+                onClick={(e) => openSec(aula, 'tudo', e)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '50%',
+                  width: '38px',
+                  height: '38px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  color: '#94a3b8',
+                  flexShrink: 0
+                }}
+                title="Ver material completo"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
+                  e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                  e.currentTarget.style.color = '#c084fc';
+                  e.currentTarget.style.transform = 'scale(1.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.color = '#94a3b8';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <ChevronRight size={20} />
+              </button>
             </div>
           ))}
 
