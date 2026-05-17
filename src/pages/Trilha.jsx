@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { Check, X, RotateCcw, MessageCircle, BookMarked, Grid3x3, PenLine, Play, Square, Volume2, Mic, LogOut, ChevronRight, Lock } from 'lucide-react';
 import { SecaoDialogo }     from '../components/SecaoDialogo';
 import { SecaoVerbos }      from '../components/SecaoVerbos';
@@ -316,6 +317,7 @@ const SecaoModal = ({ aula, secType, onClose }) => {
 
 // ── Trilha (Main Page) ────────────────────────────────────────────────────────
 export default function Trilha({ modoVisualizacao = false }) {
+  const navigate = useNavigate();
   const [modal, setModal] = useState(null);
   const [aulas, setAulas] = useState(() => {
     return myVoiceData.basico.aulas.map(a => ({
@@ -415,7 +417,7 @@ export default function Trilha({ modoVisualizacao = false }) {
           <h2 style={styles.logoTitle}>My Voice</h2>
         </div>
         {!modoVisualizacao && (
-          <button style={styles.logoutBtn}>
+          <button style={styles.logoutBtn} onClick={() => navigate(-1)}>
             <LogOut size={18}/><span style={{marginLeft:6}}>Voltar</span>
           </button>
         )}

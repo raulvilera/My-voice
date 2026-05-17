@@ -5,12 +5,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser]       = useState(null);
-  const [profile, setProfile] = useState(() => {
-    try {
-      const cached = localStorage.getItem('mv_profile');
-      return cached ? JSON.parse(cached) : null;
-    } catch { return null; }
-  });
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const profileFetched = useRef(false);
 
@@ -24,10 +19,11 @@ export const AuthProvider = ({ children }) => {
       
       if (data && !error) {
         setProfile(data);
-        localStorage.setItem('mv_profile', JSON.stringify(data));
       } else if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (normal para novo usuário)
         console.warn('Erro ao buscar perfil:', error.message);
       }
+      // Se não encontrou perfil, deixa como null (novo usuário)
     } catch (e) {
       console.warn('fetchProfile erro:', e.message);
     } finally {
@@ -36,26 +32,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Timeout de segurança reduzido para 5s
+    // Timeout de segurança: máximo 8 segundos
     const safetyTimer = setTimeout(() => {
+      console.warn('[Auth] Safety timeout - forçando loading=false');
       setLoading(false);
-    }, 5000);
+    }, 8000);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (u) {
-        // Se já temos cache, podemos liberar o loading mais cedo
-        if (profile) setLoading(false);
-        if (!profileFetched.current) {
-          profileFetched.current = true;
-          fetchProfile(u.id).finally(() => clearTimeout(safetyTimer));
-        }
+      if (u && !profileFetched.current) {
+        profileFetched.current = true;
+        fetchProfile(u.id).finally(() => clearTimeout(safetyTimer));
       } else {
         setLoading(false);
         clearTimeout(safetyTimer);
       }
     }).catch(err => {
+      console.error('[Auth] getSession error:', err);
       setLoading(false);
       clearTimeout(safetyTimer);
     });
@@ -71,7 +65,6 @@ export const AuthProvider = ({ children }) => {
           }
         } else {
           setProfile(null);
-          localStorage.removeItem('mv_profile');
           setLoading(false);
           profileFetched.current = false;
         }
@@ -127,14 +120,15 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.error('[Auth] signOut error:', err);
-    } finally {
       setUser(null);
       setProfile(null);
       profileFetched.current = false;
       setLoading(false);
+      supabase.auth.signOut().catch(err => {
+        console.warn('[Auth] Erro em background ao deslogar do Supabase:', err);
+      });
+    } catch (err) {
+      console.error('[Auth] Erro ao deslogar:', err);
     }
   };
 
