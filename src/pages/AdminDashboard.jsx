@@ -478,8 +478,8 @@ const AdminDashboard = () => {
     <div className={styles.adminContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <Mic size={26}/>
-          <div><h2>My Voice</h2><span>Área da Professora</span></div>
+          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '100px', height: 'auto', objectFit: 'contain' }} />
+          <div><span className={styles.roleTag} style={{ display: 'block' }}>Área da Professora</span></div>
         </div>
         <div className={styles.navRight}>
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>

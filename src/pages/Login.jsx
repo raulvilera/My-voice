@@ -102,8 +102,7 @@ const Login = () => {
     <div className={styles.loginPage}>
       <div className={styles.card}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon}><Mic size={32} /></div>
-          <h1>My Voice</h1>
+          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '160px', height: '160px', objectFit: 'contain', marginBottom: '0.5rem', borderRadius: '12px' }} />
           <p>Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem.</p>
         </div>
 
