@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabaseClient';
 import { myVoiceData } from '../data/myvoiceData';
 import styles from './Dashboard.module.css';
 
-const capaDefault = "/capa_padrao.jpg";
+const capaDefault = "/my_voice_default.png";
 
 // ── Bandeira dos EUA SVG inline ───────────────────────────────────────────────
 const BandeiraEUA = ({ size = 42 }) => (

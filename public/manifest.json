@@ -11,7 +11,7 @@
   "lang": "pt-BR",
   "screenshots": [
     {
-      "src": "/hero.png",
+      "src": "/my_voice_default.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
