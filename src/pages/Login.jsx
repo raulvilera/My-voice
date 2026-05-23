@@ -102,7 +102,7 @@ const Login = () => {
     <div className={styles.loginPage}>
       <div className={styles.card}>
         <div className={styles.logoArea}>
-          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '130px', height: '130px', objectFit: 'contain', marginBottom: '0.5rem', borderRadius: '20px', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '130px', height: '130px', objectFit: 'cover', marginBottom: '0.5rem', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
           <p>Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem.</p>
         </div>
 

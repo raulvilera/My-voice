@@ -478,7 +478,7 @@ const AdminDashboard = () => {
     <div className={styles.adminContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '54px', height: '54px', objectFit: 'contain', borderRadius: '12px', backgroundColor: '#fff', padding: '2px' }} />
+          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '50%' }} />
           <div><span className={styles.roleTag} style={{ display: 'block', marginLeft: '4px' }}>Área da Professora</span></div>
         </div>
         <div className={styles.navRight}>

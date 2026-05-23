@@ -387,7 +387,7 @@ export default function Trilha({ modoVisualizacao = false }) {
     <div style={styles.trilhaContainer}>
       <nav style={styles.navbar}>
         <div style={styles.logoInfo}>
-          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '54px', height: '54px', objectFit: 'contain', borderRadius: '12px', backgroundColor: '#fff', padding: '2px' }} />
+          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '50%' }} />
         </div>
         {!modoVisualizacao && (
           <button style={styles.logoutBtn} onClick={() => navigate(-1)}>
