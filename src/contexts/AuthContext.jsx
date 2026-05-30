@@ -4,10 +4,28 @@ import { supabase } from '../lib/supabaseClient';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]       = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Recupera estado inicial instantaneamente do cache para evitar tela de loading
+  const getCached = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+  
+  const [user, setUser]       = useState(() => getCached('myvoice_user'));
+  const [profile, setProfile] = useState(() => getCached('myvoice_profile'));
+  
+  // Se tem usuário no cache, inicia com loading falso para renderizar a tela NA HORA
+  const [loading, setLoading] = useState(() => !getCached('myvoice_user'));
   const profileFetched = useRef(false);
+
+  // Sincroniza estado com localStorage
+  const saveUser = (u) => {
+    setUser(u);
+    if (u) localStorage.setItem('myvoice_user', JSON.stringify(u));
+    else localStorage.removeItem('myvoice_user');
+  };
+
+  const saveProfile = (p) => {
+    setProfile(p);
+    if (p) localStorage.setItem('myvoice_profile', JSON.stringify(p));
+    else localStorage.removeItem('myvoice_profile');
+  };
 
   const fetchProfile = async (userId) => {
     try {
@@ -18,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         .single();
       
       if (data && !error) {
-        setProfile(data);
+        saveProfile(data);
       } else if (error && error.code !== 'PGRST116') {
         // PGRST116 = no rows returned (normal para novo usuário)
         console.warn('Erro ao buscar perfil:', error.message);
@@ -39,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null;
-      setUser(u);
+      saveUser(u);
       setLoading(false); // DESTRAVA A TELA DE CARREGANDO IMEDIATAMENTE
       
       if (u && !profileFetched.current) {
@@ -57,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         const u = session?.user ?? null;
-        setUser(u);
+        saveUser(u);
         setLoading(false);
         if (u) {
           if (!profileFetched.current) {
@@ -65,7 +83,7 @@ export const AuthProvider = ({ children }) => {
             await fetchProfile(u.id);
           }
         } else {
-          setProfile(null);
+          saveProfile(null);
           profileFetched.current = false;
         }
       }
@@ -120,8 +138,8 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      setUser(null);
-      setProfile(null);
+      saveUser(null);
+      saveProfile(null);
       profileFetched.current = false;
       setLoading(false);
       supabase.auth.signOut().catch(err => {
