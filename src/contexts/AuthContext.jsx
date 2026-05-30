@@ -26,9 +26,8 @@ export const AuthProvider = ({ children }) => {
       // Se não encontrou perfil, deixa como null (novo usuário)
     } catch (e) {
       console.warn('fetchProfile erro:', e.message);
-    } finally {
-      setLoading(false);
     }
+    // setLoading(false) removido daqui para destravar a interface antes
   };
 
   useEffect(() => {
@@ -41,11 +40,12 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
+      setLoading(false); // DESTRAVA A TELA DE CARREGANDO IMEDIATAMENTE
+      
       if (u && !profileFetched.current) {
         profileFetched.current = true;
         fetchProfile(u.id).finally(() => clearTimeout(safetyTimer));
       } else {
-        setLoading(false);
         clearTimeout(safetyTimer);
       }
     }).catch(err => {
@@ -58,6 +58,7 @@ export const AuthProvider = ({ children }) => {
       async (_event, session) => {
         const u = session?.user ?? null;
         setUser(u);
+        setLoading(false);
         if (u) {
           if (!profileFetched.current) {
             profileFetched.current = true;
@@ -65,7 +66,6 @@ export const AuthProvider = ({ children }) => {
           }
         } else {
           setProfile(null);
-          setLoading(false);
           profileFetched.current = false;
         }
       }

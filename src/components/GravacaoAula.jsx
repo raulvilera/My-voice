@@ -62,6 +62,7 @@ export default function GravacaoAula() {
   const recorderRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
+  const fileInputRef = useRef(null);     // fallback mobile nativo
 
   // ── Busca aulas cadastradas ──────────────────────────────────────────────
   useEffect(() => {
@@ -249,12 +250,24 @@ export default function GravacaoAula() {
     setDuracao(0);
     setEtapa('gravar');
     setErro('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleEditorSave = (editedBlob, metadata) => {
     setBlobGravado(editedBlob);
     setTituloVideo(metadata.titulo);
     setEtapa('publicar');
+  };
+
+  // ── Fallback de Gravação Nativa (Mobile) ──────────────────────────────────
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setBlobGravado(file);
+    setUrlPreview(URL.createObjectURL(file));
+    setDuracao(0); // Duração pode não ser exata por upload nativo
+    setEtapa('revisar');
+    setErro('');
   };
 
   // ── Publicar vídeo ───────────────────────────────────────────────────────
@@ -461,6 +474,28 @@ export default function GravacaoAula() {
           {erro && (
             <div className={styles.erroBox} style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
               <AlertCircle size={16} /> <span>{erro}</span>
+
+              {/* Botão de Fallback para App de Câmera Nativa do Celular */}
+              <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
+                <p style={{ fontSize: '0.85rem', marginBottom: '8px', color: '#cbd5e1' }}>
+                  Não quer mexer nas configurações? Grave usando a câmera nativa do seu celular:
+                </p>
+                <button 
+                  className={styles.btnPrimary} 
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ width: '100%', display: 'flex', justifyContent: 'center', backgroundColor: '#8b5cf6' }}
+                >
+                  <Camera size={18} /> Usar Câmera do Celular
+                </button>
+                <input 
+                  type="file" 
+                  accept="video/*" 
+                  capture="environment" 
+                  ref={fileInputRef} 
+                  style={{ display: 'none' }} 
+                  onChange={handleFileChange} 
+                />
+              </div>
             </div>
           )}
 
