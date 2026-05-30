@@ -11,11 +11,16 @@ if (!(Test-Path "$public\public")) {
     New-Item -ItemType Directory -Force -Path "$public\public"
 }
 
-# Copiar imagens originais diretamente
+# Copiar imagens originais diretamente (nomes antigos e novos)
 Copy-Item $src -Destination "$public\my_voice_default.png" -Force
 Copy-Item $src -Destination "$public\my_voice_default_round.png" -Force
 Copy-Item $src -Destination "$public\favicon.png" -Force
 Copy-Item $src -Destination "$public\public\favicon.png" -Force
+
+Copy-Item $src -Destination "$public\my_voice_default_v4.png" -Force
+Copy-Item $src -Destination "$public\my_voice_default_round_v4.png" -Force
+Copy-Item $src -Destination "$public\favicon_v4.png" -Force
+Copy-Item $src -Destination "$public\public\favicon_v4.png" -Force
 
 function Resize-Image {
     param(
@@ -32,7 +37,6 @@ function Resize-Image {
     $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
     $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
     
-    # Desenhar com preenchimento limpo
     $graphics.DrawImage($srcImage, 0, 0, $width, $height)
     
     $newImage.Save($destPath, [System.Drawing.Imaging.ImageFormat]::Png)
@@ -42,14 +46,22 @@ function Resize-Image {
     $srcImage.Dispose()
 }
 
-# Redimensionar para tamanhos específicos
+# Redimensionar para tamanhos específicos (nomes antigos)
 Resize-Image -srcPath $src -destPath "$public\icon-48.png" -width 48 -height 48
 Resize-Image -srcPath $src -destPath "$public\icon-180.png" -width 180 -height 180
 Resize-Image -srcPath $src -destPath "$public\icon-192.png" -width 192 -height 192
 Resize-Image -srcPath $src -destPath "$public\icon-512.png" -width 512 -height 512
-
 Resize-Image -srcPath $src -destPath "$public\public\icon-180.png" -width 180 -height 180
 Resize-Image -srcPath $src -destPath "$public\public\icon-192.png" -width 192 -height 192
 Resize-Image -srcPath $src -destPath "$public\public\icon-512.png" -width 512 -height 512
+
+# Redimensionar para tamanhos específicos (nomes novos)
+Resize-Image -srcPath $src -destPath "$public\icon-48_v4.png" -width 48 -height 48
+Resize-Image -srcPath $src -destPath "$public\icon-180_v4.png" -width 180 -height 180
+Resize-Image -srcPath $src -destPath "$public\icon-192_v4.png" -width 192 -height 192
+Resize-Image -srcPath $src -destPath "$public\icon-512_v4.png" -width 512 -height 512
+Resize-Image -srcPath $src -destPath "$public\public\icon-180_v4.png" -width 180 -height 180
+Resize-Image -srcPath $src -destPath "$public\public\icon-192_v4.png" -width 192 -height 192
+Resize-Image -srcPath $src -destPath "$public\public\icon-512_v4.png" -width 512 -height 512
 
 Write-Host "Icons generated successfully!"
