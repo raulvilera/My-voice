@@ -1,5 +1,5 @@
-// Service Worker v2 — força limpeza do cache de icones PWA
-const CACHE_VERSION = 'myvoice-v3';
+// Service Worker v3 — força limpeza do cache de icones PWA
+const CACHE_VERSION = 'myvoice-v4';
 const ICON_URLS = ['/icon-48.png', '/icon-192.png', '/icon-512.png', '/icon-180.png', '/my_voice_default.png'];
 
 self.addEventListener('install', (event) => {
@@ -21,7 +21,8 @@ self.addEventListener('activate', (event) => {
 
 // Rede primeiro para icones, cache como fallback
 self.addEventListener('fetch', (event) => {
-  if (ICON_URLS.some((u) => event.request.url.endsWith(u))) {
+  const urlPath = new URL(event.request.url).pathname;
+  if (ICON_URLS.some((u) => urlPath.endsWith(u))) {
     event.respondWith(
       fetch(event.request)
         .then((res) => {

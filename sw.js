@@ -1,4 +1,4 @@
-const CACHE = 'myvoice-v4';
+const CACHE = 'myvoice-v5';
 const ASSETS = ['/'];
 
 // URLs que NUNCA devem ser cacheadas (APIs externas)

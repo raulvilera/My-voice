@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Drawing
 
-$src = "C:\Users\RAULPEREIRAVILERAJUN.AzureAD.001\.gemini\antigravity\brain\ada1d3ea-8318-4f70-8a46-3afc2352b475\media__1780167989365.png"
+$src = "C:\Users\RAULPEREIRAVILERAJUN.AzureAD.001\.gemini\antigravity\brain\ada1d3ea-8318-4f70-8a46-3afc2352b475\media__1780170069237.jpg"
 $public = "c:\Users\RAULPEREIRAVILERAJUN.AzureAD.001\Desktop\My-voice-main\public"
 
 # Certificar que as pastas existem
