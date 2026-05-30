@@ -103,7 +103,14 @@ export default function GravacaoAula() {
         audio: !semMic,
       };
       
-      const s = await navigator.mediaDevices.getUserMedia(constraints);
+      let s;
+      try {
+        s = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        console.warn('[GravacaoAula] Falha nas constraints ideais, tentando genérico...', err);
+        // Fallback genérico caso o dispositivo rejeite a resolução ou facingMode
+        s = await navigator.mediaDevices.getUserMedia({ video: !semCamera, audio: !semMic });
+      }
       setStream(s);
       
       if (videoRef.current) {
@@ -118,12 +125,14 @@ export default function GravacaoAula() {
       console.error('[GravacaoAula] Erro ao acessar dispositivos:', e);
       
       let mensagem = e.message || 'Não foi possível acessar câmera/microfone.';
-      if (e.name === 'NotAllowedError') {
-        mensagem = 'Permissão negada para acessar a câmera ou microfone. Verifique as configurações de permissão do navegador.';
+      if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+        mensagem = 'Permissão negada. No celular, vá em Configurações > Aplicativos > seu Navegador (Chrome/Safari) > Permissões e libere Câmera/Microfone. (Ou abra no Chrome ao invés de redes sociais).';
       } else if (e.name === 'NotFoundError') {
         mensagem = 'Nenhum dispositivo de câmera ou microfone físico foi encontrado.';
       } else if (e.name === 'NotReadableError') {
         mensagem = 'A câmera ou o microfone já está em uso por outro aplicativo ou aba.';
+      } else if (e.name === 'OverconstrainedError') {
+        mensagem = 'A câmera do dispositivo não suporta os requisitos de vídeo solicitados.';
       }
       
       setErro(mensagem);
