@@ -170,3 +170,14 @@ img { max-width: 100%; display: block; }
 }
 
 .motivaStar { color: var(--color-warning); flex-shrink: 0; }
+
+/* ── Ocultar Vercel Toolbar ── */
+vercel-toolbar,
+#__vercel-toolbar-wrapper,
+[data-vercel-toolbar],
+.__vercel-toolbar {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
