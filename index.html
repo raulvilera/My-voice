@@ -31,6 +31,53 @@
     <link rel="manifest" href="/manifest.json" />
 
     <title>My Voice</title>
+
+    <!-- Bloqueia a Vercel Toolbar antes de qualquer renderização -->
+    <script>
+      (function () {
+        // Remove o elemento vercel-toolbar e scripts relacionados assim que aparecerem no DOM
+        const TOOLBAR_TAGS = ['vercel-toolbar', 'vercel-live-feedback'];
+        const TOOLBAR_SCRIPT_PATTERN = /_vercel\/toolbar|vercel-toolbar|vercel-live/i;
+
+        function removeToolbar(node) {
+          if (!node || !node.tagName) return;
+          const tag = node.tagName.toLowerCase();
+          if (TOOLBAR_TAGS.includes(tag)) {
+            node.remove();
+            return;
+          }
+          // Remove scripts da toolbar
+          if (tag === 'script') {
+            const src = node.src || '';
+            if (TOOLBAR_SCRIPT_PATTERN.test(src)) {
+              node.remove();
+            }
+          }
+        }
+
+        // Observer para capturar elementos injetados dinamicamente
+        const observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(removeToolbar);
+          });
+        });
+
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+        });
+
+        // Tenta remover o que já estiver no DOM
+        document.addEventListener('DOMContentLoaded', function () {
+          TOOLBAR_TAGS.forEach(function (tag) {
+            document.querySelectorAll(tag).forEach(function (el) { el.remove(); });
+          });
+          document.querySelectorAll('script').forEach(function (el) {
+            if (TOOLBAR_SCRIPT_PATTERN.test(el.src)) el.remove();
+          });
+        });
+      })();
+    </script>
 </head>
 
 <body>
