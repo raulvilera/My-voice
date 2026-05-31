@@ -6,6 +6,12 @@
   "toolbar": false,
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "x-vercel-skip-toolbar", "value": "1" }
+      ]
+    },
+    {
       "source": "/manifest.json",
       "headers": [
         { "key": "Content-Type", "value": "application/manifest+json" },
