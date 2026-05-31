@@ -3,6 +3,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
+  "toolbar": false,
   "headers": [
     {
       "source": "/manifest.json",
