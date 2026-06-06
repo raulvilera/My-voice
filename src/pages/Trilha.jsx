@@ -304,7 +304,18 @@ const SecaoModal = ({ aula, secType, onClose }) => {
         <div className="modal-body">
           {sectionsToShow.map((s, idx) => {
             const sectionType = s.type || s.tipo;
-            const sectionContent = s.conteudo ? { ...s.conteudo, titulo: s.titulo } : s;
+            // Normaliza: aulas do banco têm conteudo JSONB, hardcoded têm dados diretos
+            let base = s.conteudo && typeof s.conteudo === 'object' ? s.conteudo : s;
+            // Garante que falas/verbos/palavras/grupos nunca sejam undefined
+            const sectionContent = {
+              titulo:      s.titulo      || base.titulo      || '',
+              audioSrc:    s.audioSrc    || base.audioSrc    || null,
+              personagens: s.personagens || base.personagens || [],
+              falas:       s.falas       || base.falas       || [],
+              verbos:      s.verbos      || base.verbos      || [],
+              palavras:    s.palavras    || base.palavras     || [],
+              grupos:      s.grupos      || base.grupos       || [],
+            };
             
             switch (sectionType) {
               case 'dialogo':     return <SecaoDialogo     key={idx} section={sectionContent}/>;
