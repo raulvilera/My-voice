@@ -130,7 +130,17 @@ const PreviewAulas = ({ plano = 'basico' }) => {
   }, []);
 
   const renderSecao = (sec, idx, tituloAula) => {
-    const dados = { ...sec.conteudo, titulo: sec.titulo };
+    // Normaliza: aulas do banco têm conteudo JSONB, hardcoded têm dados diretos
+    const base = sec.conteudo && typeof sec.conteudo === 'object' ? sec.conteudo : sec;
+    const dados = {
+      titulo:      sec.titulo      || base.titulo      || '',
+      audioSrc:    sec.audioSrc    || base.audioSrc    || null,
+      personagens: sec.personagens || base.personagens || [],
+      falas:       sec.falas       || base.falas       || [],
+      verbos:      sec.verbos      || base.verbos       || [],
+      palavras:    sec.palavras    || base.palavras     || [],
+      grupos:      sec.grupos      || base.grupos       || [],
+    };
     return (
       <div key={idx}>
         <VideoEducacional
