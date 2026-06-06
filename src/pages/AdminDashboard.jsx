@@ -7,21 +7,43 @@ import {
   MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
   CreditCard, Crown, Zap, Bot, Video,
 } from 'lucide-react';
-import { myVoiceData } from '../data/myvoiceData';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
+
+// ── Bandeira dos EUA SVG inline ───────────────────────────────────────────────
+const BandeiraEUA = ({ size = 32 }) => (
+  <svg width={size} height={size * 0.526} viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" style={{ borderRadius: 3, display: 'block' }}>
+    {/* Listras */}
+    {[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => (
+      <rect key={i} x="0" y={i * 400/13} width="760" height={400/13}
+        fill={i % 2 === 0 ? '#B22234' : '#FFFFFF'} />
+    ))}
+    {/* Cantão azul */}
+    <rect x="0" y="0" width="303" height={400 * 7/13} fill="#3C3B6E" />
+    {/* Estrelas */}
+    {Array.from({ length: 50 }).map((_, idx) => {
+      const row = Math.floor(idx / 6) % 2 === 0 ? Math.floor(idx / 6) : Math.floor(idx / 5);
+      const col = idx % (Math.floor(idx / 6) % 2 === 0 ? 6 : 5);
+      const isOddRow = Math.floor(idx / 6) % 2 !== 0;
+      const cx = isOddRow ? 30 + col * 50 + 25 : 30 + col * 50;
+      const cy = Math.floor(idx / (isOddRow ? 5 : 6)) * 26 + (isOddRow ? 13 : 0) + 16;
+      return <polygon key={idx} points="0,-9 2.6,-4 9,-4 4,0 6,6 0,3 -6,6 -4,0 -9,-4 -2.6,-4"
+        transform={`translate(${cx},${cy})`} fill="white" />;
+    })}
+  </svg>
+);
 import { supabase } from '../lib/supabaseClient';
 import NovaAula from './NovaAula';
 import Planos from './Planos';
 import VideoEducacional from '../components/VideoEducacional';
+const GravacaoAula = lazy(() =>
+  import('../components/GravacaoAula').catch(() => ({ default: () => <p style={{color:'#94a3b8',padding:'2rem'}}>Componente de gravação não encontrado. Verifique se GravacaoAula.jsx está em src/components/.</p> }))
+);
 import { SecaoDialogo }    from '../components/SecaoDialogo';
 import { SecaoVerbos }     from '../components/SecaoVerbos';
 import { SecaoVocabulario }from '../components/SecaoVocabulario';
 import { SecaoExercicios } from '../components/SecaoExercicios';
 import styles from './AdminDashboard.module.css';
-
-// Lazy loading do componente de gravação para performance
-const GravacaoAula = lazy(() => import('../components/GravacaoAula'));
 
 // ── Agente IA: registra atividade automaticamente ────────────────────────────
 const EDGE_URL = 'https://ppzvwhkvwupmfmijrkkl.supabase.co/functions/v1/registrar-atividade';
@@ -49,76 +71,46 @@ const PILL_INFO = {
 
 // ── Preview de aulas ──────────────────────────────────────────────────────────
 const PreviewAulas = ({ plano = 'basico' }) => {
-  const [aulas, setAulas]         = useState(() => {
-    return myVoiceData.basico.aulas.map(a => ({
-      ...a,
-      id: `hc-${a.id}`,
-      publicada: true,
-      secoes: a.sections?.map((s, i) => ({
-        tipo: s.type || s.tipo,
-        titulo: s.titulo,
-        conteudo: s.conteudo || s,
-        ordem: i
-      })) || []
-    }));
-  });
+  const [aulas, setAulas]         = useState([]);
   const [aulaAberta, setAulaAberta] = useState(null);
   const [secAberta, setSecAberta]   = useState(null);
-  const [loading, setLoading]     = useState(false);
+  const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-
-    // Sincroniza aulas do aluno (hardcoded)
-    const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
-      ...a,
-      id: `hc-${a.id}`,
-      publicada: true,
-      secoes: a.sections?.map((s, i) => ({
-        tipo: s.type || s.tipo,
-        titulo: s.titulo,
-        conteudo: s.conteudo || s,
-        ordem: i
-      })) || []
-    }));
-
-    // Timeout de segurança: se o Supabase travar/pausar/demorar, garante carregamento do fallback local
     const safetyTimer = setTimeout(() => {
       if (isMounted) {
-        console.warn('[AdminDashboard] Timeout de segurança atingido, carregando fallback hardcoded...');
-        setAulas(prev => prev.length === 0 ? aulasHardcoded : prev);
+        console.warn('[AdminDashboard] Timeout de segurança atingido');
         setLoading(false);
       }
-    }, 6000);
+    }, 8000);
 
     (async () => {
       try {
-        const { data, error } = await supabase
+        console.log('[AdminDashboard] Iniciando busca de aulas...');
+
+        // Busca aulas com suas seções em uma única query otimizada
+        const { data: soAulas, error: errAulas } = await supabase
           .from('aulas')
           .select('*, secoes(*)')
-          .order('numero', { ascending: true });
+          .order('numero');
 
-        let aulasDB = [];
-        if (error) {
-          console.error('[AdminDashboard] Erro ao buscar aulas:', error);
-        } else {
-          aulasDB = data || [];
+        console.log('[AdminDashboard] Aulas com seções:', soAulas, 'Erro:', errAulas);
+
+        if (errAulas) {
+          console.error('[AdminDashboard] Erro ao buscar aulas:', errAulas);
+          if (isMounted) setLoading(false);
+          return;
         }
 
         if (isMounted) {
-          // Evita duplicatas por número de aula
-          const numerosDB = new Set(aulasDB.map(a => a.numero));
-          const filtradas = aulasHardcoded.filter(a => !numerosDB.has(a.numero));
-          
-          setAulas([...filtradas, ...aulasDB].sort((a, b) => a.numero - b.numero));
+          setAulas(soAulas || []);
+          setLoading(false);
         }
       } catch (e) {
         console.error('[AdminDashboard] Exceção:', e);
-        if (isMounted) {
-          setAulas(prev => prev.length === 0 ? aulasHardcoded : prev);
-        }
-      } finally {
         if (isMounted) setLoading(false);
+      } finally {
         clearTimeout(safetyTimer);
       }
     })();
@@ -130,19 +122,19 @@ const PreviewAulas = ({ plano = 'basico' }) => {
   }, []);
 
   const renderSecao = (sec, idx, tituloAula) => {
-    // Normaliza: aulas do banco têm conteudo JSONB, hardcoded têm dados diretos
-    const base = sec.conteudo && typeof sec.conteudo === 'object' ? sec.conteudo : sec;
+    const base = (sec.conteudo && typeof sec.conteudo === 'object') ? sec.conteudo : {};
     const dados = {
       titulo:      sec.titulo      || base.titulo      || '',
       audioSrc:    sec.audioSrc    || base.audioSrc    || null,
       personagens: sec.personagens || base.personagens || [],
       falas:       sec.falas       || base.falas       || [],
-      verbos:      sec.verbos      || base.verbos       || [],
+      verbos:      sec.verbos      || base.verbos      || [],
       palavras:    sec.palavras    || base.palavras     || [],
       grupos:      sec.grupos      || base.grupos       || [],
     };
     return (
       <div key={idx}>
+        {/* Vídeo educacional gerado por IA para cada seção */}
         <VideoEducacional
           tituloAula={tituloAula}
           tipoSecao={sec.tipo}
@@ -170,17 +162,6 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
   const fecharModal = () => { setAulaAberta(null); setSecAberta(null); };
 
-  const excluirAula = async (id) => {
-    if (!String(id).startsWith('hc-') && window.confirm('Deseja mesmo excluir esta aula?')) {
-      try {
-        await supabase.from('aulas').delete().eq('id', id);
-        setAulas(prev => prev.filter(a => a.id !== id));
-      } catch (e) {
-        console.error('Erro ao excluir:', e);
-      }
-    }
-  };
-
   const secoesModal = aulaAberta
     ? (aulaAberta.secoes || [])
         .sort((a, b) => a.ordem - b.ordem)
@@ -191,6 +172,14 @@ const PreviewAulas = ({ plano = 'basico' }) => {
     ? (PILL_INFO[secAberta]?.emoji + ' ' + PILL_INFO[secAberta]?.label)
     : '📋 Aula completa';
 
+  if (loading) return (
+    <div>
+      <p className={styles.loadingMsg}>Carregando aulas…</p>
+      <p style={{color:'#64748b',fontSize:'0.75rem',textAlign:'center',marginTop:'0.5rem'}}>
+        Se esta mensagem persistir por mais de 5 segundos, abra o Console (F12) e verifique os erros.
+      </p>
+    </div>
+  );
   if (aulas.length === 0) return <p className={styles.emptyMsg}>Nenhuma aula cadastrada ainda.</p>;
 
   return (
@@ -206,6 +195,7 @@ const PreviewAulas = ({ plano = 'basico' }) => {
               <h3>{aula.titulo}</h3>
               <p>{aula.subtitulo}</p>
 
+              {/* ── Pílulas de seção ── */}
               {(aula.secoes || []).length > 0 && (
                 <div className={styles.pillsRow}>
                   {(aula.secoes)
@@ -230,30 +220,19 @@ const PreviewAulas = ({ plano = 'basico' }) => {
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
-              <button
-                className={styles.previewBtn}
-                onClick={() => { setAulaAberta(aula); setSecAberta(null); }}
-              >
-                <Eye size={15}/>
-                <span>Ver tudo</span>
-              </button>
-              {!String(aula.id).startsWith('hc-') && (
-                <button
-                  className={styles.previewBtn}
-                  style={{ background: 'rgba(239,68,68,0.15)', borderColor: 'rgba(239,68,68,0.4)', color: '#f87171' }}
-                  onClick={() => excluirAula(aula.id)}
-                  title="Excluir aula"
-                >
-                  <X size={15}/>
-                  <span>Excluir</span>
-                </button>
-              )}
-            </div>
+            {/* ── Botão Ver (estilizado) ── */}
+            <button
+              className={styles.previewBtn}
+              onClick={() => { setAulaAberta(aula); setSecAberta(null); }}
+            >
+              <Eye size={15}/>
+              <span>Ver tudo</span>
+            </button>
           </div>
         </div>
       ))}
 
+      {/* ── Modal via Portal (evita bloqueio do backdrop-filter do glass-panel) ── */}
       {aulaAberta && createPortal(
         <div className={styles.modalOverlay} onClick={fecharModal}>
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -283,12 +262,10 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 const UploadDocumento = ({ onSalvo }) => {
   const { user } = useAuth();
   const [arquivo, setArquivo]     = useState(null);
-  const [convertendo, setConvert] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [erro, setErro]           = useState('');
   const [salvando, setSalvando]   = useState(false);
   const [sucesso, setSucesso]     = useState('');
-  const [registroIA, setRegistroIA] = useState(null);
 
   const handleFile = (e) => {
     const f = e.target.files?.[0];
@@ -297,46 +274,13 @@ const UploadDocumento = ({ onSalvo }) => {
       || f.type === 'text/plain'
       || f.name.endsWith('.docx')
       || f.name.endsWith('.txt');
-    if (!ok) { setErro('Use um arquivo .docx ou .txt.'); return; }
+    if (!ok) { setErro('Use um arquivo .docx ou .txt exportado do Word/Google Docs.'); return; }
     setArquivo(f); setErro(''); setResultado(null);
-  };
-
-  const converter = async () => {
-    if (!arquivo) return;
-    setConvert(true); setErro('');
-    try {
-      const texto = await new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = () => res(r.result);
-        r.onerror = rej;
-        r.readAsText(arquivo);
-      });
-
-      const prompt = `Converta este conteúdo de aula para JSON My Voice. CONTEÚDO: ${texto.slice(0, 5000)}`;
-
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1500,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-      const data = await resp.json();
-      const raw = data.content?.find(b => b.type === 'text')?.text || '';
-      const clean = raw.replace(/```json|```/g, '').trim();
-      setResultado(JSON.parse(clean));
-    } catch (e) {
-      setErro('Erro ao converter: ' + e.message);
-    } finally {
-      setConvert(false);
-    }
   };
 
   const salvar = async (publicar = false) => {
     if (!resultado) return;
-    setSalvando(true);
+    setSalvando(true); setErro('');
     try {
       const { data: aulasExist } = await supabase.from('aulas').select('numero').order('numero', { ascending: false }).limit(1);
       const numero = (aulasExist?.[0]?.numero || 0) + 1;
@@ -349,13 +293,15 @@ const UploadDocumento = ({ onSalvo }) => {
 
       const secoesData = (resultado.secoes || []).map((s, i) => ({
         aula_id: aula.id,
-        tipo: s.tipo || s.type,
+        tipo: s.tipo,
         titulo: s.titulo,
-        conteudo: s.conteudo || s,
+        conteudo: s.conteudo,
         ordem: i,
       }));
-      await supabase.from('secoes').insert(secoesData);
+      const { error: secErr } = await supabase.from('secoes').insert(secoesData);
+      if (secErr) throw secErr;
 
+      // ── Agente IA registra a atividade importada automaticamente ─────────
       dispararAgenteRegistro({
         aula_id: aula.id,
         professor_id: user?.id,
@@ -364,7 +310,7 @@ const UploadDocumento = ({ onSalvo }) => {
         tag: 'Iniciante',
         secoes: secoesData,
         origem: 'upload',
-      }).then(reg => { if (reg) setRegistroIA(reg); });
+      }).catch(err => console.warn('[Upload] Erro ao disparar agente:', err));
 
       setSucesso(publicar ? 'Aula publicada!' : 'Salva como rascunho!');
       setTimeout(() => { setSucesso(''); onSalvo?.(); }, 2000);
@@ -380,26 +326,54 @@ const UploadDocumento = ({ onSalvo }) => {
       <div className={styles.uploadCard}>
         <div className={styles.uploadIcon}><Upload size={32}/></div>
         <h3>Importar Aula de Documento</h3>
+        <p className={styles.uploadDesc}>
+          Envie um arquivo <strong>.docx</strong> (Word / Google Docs exportado) ou <strong>.txt</strong>.
+          Você poderá editar o conteúdo manualmente antes de salvar.
+        </p>
+
         <label className={styles.fileLabel}>
           <FileText size={16}/>
-          {arquivo ? arquivo.name : 'Escolher arquivo'}
+          {arquivo ? arquivo.name : 'Escolher arquivo (.docx ou .txt)'}
           <input type="file" accept=".docx,.txt" onChange={handleFile} style={{ display: 'none' }}/>
         </label>
-        {arquivo && !resultado && (
-          <button className={styles.convertBtn} onClick={converter} disabled={convertendo}>
-            {convertendo ? <Loader2 size={16} className={styles.spin}/> : 'Converter com Claude'}
-          </button>
-        )}
+
         {erro && <div className={styles.erroBox}>{erro}</div>}
         {sucesso && <div className={styles.sucessoBox}>{sucesso}</div>}
       </div>
 
+      {/* Preview do resultado */}
       {resultado && (
         <div className={styles.resultadoCard}>
-          <h3>{resultado.titulo}</h3>
+          <div className={styles.resultadoHeader}>
+            <div>
+              <h3>{resultado.titulo}</h3>
+              {resultado.subtitulo && <p>{resultado.subtitulo}</p>}
+            </div>
+            <div className={styles.pillsRow}>
+              {(resultado.secoes || []).map((s, i) => {
+                const info = PILL_INFO[s.tipo];
+                return info ? (
+                  <span key={i} className={styles.sectionPillStatic} style={{ '--pill-cor': info.cor }}>
+                    {info.emoji} {info.label}
+                  </span>
+                ) : null;
+              })}
+            </div>
+          </div>
+
+          <p className={styles.resultadoInfo}>
+            ✅ {resultado.secoes?.length || 0} seção(ões) detectada(s).
+          </p>
+
           <div className={styles.resultadoBtns}>
-            <button className={styles.salvarBtn} onClick={() => salvar(false)} disabled={salvando}>Salvar Rascunho</button>
-            <button className={styles.publishBtn} onClick={() => salvar(true)} disabled={salvando}>Publicar Aula</button>
+            <button className={styles.salvarBtn} onClick={() => salvar(false)} disabled={salvando}>
+              {salvando ? <Loader2 size={16} className={styles.spin}/> : <Plus size={16}/>}
+              {salvando ? 'Salvando…' : 'Salvar como Rascunho'}
+            </button>
+            <button className={styles.publicarBtn} onClick={() => salvar(true)} disabled={salvando}>
+              {salvando ? <Loader2 size={16} className={styles.spin}/> : <Eye size={16}/>}
+              {salvando ? 'Publicando…' : 'Publicar Aula'}
+            </button>
           </div>
         </div>
       )}
@@ -410,14 +384,19 @@ const UploadDocumento = ({ onSalvo }) => {
 // ── Gerenciar Alunos ──────────────────────────────────────────────────────────
 const GerenciarAlunos = () => {
   const [alunos, setAlunos]   = useState([]);
+  const [busca, setBusca]     = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     (async () => {
       const { data } = await supabase.from('profiles').select('*').eq('role', 'aluno').order('created_at', { ascending: false });
-      setAlunos(data || []);
-      setLoading(false);
+      if (isMounted) {
+        setAlunos(data || []);
+        setLoading(false);
+      }
     })();
+    return () => { isMounted = false; };
   }, []);
 
   const toggleAtivo = async (aluno) => {
@@ -425,31 +404,89 @@ const GerenciarAlunos = () => {
     setAlunos(prev => prev.map(a => a.id === aluno.id ? { ...a, ativo: !a.ativo } : a));
   };
 
+  const filtrados = alunos.filter(a =>
+    (a.name || '').toLowerCase().includes(busca.toLowerCase()) ||
+    (a.email || '').toLowerCase().includes(busca.toLowerCase())
+  );
+
   return (
     <div className={styles.alunosPanel}>
-      {loading ? <p>Carregando…</p> : (
-        <div className={styles.alunosList}>
-          {alunos.map(aluno => (
-            <div key={aluno.id} className={styles.alunoRow}>
-              <span>{aluno.name || aluno.email}</span>
-              <button onClick={() => toggleAtivo(aluno)}>
-                {aluno.ativo ? <ToggleRight size={22}/> : <ToggleLeft size={22}/>}
-              </button>
-            </div>
-          ))}
+      <div className={styles.panelHeader}>
+        <div className={styles.statsRow}>
+          <span className={styles.statChip}><Users size={14}/> {alunos.length} total</span>
+          <span className={styles.statChip} style={{ color: 'var(--color-success)' }}><ToggleRight size={14}/> {alunos.filter(a => a.ativo).length} ativos</span>
+          <span className={styles.statChip} style={{ color: 'var(--color-danger)' }}><ToggleLeft size={14}/> {alunos.filter(a => !a.ativo).length} bloqueados</span>
         </div>
-      )}
+        <div className={styles.buscaField}>
+          <Search size={16}/>
+          <input type="text" placeholder="Buscar…" value={busca} onChange={e => setBusca(e.target.value)}/>
+        </div>
+      </div>
+      {loading ? <p className={styles.loadingMsg}>Carregando alunos…</p>
+        : filtrados.length === 0 ? <p className={styles.emptyMsg}>Nenhum aluno encontrado.</p>
+        : (
+          <div className={styles.alunosList}>
+            {filtrados.map(aluno => (
+              <div key={aluno.id} className={`${styles.alunoRow} ${!aluno.ativo ? styles.inativo : ''}`}>
+                <div className={styles.alunoAvatar}>{(aluno.name || 'A').charAt(0).toUpperCase()}</div>
+                <div className={styles.alunoInfo}>
+                  <span className={styles.alunoNome}>{aluno.name || 'Sem nome'}</span>
+                  <span className={styles.alunoEmail}>{aluno.email}</span>
+                </div>
+                <div className={styles.alunoMeta}>
+                  <span className={styles.alunoData}>{new Date(aluno.created_at).toLocaleDateString('pt-BR')}</span>
+                  <span className={`${styles.statusBadge} ${aluno.ativo ? styles.ativo : styles.bloqueado}`}>
+                    {aluno.ativo ? 'Ativo' : 'Bloqueado'}
+                  </span>
+                </div>
+                <button
+                  className={`${styles.toggleBtn} ${aluno.ativo ? styles.toggleBtnAtivo : styles.toggleBtnInativo}`}
+                  onClick={() => toggleAtivo(aluno)}
+                >
+                  {aluno.ativo ? <ToggleRight size={22}/> : <ToggleLeft size={22}/>}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
     </div>
   );
 };
 
 // ── Modo Ver como Aluno ───────────────────────────────────────────────────────
 const ModoAluno = ({ onFechar }) => (
-  <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#0f172a', display: 'flex', flexDirection: 'column' }}>
-    <div style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', padding: '0.6rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ color: '#fff', fontWeight: 700 }}>Modo Visualização</span>
-      <button onClick={onFechar} style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', padding: '0.4rem 1rem', borderRadius: '20px', cursor: 'pointer' }}>Fechar</button>
+  <div style={{
+    position: 'fixed', inset: 0, zIndex: 300,
+    display: 'flex', flexDirection: 'column',
+    background: 'var(--color-bg-primary, #0f172a)',
+  }}>
+    {/* Banner fixo */}
+    <div style={{
+      background: 'linear-gradient(135deg, #7c3aed, #db2777)',
+      padding: '0.6rem 1.25rem',
+      display: 'flex', alignItems: 'center',
+      justifyContent: 'space-between', gap: '1rem',
+      flexShrink: 0, zIndex: 400,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <GraduationCap size={18} color="#fff"/>
+        <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
+          Modo Visualização — você está vendo como o aluno vê
+        </span>
+      </div>
+      <button
+        onClick={onFechar}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '0.4rem',
+          background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)',
+          borderRadius: '999px', padding: '0.35rem 0.9rem',
+          color: '#fff', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
+        }}
+      >
+        <X size={15}/> Voltar à área da professora
+      </button>
     </div>
+    {/* Trilha do aluno em modo somente-leitura */}
     <div style={{ flex: 1, overflowY: 'auto' }}>
       <Trilha modoVisualizacao />
     </div>
@@ -463,24 +500,25 @@ const AdminDashboard = () => {
   const [aba, setAba] = useState('aulas');
   const [modoAluno, setModoAluno] = useState(false);
 
-  useEffect(() => {
-    if (profile && profile.role === 'aluno') {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [profile, navigate]);
-
   const plano = profile?.plano || 'basico';
 
-  const handleLogout = async () => { await signOut(); navigate('/login', { replace: true }); };
+  const handleLogout = async () => { await signOut(); navigate('/login'); };
 
   const ABAS = [
-    { id: 'aulas',    label: 'Aulas',        icon: <Eye size={16}/> },
-    { id: 'nova',     label: 'Nova Aula',     icon: <Plus size={16}/> },
-    { id: 'gravacao', label: 'Gravar Aula',   icon: <Video size={16}/> },
-    { id: 'upload',   label: 'Importar Doc',  icon: <Upload size={16}/> },
-    { id: 'alunos',   label: 'Alunos',        icon: <Users size={16}/> },
-    { id: 'planos',   label: 'Planos',        icon: <CreditCard size={16}/> },
+    { id: 'aulas',   label: 'Aulas',          icon: <Eye size={16}/> },
+    { id: 'trilha',  label: 'Trilha do Aluno', icon: <GraduationCap size={16}/> },
+    { id: 'nova',    label: 'Nova Aula',       icon: <Plus size={16}/> },
+    { id: 'upload',  label: 'Importar Doc',    icon: <Upload size={16}/> },
+    { id: 'gravar',  label: 'Gravar Aula',     icon: <Video size={16}/> },
+    { id: 'alunos',  label: 'Alunos',          icon: <Users size={16}/> },
+    { id: 'planos',  label: 'Planos',          icon: <CreditCard size={16}/> },
   ];
+
+  const planoBadgeInfo = {
+    basico: { label: 'Grátis', cor: '#64748b', icone: <Mic size={12}/> },
+    pro:    { label: 'Pro',    cor: '#8b5cf6', icone: <Zap size={12}/> },
+    escola: { label: 'Escola', cor: '#f59e0b', icone: <Crown size={12}/> },
+  }[plano] || { label: 'Grátis', cor: '#64748b', icone: <Mic size={12}/> };
 
   return (
     <>
@@ -488,40 +526,83 @@ const AdminDashboard = () => {
     <div className={styles.adminContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '50%' }} />
-          <div><span className={styles.roleTag} style={{ display: 'block', marginLeft: '4px' }}>Área da Professora</span></div>
+          <div className={styles.logoMicWrapper}>
+            <div className={styles.logoBandeira}>
+              <BandeiraEUA size={42} />
+            </div>
+            <Mic size={26} className={styles.logoIcon}/>
+          </div>
+          <div>
+            <h2>My Voice</h2>
+            <span className={styles.roleTag}>Área da Professora</span>
+          </div>
         </div>
         <div className={styles.navRight}>
+          <button
+            className={styles.planoBadgeBtn}
+            style={{ '--plano-cor': planoBadgeInfo.cor }}
+            onClick={() => setAba('planos')}
+            title="Gerenciar plano"
+          >
+            {planoBadgeInfo.icone}
+            <span>{planoBadgeInfo.label}</span>
+          </button>
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>
-          <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>Ver como Aluno</button>
-          <button className={styles.logoutBtn} onClick={handleLogout}>Sair</button>
+          <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>
+            <GraduationCap size={16}/> Ver como Aluno
+          </button>
+          <button className={styles.logoutBtn} onClick={handleLogout}><LogOut size={18}/> Sair</button>
         </div>
       </nav>
 
       <main className={styles.mainContent}>
         <div className={styles.tabsBar}>
           {ABAS.map(a => (
-            <button key={a.id} className={`${styles.tabBtn} ${aba === a.id ? styles.tabBtnActive : ''}`} onClick={() => setAba(a.id)}>
+            <button
+              key={a.id}
+              className={`${styles.tabBtn} ${aba === a.id ? styles.tabBtnActive : ''}`}
+              onClick={() => setAba(a.id)}
+            >
               {a.icon} {a.label}
+              {a.id === 'planos' && plano === 'basico' && (
+                <span className={styles.upgradeDot} />
+              )}
             </button>
           ))}
         </div>
 
-        {aba === 'aulas'    && <PreviewAulas plano={plano} />}
-        {aba === 'nova'     && <NovaAula onSalvo={() => setAba('aulas')} />}
-        {aba === 'gravacao' && (
-          <Suspense fallback={<div className={styles.loadingMsg}><Loader2 size={24} className={styles.spin}/> Carregando gravador...</div>}>
+        {aba === 'aulas'  && <PreviewAulas plano={plano} />}
+        {aba === 'trilha' && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              marginBottom: '1rem', padding: '0.65rem 1rem',
+              background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)',
+              borderRadius: '12px', fontSize: '0.82rem', color: '#a78bfa', fontWeight: 600,
+            }}>
+              <GraduationCap size={16}/>
+              Você está visualizando a Trilha exatamente como o aluno vê
+            </div>
+            <Trilha modoVisualizacao />
+          </div>
+        )}
+        {aba === 'nova'   && <NovaAula onSalvo={() => setAba('aulas')} />}
+        {aba === 'upload' && <UploadDocumento onSalvo={() => setAba('aulas')} />}
+        {aba === 'gravar' && (
+          <Suspense fallback={<p style={{color:'#94a3b8',padding:'2rem'}}>Carregando gravador…</p>}>
             <GravacaoAula />
           </Suspense>
         )}
-        {aba === 'upload'   && <UploadDocumento onSalvo={() => setAba('aulas')} />}
-        {aba === 'alunos'   && <GerenciarAlunos />}
-        {aba === 'planos'   && <Planos onMudarPlano={() => setAba('aulas')} />}
+        {aba === 'alunos' && <GerenciarAlunos />}
+        {aba === 'planos' && (
+          <Planos
+            onMudarPlano={() => setAba('aulas')}
+          />
+        )}
       </main>
     </div>
     </>
   );
 };
 
-// ESTA LINHA É A MAIS IMPORTANTE PARA CORRIGIR O ERRO DA VERCEL:
 export default AdminDashboard;
