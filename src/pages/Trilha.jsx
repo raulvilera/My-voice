@@ -322,10 +322,57 @@ const SecaoModal = ({ aula, secType, onClose }) => {
 
 // ── Trilha (Main Page) ────────────────────────────────────────────────────────
 export default function Trilha({ modoVisualizacao = false }) {
+  const navigate = useNavigate();
   const [modal, setModal] = useState(null);
-  const curso = myVoiceData.basico;
+  const [aulas, setAulas] = useState(() =>
+    myVoiceData.basico.aulas.map(a => ({
+      ...a,
+      id: `hc-${a.id}`,
+      publicada: true,
+      secoes: (a.sections || []).map((s, i) => ({
+        tipo: s.type || s.tipo,
+        titulo: s.titulo,
+        conteudo: s,
+        ordem: i,
+      })),
+    }))
+  );
 
-  // ✅ CORREÇÃO: Adiciona e.stopPropagation() para evitar borbulha de eventos
+  useEffect(() => {
+    let mounted = true;
+    const aulasHC = myVoiceData.basico.aulas.map(a => ({
+      ...a,
+      id: `hc-${a.id}`,
+      publicada: true,
+      secoes: (a.sections || []).map((s, i) => ({
+        tipo: s.type || s.tipo,
+        titulo: s.titulo,
+        conteudo: s,
+        ordem: i,
+      })),
+    }));
+
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('aulas')
+          .select('*, secoes(*)')
+          .eq('publicada', true)
+          .order('numero', { ascending: true });
+
+        if (!mounted) return;
+        const aulasDB = (!error && data) ? data : [];
+        const numerosDB = new Set(aulasDB.map(a => a.numero));
+        const filtradas = aulasHC.filter(a => !numerosDB.has(a.numero));
+        setAulas([...filtradas, ...aulasDB].sort((a, b) => a.numero - b.numero));
+      } catch {
+        if (mounted) setAulas(aulasHC);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
   const openSec = (aula, secType, e) => {
     e.stopPropagation();
     setModal({ aula, secType });
@@ -335,16 +382,11 @@ export default function Trilha({ modoVisualizacao = false }) {
     <div style={styles.trilhaContainer}>
       <nav style={styles.navbar}>
         <div style={styles.logoInfo}>
-          <div style={styles.logoMicWrapper}>
-            <div style={styles.logoBandeira}>
-              <BandeiraEUA size={42} />
-            </div>
-            <Mic size={26} color="#8b5cf6" style={{ position: 'relative', zIndex: 1 }}/>
-          </div>
+          <img src="/my_voice_default.png" alt="My Voice" style={{ width:46, height:46, borderRadius:'50%', objectFit:'cover' }} />
           <h2 style={styles.logoTitle}>My Voice</h2>
         </div>
         {!modoVisualizacao && (
-          <button style={styles.logoutBtn}>
+          <button style={styles.logoutBtn} onClick={() => navigate(-1)}>
             <LogOut size={18}/><span style={{marginLeft:6}}>Voltar</span>
           </button>
         )}
@@ -352,54 +394,40 @@ export default function Trilha({ modoVisualizacao = false }) {
 
       <main style={styles.mainContent}>
         <header style={styles.header}>
-          <h1 style={styles.headerTitle}>{curso.nome}</h1>
-          <p style={{color:'#94a3b8',fontSize:'0.95rem'}}>{curso.descricao}</p>
+          <h1 style={styles.headerTitle}>{myVoiceData.basico.nome}</h1>
+          <p style={{color:'#94a3b8',fontSize:'0.95rem'}}>{myVoiceData.basico.descricao}</p>
         </header>
 
         <div style={styles.aulasList}>
-          {curso.aulas.map(aula => (
-            <div key={aula.id} style={styles.aulaCard}>
-              <div style={styles.aulaNumero}>
-                <span>{String(aula.numero).padStart(2,'0')}</span>
-              </div>
-              <div style={styles.aulaInfo}>
-                <span style={styles.aulaTagSmall}>{aula.tag}</span>
-                <h3 style={{fontSize:'1rem',fontWeight:700,margin:'2px 0'}}>{aula.titulo}</h3>
-                <p style={{fontSize:'0.82rem',color:'#94a3b8',marginBottom:8}}>{aula.subtitulo}</p>
-                <div style={styles.aulaSections}>
-                  {(aula.sections || aula.secoes || []).map((s, si) => {
-                    // ✅ CORREÇÃO: Suporta tanto 'type' quanto 'tipo'
-                    const sectionType = s.type || s.tipo;
-                    const { emoji, label } = PILL_LABELS[sectionType] || {};
-                    return (
-                      <button 
-                        key={si} 
-                        style={styles.sectionPillBtn}
-                        onClick={(e) => openSec(aula, sectionType, e)}
-                      >
-                        {emoji} {label}
-                      </button>
-                    );
-                  })}
+          {aulas.map(aula => {
+            const secs = aula.sections || aula.secoes || [];
+            return (
+              <div key={aula.id} style={styles.aulaCard} onClick={(e) => openSec(aula, 'tudo', e)}>
+                <div style={styles.aulaNumero}>
+                  <span>{String(aula.numero).padStart(2,'0')}</span>
                 </div>
+                <div style={styles.aulaInfo}>
+                  <span style={styles.aulaTagSmall}>{aula.tag}</span>
+                  <h3 style={{fontSize:'1rem',fontWeight:700,margin:'2px 0'}}>{aula.titulo}</h3>
+                  <p style={{fontSize:'0.82rem',color:'#94a3b8',marginBottom:8}}>{aula.subtitulo}</p>
+                  <div style={styles.aulaSections}>
+                    {secs.map((s, si) => {
+                      const sectionType = s.type || s.tipo;
+                      const { emoji, label } = PILL_LABELS[sectionType] || {};
+                      if (!emoji) return null;
+                      return (
+                        <button key={si} style={styles.sectionPillBtn}
+                          onClick={(e) => openSec(aula, sectionType, e)}>
+                          {emoji} {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <ChevronRight size={20} color="#94a3b8"/>
               </div>
-              <ChevronRight size={20} color="#94a3b8"/>
-            </div>
-          ))}
-
-          {[3,4,5].map(n => (
-            <div key={n} style={{...styles.aulaCard, opacity:0.4, cursor:'not-allowed', filter:'grayscale(0.5)'}}>
-              <div style={{...styles.aulaNumero, background:'rgba(255,255,255,0.08)'}}>
-                <span>{String(n).padStart(2,'0')}</span>
-              </div>
-              <div style={styles.aulaInfo}>
-                <span style={styles.aulaTagSmall}>Em breve</span>
-                <h3 style={{fontSize:'1rem',fontWeight:700,margin:'2px 0'}}>Aula {n} – Linda & Glynda</h3>
-                <p style={{fontSize:'0.82rem',color:'#94a3b8'}}>Conteúdo sendo preparado…</p>
-              </div>
-              <Lock size={18} color="#94a3b8"/>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
 
