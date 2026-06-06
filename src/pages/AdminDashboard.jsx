@@ -526,12 +526,7 @@ const AdminDashboard = () => {
     <div className={styles.adminContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <div className={styles.logoMicWrapper}>
-            <div className={styles.logoBandeira}>
-              <BandeiraEUA size={42} />
-            </div>
-            <Mic size={26} className={styles.logoIcon}/>
-          </div>
+          <img src="/my_voice_default.png" alt="My Voice" style={{ width:'54px', height:'54px', borderRadius:'50%', objectFit:'cover' }} />
           <div>
             <h2>My Voice</h2>
             <span className={styles.roleTag}>Área da Professora</span>
