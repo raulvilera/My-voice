@@ -2,7 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { BookMarked, Play, Square, Volume2 } from 'lucide-react';
 
 // ── Verbos com player MP3 real (se audioSrc) ──────────────────────────────────
-export const SecaoVerbos = ({ section }) => {
+export const SecaoVerbos = ({ section: rawSection }) => {
+  const section = {
+    ...rawSection,
+    titulo:  rawSection?.titulo  || rawSection?.conteudo?.titulo  || '',
+    verbos:  rawSection?.verbos  || rawSection?.conteudo?.verbos  || [],
+    audioSrc: rawSection?.audioSrc || rawSection?.conteudo?.audioSrc || null,
+  };
   const hasMp3 = Boolean(section?.audioSrc);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
