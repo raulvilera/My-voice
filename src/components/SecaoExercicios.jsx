@@ -9,7 +9,12 @@ const VideoAulaProfessora = lazy(() =>
 
 // ── Exercícios ────────────────────────────────────────────────────────────────
 // aulaId: opcional — quando fornecido, exibe o vídeo da professora acima dos exercícios
-export const SecaoExercicios = ({ section, aulaId }) => {
+export const SecaoExercicios = ({ section: rawSection, aulaId }) => {
+  const section = {
+    ...rawSection,
+    titulo: rawSection?.titulo  || rawSection?.conteudo?.titulo  || '',
+    grupos: rawSection?.grupos  || rawSection?.conteudo?.grupos  || [],
+  };
   const [respostas, setRespostas]   = useState({});
   const [resultados, setResultados] = useState({});
   const [checked, setChecked]       = useState(false);
