@@ -232,7 +232,7 @@ basico: {
           {
             type: 'verbos',
             titulo: '📘 Verbos – Ouça e Repita (Áudio 1)',
-            audioSrc: '/audios/Audio-1.mp3',
+            audioSrc: '/audios/Aúdio-1.mp3',
             verbos: [
               { verbo: 'TO BE (ser/estar)',         presente: 'am / is / are', passado: 'was / were',  participio: 'been'        },
               { verbo: 'TO FEEL (sentir)',           presente: 'feel',          passado: 'felt',        participio: 'felt'        },
@@ -250,7 +250,7 @@ basico: {
           {
             type: 'vocabulario',
             titulo: '📖 Vocabulary – Feelings & Family (Áudio 3)',
-            audioSrc: '/audios/Audio-3.mp3',
+            audioSrc: '/audios/Aúdio-3.mp3',
             palavras: [
               { en: 'sad',                           pt: 'triste'                     },
               { en: 'happy',                         pt: 'feliz'                      },
@@ -319,7 +319,7 @@ basico: {
           {
             type: 'verbos',
             titulo: '📘 Verbos – Ouça e Repita (Áudio 2)',
-            audioSrc: '/audios/Audio-2.mp3',
+            audioSrc: '/audios/Aúdio-2.mp3',
             verbos: [
               { verbo: 'TO LISTEN (ouvir/escutar)',  presente: 'listen',   passado: 'listened',   participio: 'listened'   },
               { verbo: 'TO COME (vir)',              presente: 'come',     passado: 'came',       participio: 'come'       },
@@ -335,7 +335,7 @@ basico: {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo – Dallas & Susie (Áudio 4)',
-            audioSrc: '/audios/Audio-4.mp3',
+            audioSrc: '/audios/Aúdio-4.mp3',
             personagens: ['Susie', 'Dallas'],
             falas: [
               { personagem: 'Susie',  texto: "Dallas, can I tell you something else?"          },
