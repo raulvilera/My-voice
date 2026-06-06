@@ -12,8 +12,8 @@ const VideoAulaProfessora = lazy(() =>
 export const SecaoExercicios = ({ section: rawSection, aulaId }) => {
   const section = {
     ...rawSection,
-    titulo: rawSection?.titulo  || rawSection?.conteudo?.titulo  || '',
-    grupos: rawSection?.grupos  || rawSection?.conteudo?.grupos  || [],
+    titulo: rawSection?.titulo || rawSection?.conteudo?.titulo || '',
+    grupos: rawSection?.grupos || rawSection?.conteudo?.grupos || [],
   };
   const [respostas, setRespostas]   = useState({});
   const [resultados, setResultados] = useState({});
