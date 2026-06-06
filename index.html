@@ -4,30 +4,27 @@
     <meta charset="UTF-8" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/my_voice_default.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
 
     <!-- PWA Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#8b5cf6" />
+    <meta name="theme-color" content="#0f172a" />
     <meta name="mobile-web-app-capable" content="yes" />
 
     <!-- Apple PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="My Voice" />
-    <link rel="apple-touch-icon" href="/my_voice_default.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- SEO / Open Graph -->
     <meta name="description" content="Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem." />
     <meta property="og:title" content="My Voice – Inglês do Zero" />
     <meta property="og:description" content="Do zero à conversação real. Inglês para o seu dia a dia, trabalho e viagem." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/my_voice_default.png" />
+    <meta property="og:image" content="/icon-512-maskable.png" />
 
-    <!-- App Download Links (PWA Install) -->
-    <!-- O botão de instalação é gerenciado dinamicamente via JavaScript -->
-
-    <!-- Manifest Link -->
+    <!-- Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
     <title>My Voice</title>
@@ -37,7 +34,6 @@
     <div id="root"></div>
     <script type="module" src="/src/index.jsx"></script>
     <script>
-      // Registra o Service Worker para funcionalidade PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
@@ -46,16 +42,13 @@
         });
       }
 
-      // Captura o evento de instalação do PWA
       let deferredPrompt;
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        console.log('PWA pronto para instalação');
       });
 
       window.addEventListener('appinstalled', () => {
-        console.log('PWA instalado com sucesso');
         deferredPrompt = null;
       });
     </script>
