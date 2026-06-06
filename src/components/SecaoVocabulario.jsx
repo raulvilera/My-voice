@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { Grid3x3 } from 'lucide-react';
 
 // ── Vocabulário ───────────────────────────────────────────────────────────────
-export const SecaoVocabulario = ({ section }) => {
+export const SecaoVocabulario = ({ section: rawSection }) => {
+  const section = {
+    ...rawSection,
+    titulo:   rawSection?.titulo   || rawSection?.conteudo?.titulo   || '',
+    palavras: rawSection?.palavras || rawSection?.conteudo?.palavras || [],
+  };
   const [revealed, setRevealed] = useState({});
   
   const styles = {
