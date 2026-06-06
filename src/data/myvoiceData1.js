@@ -1,0 +1,392 @@
+export const myVoiceData = {
+basico: {
+    nome: 'Inglês Básico',
+    descricao: 'Do zero à conversação. Comece sua voz em inglês aqui.',
+    cor: '#8b5cf6',
+    aulas: [
+      {
+        id: 'aula1',
+        numero: 1,
+        titulo: 'Linda & Glynda – Aula 1',
+        subtitulo: 'Verbo To Be · Vocabulário do Dia a Dia',
+        tag: 'Iniciante',
+        sections: [
+          {
+            type: 'dialogo',
+            titulo: '💬 Diálogo',
+            personagens: ['Linda', 'Glynda'],
+            falas: [
+              { personagem: 'Linda', texto: 'Hi, Glynda. How are you?' },
+              { personagem: 'Glynda', texto: 'Hi, Linda. I\'m okay… just a little tired.' },
+              { personagem: 'Linda', texto: 'I understand. I love my job, but my days are busy.' },
+              { personagem: 'Glynda', texto: 'I have a good job. I make a lot of money, but I\'m not happy.' },
+              { personagem: 'Linda', texto: 'Really? Why not?' },
+              { personagem: 'Glynda', texto: 'I work a lot. I don\'t have much time for my son.' },
+              { personagem: 'Linda', texto: 'I see… I have three children, and I spend a lot of time with them.' },
+              { personagem: 'Glynda', texto: 'That is very good. I have one son, and I want to spend more time with him.' },
+              { personagem: 'Linda', texto: 'Maybe you can start with small changes.' },
+              { personagem: 'Glynda', texto: 'Yes… I think I need that.' },
+            ]
+          },
+          {
+            type: 'verbos',
+            titulo: '📘 Verbos do Diálogo',
+            verbos: [
+              { verbo: 'TO BE (ser/estar)', presente: 'am / is / are', passado: 'was / were', participio: 'been' },
+              { verbo: 'TO LOVE (amar)', presente: 'love', passado: 'loved', participio: 'loved' },
+              { verbo: 'TO UNDERSTAND (entender)', presente: 'understand', passado: 'understood', participio: 'understood' },
+              { verbo: 'TO HAVE (ter)', presente: 'have', passado: 'had', participio: 'had' },
+              { verbo: 'TO SPEND (gastar/passar tempo)', presente: 'spend', passado: 'spent', participio: 'spent' },
+              { verbo: 'TO TRY (tentar)', presente: 'try', passado: 'tried', participio: 'tried' },
+            ]
+          },
+          {
+            type: 'vocabulario',
+            titulo: '📖 Vocabulary',
+            palavras: [
+              { en: 'teacher', pt: 'professora' },
+              { en: 'secretary', pt: 'secretária' },
+              { en: 'mother', pt: 'mãe' },
+              { en: 'son', pt: 'filho' },
+              { en: 'children', pt: 'filhos' },
+              { en: 'job', pt: 'trabalho' },
+              { en: 'busy', pt: 'ocupada' },
+              { en: 'days', pt: 'dias' },
+              { en: 'happy', pt: 'feliz' },
+              { en: 'tired', pt: 'cansada' },
+              { en: 'not happy', pt: 'não feliz / insatisfeita' },
+              { en: 'always', pt: 'sempre' },
+              { en: 'a lot', pt: 'muito' },
+              { en: 'a lot of time', pt: 'muito tempo' },
+              { en: 'How are you?', pt: 'Como você está?' },
+              { en: 'I understand', pt: 'Eu entendo' },
+              { en: 'That\'s nice', pt: 'Que bom' },
+              { en: 'Really?', pt: 'Sério?' },
+              { en: 'Why?', pt: 'Por quê?' },
+              { en: 'Thank you', pt: 'Obrigada' },
+              { en: 'I am trying', pt: 'Eu estou tentando' },
+            ]
+          },
+          {
+            type: 'exercicios',
+            titulo: '✏️ Exercícios – Verbo TO BE',
+            grupos: [
+              {
+                instrucao: 'Complete com am / is / are:',
+                questoes: [
+                  { pergunta: 'I ___ happy.', resposta: 'am' },
+                  { pergunta: 'She ___ a teacher.', resposta: 'is' },
+                  { pergunta: 'They ___ tired.', resposta: 'are' },
+                  { pergunta: 'He ___ busy.', resposta: 'is' },
+                  { pergunta: 'We ___ friends.', resposta: 'are' },
+                ]
+              },
+              {
+                instrucao: 'Forma negativa (adicione not):',
+                questoes: [
+                  { pergunta: 'I am happy → I am ___ happy', resposta: 'not' },
+                  { pergunta: 'She is busy → She is ___ busy', resposta: 'not' },
+                  { pergunta: 'They are tired → They are ___ tired', resposta: 'not' },
+                ]
+              },
+              {
+                instrucao: 'Transforme em pergunta:',
+                questoes: [
+                  { pergunta: 'You are happy → ___ you happy?', resposta: 'Are' },
+                  { pergunta: 'She is a teacher → ___ she a teacher?', resposta: 'Is' },
+                  { pergunta: 'They are busy → ___ they busy?', resposta: 'Are' },
+                ]
+              },
+              {
+                instrucao: 'Respostas curtas:',
+                questoes: [
+                  { pergunta: 'Are you tired? → Yes, I ___', resposta: 'am' },
+                  { pergunta: 'Is she a teacher? → Yes, she ___', resposta: 'is' },
+                  { pergunta: 'Are they busy? → Yes, they ___', resposta: 'are' },
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'aula2',
+        numero: 2,
+        titulo: 'Linda & Glynda – Aula 2',
+        subtitulo: 'Perguntas com To Be · Família · Profissões',
+        tag: 'Iniciante',
+        sections: [
+          {
+            type: 'dialogo',
+            titulo: '💬 Diálogo',
+            personagens: ['Linda', 'Glynda'],
+            falas: [
+              { personagem: 'Glynda', texto: 'Hello, Linda. You are quiet today. Are you okay?' },
+              { personagem: 'Linda', texto: 'No, I am not okay. I am sad.' },
+              { personagem: 'Glynda', texto: 'Why are you sad? Is everything ok?' },
+              { personagem: 'Linda', texto: 'Today is a holiday and my family is here but my father can\'t come.' },
+              { personagem: 'Glynda', texto: 'Really? Where is he?' },
+              { personagem: 'Linda', texto: 'He is in Salvador.' },
+              { personagem: 'Glynda', texto: 'Why is he there?' },
+              { personagem: 'Linda', texto: 'Because he is a businessman.' },
+              { personagem: 'Glynda', texto: 'What about your mother? Is she a businesswoman?' },
+              { personagem: 'Linda', texto: 'No, she is a teacher.' },
+              { personagem: 'Glynda', texto: 'Is she a good teacher?' },
+              { personagem: 'Linda', texto: 'Yes, she is a very good teacher.' },
+              { personagem: 'Glynda', texto: 'I have to go now. See you later. Bye, Linda.' },
+              { personagem: 'Linda', texto: 'Bye, Glynda.' },
+            ]
+          },
+          {
+            type: 'verbos',
+            titulo: '📘 Verbos da Aula',
+            verbos: [
+              { verbo: 'TO BE (ser/estar)', presente: 'am / is / are', passado: 'was / were', participio: 'been' },
+              { verbo: 'TO COME (vir)', presente: 'come', passado: 'came', participio: 'come' },
+              { verbo: 'TO HAVE (ter)', presente: 'have / has', passado: 'had', participio: 'had' },
+              { verbo: 'TO GO (ir)', presente: 'go', passado: 'went', participio: 'gone' },
+              { verbo: 'TO SEE (ver)', presente: 'see', passado: 'saw', participio: 'seen' },
+              { verbo: 'TO UNDERSTAND (entender)', presente: 'understand', passado: 'understood', participio: 'understood' },
+              { verbo: 'TO CALL (ligar/chamar)', presente: 'call', passado: 'called', participio: 'called' },
+              { verbo: 'TO WORK (trabalhar)', presente: 'work', passado: 'worked', participio: 'worked' },
+            ]
+          },
+          {
+            type: 'vocabulario',
+            titulo: '📖 Vocabulary',
+            palavras: [
+              { en: 'father', pt: 'pai' },
+              { en: 'mother', pt: 'mãe' },
+              { en: 'family', pt: 'família' },
+              { en: 'children', pt: 'filhos / crianças' },
+              { en: 'son', pt: 'filho' },
+              { en: 'teacher', pt: 'professor(a)' },
+              { en: 'businessman', pt: 'homem de negócios' },
+              { en: 'businesswoman', pt: 'mulher de negócios' },
+              { en: 'here', pt: 'aqui' },
+              { en: 'there', pt: 'lá' },
+              { en: 'holiday', pt: 'feriado' },
+              { en: 'sad', pt: 'triste' },
+              { en: 'happy', pt: 'feliz' },
+              { en: 'okay / ok', pt: 'bem' },
+              { en: 'busy', pt: 'ocupado' },
+              { en: 'excited', pt: 'animado' },
+              { en: 'Are you okay?', pt: 'Você está bem?' },
+              { en: 'Where is he?', pt: 'Onde ele está?' },
+              { en: 'Is he on vacation?', pt: 'Ele está de férias?' },
+              { en: 'Is she a teacher?', pt: 'Ela é professora?' },
+              { en: 'Are they happy?', pt: 'Eles estão felizes?' },
+              { en: 'today', pt: 'hoje' },
+              { en: 'now', pt: 'agora' },
+              { en: 'with', pt: 'com' },
+              { en: 'without', pt: 'sem' },
+              { en: 'because', pt: 'porque' },
+              { en: 'very', pt: 'muito' },
+            ]
+          },
+          {
+            type: 'exercicios',
+            titulo: '✏️ Exercícios – Perguntas com To Be',
+            grupos: [
+              {
+                instrucao: 'Forme perguntas (troque a ordem do sujeito e verbo):',
+                questoes: [
+                  { pergunta: 'She is sad. → ___ she sad?', resposta: 'Is' },
+                  { pergunta: 'He is a businessman. → ___ he a businessman?', resposta: 'Is' },
+                  { pergunta: 'They are here. → ___ they here?', resposta: 'Are' },
+                  { pergunta: 'You are okay. → ___ you okay?', resposta: 'Are' },
+                  { pergunta: 'It is a holiday. → ___ it a holiday?', resposta: 'Is' },
+                ]
+              },
+              {
+                instrucao: 'Complete com o verbo TO BE correto:',
+                questoes: [
+                  { pergunta: 'My father ___ in Salvador.', resposta: 'is' },
+                  { pergunta: 'My parents ___ happy.', resposta: 'are' },
+                  { pergunta: 'She ___ not a businesswoman.', resposta: 'is' },
+                  { pergunta: 'I ___ not okay today.', resposta: 'am' },
+                  { pergunta: 'Where ___ he?', resposta: 'is' },
+                ]
+              },
+              {
+                instrucao: 'Resposta curta (Yes/No):',
+                questoes: [
+                  { pergunta: 'Is Linda sad? → Yes, ___ ___', resposta: 'she is' },
+                  { pergunta: 'Is her father in São Paulo? → No, ___ ___', resposta: 'he isn\'t' },
+                  { pergunta: 'Is her mother a teacher? → Yes, ___ ___', resposta: 'she is' },
+                  { pergunta: 'Are they at home? → No, ___ ___', resposta: 'they aren\'t' },
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      // ── NOVAS AULAS – Dallas & Susie ─────────────────────────────────────────
+      {
+        id: 'aula3',
+        numero: 3,
+        titulo: 'Dallas & Susie – Aula 1',
+        subtitulo: 'Verbos Grupo I · Sentimentos e Emoções',
+        tag: 'Iniciante',
+        sections: [
+          {
+            type: 'verbos',
+            titulo: '📘 Verbos – Ouça e Repita (Áudio 1)',
+            audioSrc: '/audios/Audio-1.mp3',
+            verbos: [
+              { verbo: 'TO BE (ser/estar)',         presente: 'am / is / are', passado: 'was / were',  participio: 'been'        },
+              { verbo: 'TO FEEL (sentir)',           presente: 'feel',          passado: 'felt',        participio: 'felt'        },
+              { verbo: 'TO HAPPEN (acontecer)',      presente: 'happen',        passado: 'happened',    participio: 'happened'    },
+              { verbo: 'TO MISS (sentir falta de)', presente: 'miss',          passado: 'missed',      participio: 'missed'      },
+              { verbo: 'TO UNDERSTAND (entender)',   presente: 'understand',    passado: 'understood',  participio: 'understood'  },
+              { verbo: 'TO HEAR (ouvir)',            presente: 'hear',          passado: 'heard',       participio: 'heard'       },
+              { verbo: 'TO TALK (conversar)',        presente: 'talk',          passado: 'talked',      participio: 'talked'      },
+              { verbo: 'TO STAY (ficar)',            presente: 'stay',          passado: 'stayed',      participio: 'stayed'      },
+              { verbo: 'TO TRUST (confiar)',         presente: 'trust',         passado: 'trusted',     participio: 'trusted'     },
+              { verbo: 'TO SOUND (soar/parecer)',    presente: 'sound',         passado: 'sounded',     participio: 'sounded'     },
+              { verbo: 'TO LOVE (amar)',             presente: 'love',          passado: 'loved',       participio: 'loved'       },
+            ]
+          },
+          {
+            type: 'vocabulario',
+            titulo: '📖 Vocabulary – Feelings & Family (Áudio 3)',
+            audioSrc: '/audios/Audio-3.mp3',
+            palavras: [
+              { en: 'sad',                           pt: 'triste'                     },
+              { en: 'happy',                         pt: 'feliz'                      },
+              { en: 'worry',                         pt: 'preocupação'                },
+              { en: 'tired',                         pt: 'cansado(a)'                 },
+              { en: 'strong',                        pt: 'forte'                      },
+              { en: 'better',                        pt: 'melhor'                     },
+              { en: 'alone',                         pt: 'sozinho(a)'                 },
+              { en: 'difficult',                     pt: 'difícil'                    },
+              { en: 'family',                        pt: 'família'                    },
+              { en: 'father',                        pt: 'pai'                        },
+              { en: 'grandmother',                   pt: 'avó'                        },
+              { en: 'friend',                        pt: 'amigo(a)'                   },
+              { en: 'I miss you',                    pt: 'Sinto sua falta'            },
+              { en: 'I am here for you',             pt: 'Estou aqui por você'        },
+              { en: 'Stay strong',                   pt: 'Fique forte'                },
+              { en: 'Trust God',                     pt: 'Confie em Deus'             },
+              { en: 'Everything will be okay',       pt: 'Tudo vai ficar bem'         },
+              { en: 'Thank you for listening to me', pt: 'Obrigada por me ouvir'      },
+            ]
+          },
+          {
+            type: 'exercicios',
+            titulo: '✏️ Exercícios – Verbos e Vocabulário',
+            grupos: [
+              {
+                instrucao: 'Escreva o passado dos verbos:',
+                questoes: [
+                  { pergunta: 'feel  →  ___',  resposta: 'felt'    },
+                  { pergunta: 'hear  →  ___',  resposta: 'heard'   },
+                  { pergunta: 'miss  →  ___',  resposta: 'missed'  },
+                  { pergunta: 'stay  →  ___',  resposta: 'stayed'  },
+                  { pergunta: 'trust →  ___',  resposta: 'trusted' },
+                ]
+              },
+              {
+                instrucao: 'Traduza para o inglês:',
+                questoes: [
+                  { pergunta: 'Sinto sua falta →  ___',       resposta: 'I miss you'              },
+                  { pergunta: 'Fique forte →  ___',            resposta: 'Stay strong'             },
+                  { pergunta: 'Tudo vai ficar bem →  ___',     resposta: 'Everything will be okay' },
+                  { pergunta: 'Estou aqui por você →  ___',    resposta: 'I am here for you'       },
+                ]
+              },
+              {
+                instrucao: 'Complete com a palavra correta (sad / strong / alone / tired / better):',
+                questoes: [
+                  { pergunta: 'She works all day. She is very ___.',        resposta: 'tired'  },
+                  { pergunta: 'He has no friends here. He feels ___.',      resposta: 'alone'  },
+                  { pergunta: 'She cried today. She is feeling ___.',       resposta: 'sad'    },
+                  { pergunta: 'After resting, I feel ___.',                 resposta: 'better' },
+                  { pergunta: 'Her grandmother tells her to stay ___.',     resposta: 'strong' },
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'aula4',
+        numero: 4,
+        titulo: 'Dallas & Susie – Aula 2',
+        subtitulo: 'Verbos Grupo II · Diálogo Real · Esperança e Família',
+        tag: 'Iniciante',
+        sections: [
+          {
+            type: 'verbos',
+            titulo: '📘 Verbos – Ouça e Repita (Áudio 2)',
+            audioSrc: '/audios/Audio-2.mp3',
+            verbos: [
+              { verbo: 'TO LISTEN (ouvir/escutar)',  presente: 'listen',   passado: 'listened',   participio: 'listened'   },
+              { verbo: 'TO COME (vir)',              presente: 'come',     passado: 'came',       participio: 'come'       },
+              { verbo: 'TO RETURN (retornar)',       presente: 'return',   passado: 'returned',   participio: 'returned'   },
+              { verbo: 'TO HOPE (esperar/torcer)',   presente: 'hope',     passado: 'hoped',      participio: 'hoped'      },
+              { verbo: 'TO HELP (ajudar)',           presente: 'help',     passado: 'helped',     participio: 'helped'     },
+              { verbo: 'TO SMILE (sorrir)',          presente: 'smile',    passado: 'smiled',     participio: 'smiled'     },
+              { verbo: 'TO PRAY (rezar/orar)',       presente: 'pray',     passado: 'prayed',     participio: 'prayed'     },
+              { verbo: 'TO WORRY (preocupar-se)',    presente: 'worry',    passado: 'worried',    participio: 'worried'    },
+              { verbo: 'TO REMEMBER (lembrar)',      presente: 'remember', passado: 'remembered', participio: 'remembered' },
+            ]
+          },
+          {
+            type: 'dialogo',
+            titulo: '💬 Diálogo – Dallas & Susie (Áudio 4)',
+            audioSrc: '/audios/Audio-4.mp3',
+            personagens: ['Susie', 'Dallas'],
+            falas: [
+              { personagem: 'Susie',  texto: "Dallas, can I tell you something else?"          },
+              { personagem: 'Dallas', texto: "Of course, Susie. I'm listening."                },
+              { personagem: 'Susie',  texto: "My grandmother always talks to me on the phone." },
+              { personagem: 'Dallas', texto: "That's very special."                            },
+              { personagem: 'Susie',  texto: "Yes, she tells me to stay strong and trust God." },
+              { personagem: 'Dallas', texto: "Your grandmother sounds very wise."              },
+              { personagem: 'Susie',  texto: "She is. I love listening to her stories."        },
+              { personagem: 'Dallas', texto: "That's wonderful."                               },
+              { personagem: 'Susie',  texto: "I already feel a little better now."             },
+              { personagem: 'Dallas', texto: "I'm happy to hear that, Susie."                  },
+            ]
+          },
+          {
+            type: 'exercicios',
+            titulo: '✏️ Exercícios – Diálogo e Verbos',
+            grupos: [
+              {
+                instrucao: 'Escreva o passado dos verbos:',
+                questoes: [
+                  { pergunta: 'listen  →  ___',   resposta: 'listened'   },
+                  { pergunta: 'come    →  ___',   resposta: 'came'       },
+                  { pergunta: 'hope    →  ___',   resposta: 'hoped'      },
+                  { pergunta: 'worry   →  ___',   resposta: 'worried'    },
+                  { pergunta: 'remember → ___',   resposta: 'remembered' },
+                ]
+              },
+              {
+                instrucao: "Baseado no diálogo – Verdadeiro (True) ou Falso (False)?",
+                questoes: [
+                  { pergunta: "Susie's grandmother talks to her on the phone. →  ___",        resposta: 'True'  },
+                  { pergunta: "Dallas says that's not important. →  ___",                      resposta: 'False' },
+                  { pergunta: "Grandmother tells Susie to stay strong and trust God. →  ___", resposta: 'True'  },
+                  { pergunta: "Susie feels worse at the end of the dialogue. →  ___",         resposta: 'False' },
+                ]
+              },
+              {
+                instrucao: 'Complete com o verbo correto (listen / smile / hope / pray / remember):',
+                questoes: [
+                  { pergunta: "I always ___ to my grandmother's advice.",      resposta: 'listen'   },
+                  { pergunta: "She starts to ___ when she hears good news.",   resposta: 'smile'    },
+                  { pergunta: "They ___ that everything will be okay.",        resposta: 'hope'     },
+                  { pergunta: "He ___ every night before sleeping.",           resposta: 'prays'    },
+                  { pergunta: "I always ___ her words.",                       resposta: 'remember' },
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+};
