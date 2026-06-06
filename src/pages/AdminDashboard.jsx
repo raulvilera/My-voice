@@ -33,6 +33,7 @@ const BandeiraEUA = ({ size = 32 }) => (
   </svg>
 );
 import { supabase } from '../lib/supabaseClient';
+import myVoiceData  from '../data/myvoiceData';
 import NovaAula from './NovaAula';
 import Planos from './Planos';
 import VideoEducacional from '../components/VideoEducacional';
@@ -104,7 +105,22 @@ const PreviewAulas = ({ plano = 'basico' }) => {
         }
 
         if (isMounted) {
-          setAulas(soAulas || []);
+          const aulasDB    = soAulas || [];
+          const numerosDB  = new Set(aulasDB.map(a => a.numero));
+          const aulasHC    = (myVoiceData?.basico?.aulas || []).map(a => ({
+            ...a,
+            id: `hc-${a.id}`,
+            publicada: true,
+            secoes: (a.sections || []).map((s, i) => ({
+              tipo: s.type || s.tipo,
+              titulo: s.titulo,
+              conteudo: s,
+              ordem: i,
+            })),
+          }));
+          const filtradas  = aulasHC.filter(a => !numerosDB.has(a.numero));
+          const merged     = [...filtradas, ...aulasDB].sort((a, b) => a.numero - b.numero);
+          setAulas(merged);
           setLoading(false);
         }
       } catch (e) {
