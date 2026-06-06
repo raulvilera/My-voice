@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, X, RotateCcw, MessageCircle, BookMarked, Grid3x3, PenLine, Play, Square, Volume2, Mic, LogOut, ChevronRight, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { SecaoDialogo }     from '../components/SecaoDialogo';
 import { SecaoVerbos }      from '../components/SecaoVerbos';
 import { SecaoVocabulario } from '../components/SecaoVocabulario';
 import { SecaoExercicios }  from '../components/SecaoExercicios';
+import { supabase }         from '../lib/supabaseClient';
 
 // ── Bandeira dos EUA SVG inline ───────────────────────────────────────────────
 const BandeiraEUA = ({ size = 36 }) => (
