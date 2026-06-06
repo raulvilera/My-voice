@@ -304,10 +304,12 @@ const SecaoModal = ({ aula, secType, onClose }) => {
         <div className="modal-body">
           {sectionsToShow.map((s, idx) => {
             const sectionType = s.type || s.tipo;
-            // Normaliza: aulas do banco têm conteudo JSONB, hardcoded têm dados diretos
-            let base = s.conteudo && typeof s.conteudo === 'object' ? s.conteudo : s;
-            // Garante que falas/verbos/palavras/grupos nunca sejam undefined
-            const sectionContent = {
+            // Passa o objeto inteiro — cada componente faz sua própria normalização
+            // Para hardcoded: s tem dados diretos (falas, verbos, etc.)
+            // Para banco: s tem .conteudo com os dados
+            // Merge dos dois para garantir que nada se perca
+            const base = (s.conteudo && typeof s.conteudo === 'object') ? s.conteudo : {};
+            const norm = {
               titulo:      s.titulo      || base.titulo      || '',
               audioSrc:    s.audioSrc    || base.audioSrc    || null,
               personagens: s.personagens || base.personagens || [],
@@ -318,10 +320,10 @@ const SecaoModal = ({ aula, secType, onClose }) => {
             };
             
             switch (sectionType) {
-              case 'dialogo':     return <SecaoDialogo     key={idx} section={sectionContent}/>;
-              case 'verbos':      return <SecaoVerbos      key={idx} section={sectionContent}/>;
-              case 'vocabulario': return <SecaoVocabulario key={idx} section={sectionContent}/>;
-              case 'exercicios':  return <SecaoExercicios  key={idx} section={sectionContent} aulaId={aula.id}/>;
+              case 'dialogo':     return <SecaoDialogo     key={idx} section={norm}/>;
+              case 'verbos':      return <SecaoVerbos      key={idx} section={norm}/>;
+              case 'vocabulario': return <SecaoVocabulario key={idx} section={norm}/>;
+              case 'exercicios':  return <SecaoExercicios  key={idx} section={norm} aulaId={aula.id}/>;
               default: return null;
             }
           })}
