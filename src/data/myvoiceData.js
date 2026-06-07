@@ -24,7 +24,7 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula1.mp3.mp3`,
+            audioSrc: `${AUDIO_BASE}/dialogo-aula1.mp3`,
             personagens: ['Linda', 'Glynda'],
             falas: [
               { personagem: 'Linda', start: 1.0, end: 4.24, texto: 'Hi, Glynda. How are you?' },
@@ -127,7 +127,7 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3.mp3`,
+            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             personagens: ['Linda', 'Glynda'],
             falas: [
               { personagem: 'Glynda', start: 1.0, end: 4.29, texto: 'Hello, Linda. You are quiet today. Are you okay?' },
@@ -238,19 +238,34 @@ export const myVoiceData = {
         sections: [
           {
             type: 'dialogo',
-            titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula3.mp3.mp3`,
-            personagens: ['Linda', 'Peter'],
+            titulo: '🔊 Word List & Expressions',
+            audioSrc: `${AUDIO_BASE}/dialogo-aula3.mp3`,
+            personagens: ['Narrator'],
             falas: [
-              { personagem: 'Peter', start: 1.0, end: 7.65, texto: 'Hi, Linda. Did you listen to the music I sent you?' },
-              { personagem: 'Linda', start: 8.25, end: 15.49, texto: 'Yes, I listened. It was beautiful. I smiled when I heard it.' },
-              { personagem: 'Peter', start: 16.09, end: 22.74, texto: 'I am glad. I was worried you did not like it.' },
-              { personagem: 'Linda', start: 23.34, end: 31.19, texto: 'I liked it very much. I returned home, sat down, and listened again.' },
-              { personagem: 'Peter', start: 31.79, end: 37.84, texto: 'Did you remember the first time we talked about music?' },
-              { personagem: 'Linda', start: 38.44, end: 46.89, texto: 'Yes, I remembered. You stayed calm and talked to me for a long time.' },
-              { personagem: 'Peter', start: 47.49, end: 51.72, texto: 'I always trusted that you understood me.' },
-              { personagem: 'Linda', start: 52.32, end: 59.57, texto: 'I did. And I still do. You always say the right things.' },
-              { personagem: 'Peter', start: 60.17, end: 64.4, texto: 'Thank you, Linda. That means a lot.' }
+              { personagem: 'Narrator', start: 0.0,  end: 17.8, texto: 'Verbs: Be · Was · Were · Been · Feel · Felt · Happen · Happened · Miss · Missed' },
+              { personagem: 'Narrator', start: 18.2, end: 33.9, texto: 'Understand · Understood · Hear · Heard · Talk · Talked · Stay · Stayed' },
+              { personagem: 'Narrator', start: 36.1, end: 46.0, texto: 'Trust · Trusted · Sound · Sounded · Love · Loved' },
+              { personagem: 'Narrator', start: 0.0,  end: 2.0,  texto: 'Word List' },
+              { personagem: 'Narrator', start: 4.0,  end: 6.0,  texto: 'Feelings' },
+              { personagem: 'Narrator', start: 6.0,  end: 8.0,  texto: 'Sad' },
+              { personagem: 'Narrator', start: 8.0,  end: 10.0, texto: 'Happy' },
+              { personagem: 'Narrator', start: 10.0, end: 12.0, texto: 'Worry' },
+              { personagem: 'Narrator', start: 14.0, end: 16.0, texto: 'Tired' },
+              { personagem: 'Narrator', start: 16.0, end: 18.0, texto: 'Strong' },
+              { personagem: 'Narrator', start: 20.0, end: 22.0, texto: 'Better' },
+              { personagem: 'Narrator', start: 22.0, end: 24.0, texto: 'Alone' },
+              { personagem: 'Narrator', start: 26.0, end: 28.0, texto: 'Difficult' },
+              { personagem: 'Narrator', start: 28.0, end: 30.0, texto: 'Family' },
+              { personagem: 'Narrator', start: 32.0, end: 34.0, texto: 'Father' },
+              { personagem: 'Narrator', start: 34.0, end: 36.0, texto: 'Grandmother' },
+              { personagem: 'Narrator', start: 36.0, end: 38.0, texto: 'Friend' },
+              { personagem: 'Narrator', start: 42.0, end: 44.0, texto: 'Useful Expressions' },
+              { personagem: 'Narrator', start: 46.0, end: 48.0, texto: 'I miss you' },
+              { personagem: 'Narrator', start: 48.0, end: 50.0, texto: 'I am here for you' },
+              { personagem: 'Narrator', start: 52.0, end: 54.0, texto: 'Stay strong' },
+              { personagem: 'Narrator', start: 54.0, end: 56.0, texto: 'Trust God' },
+              { personagem: 'Narrator', start: 58.0, end: 60.0, texto: 'Everything will be okay' },
+              { personagem: 'Narrator', start: 62.0, end: 64.0, texto: 'Thank you for listening to me' }
             ]
           },
           {
@@ -334,7 +349,7 @@ export const myVoiceData = {
       {
         id: 'aula4',
         numero: 4,
-        titulo: 'Linda & Peter – Aula 4',
+        titulo: 'Dalit & Susie – Aula 4',
         subtitulo: 'Apoio Emocional · Família · Simple Past',
         tag: 'Iniciante',
         sections: [
@@ -342,19 +357,19 @@ export const myVoiceData = {
             type: 'dialogo',
             titulo: '💬 Diálogo',
             audioSrc: `${AUDIO_BASE}/dialogo-aula4.mp3`,
-            personagens: ['Linda', 'Peter'],
+            personagens: ['Susie', 'Dalit'],
             falas: [
-              { personagem: 'Peter', start: 1.2, end: 6.94, texto: 'Linda, can I talk to you? I am feeling a little down today.' },
-              { personagem: 'Linda', start: 7.64, end: 11.18, texto: 'Of course, Peter. I am here. What happened?' },
-              { personagem: 'Peter', start: 11.88, end: 18.07, texto: 'I miss my family. My father, my mother, my grandmother… they are far away.' },
-              { personagem: 'Linda', start: 18.77, end: 22.74, texto: 'I understand. Being away from family is really hard.' },
-              { personagem: 'Peter', start: 23.44, end: 28.74, texto: 'I am tired. I feel alone sometimes. My old friends are gone.' },
-              { personagem: 'Linda', start: 29.44, end: 36.07, texto: 'Peter, I know it is not easy. But you are strong. You are not alone.' },
-              { personagem: 'Peter', start: 36.77, end: 42.96, texto: 'Thank you. I miss my grandmother the most. She was always there for me.' },
-              { personagem: 'Linda', start: 43.66, end: 48.08, texto: 'She sounds like a wonderful person. Tell me about her.' },
-              { personagem: 'Peter', start: 48.78, end: 54.52, texto: 'She was kind, wise, and very funny. I loved spending time with her.' },
-              { personagem: 'Linda', start: 55.22, end: 60.52, texto: 'I am here for you, Peter. Stay strong. Everything will be okay.' },
-              { personagem: 'Peter', start: 61.22, end: 64.32, texto: 'Thank you for listening to me, Linda.' }
+              { personagem: 'Susie',  start: 0.0,  end: 2.7,  texto: 'Dalit, can I tell you something else?' },
+              { personagem: 'Dalit',  start: 2.7,  end: 4.2,  texto: "Of course, Susie. I'm listening." },
+              { personagem: 'Susie',  start: 4.2,  end: 6.4,  texto: 'My grandmother always talks to me on the phone.' },
+              { personagem: 'Dalit',  start: 6.4,  end: 7.5,  texto: "That's very special." },
+              { personagem: 'Susie',  start: 7.5,  end: 10.2, texto: 'Yes, she tells me to stay strong and trust God.' },
+              { personagem: 'Dalit',  start: 10.2, end: 12.1, texto: 'Your grandmother sounds very wise.' },
+              { personagem: 'Susie',  start: 12.1, end: 12.9, texto: 'She is.' },
+              { personagem: 'Susie',  start: 12.9, end: 14.6, texto: 'I love listening to her stories.' },
+              { personagem: 'Dalit',  start: 14.6, end: 15.8, texto: "That's wonderful." },
+              { personagem: 'Susie',  start: 15.8, end: 17.5, texto: 'I already feel a little better now.' },
+              { personagem: 'Dalit',  start: 17.5, end: 19.0, texto: "I'm happy to hear that, Susie." }
             ]
           },
           {
