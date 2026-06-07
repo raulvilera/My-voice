@@ -24,7 +24,7 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula1.mp3`,
+            audioSrc: `${AUDIO_BASE}/dialogo-aula1.mp3.mp3`,
             personagens: ['Linda', 'Glynda'],
             falas: [
               { personagem: 'Linda', start: 1.0, end: 4.24, texto: 'Hi, Glynda. How are you?' },
@@ -127,7 +127,7 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
+            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3.mp3`,
             personagens: ['Linda', 'Glynda'],
             falas: [
               { personagem: 'Glynda', start: 1.0, end: 4.29, texto: 'Hello, Linda. You are quiet today. Are you okay?' },
@@ -239,7 +239,7 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula3.mp3`,
+            audioSrc: `${AUDIO_BASE}/dialogo-aula3.mp3.mp3`,
             personagens: ['Linda', 'Peter'],
             falas: [
               { personagem: 'Peter', start: 1.0, end: 7.65, texto: 'Hi, Linda. Did you listen to the music I sent you?' },
@@ -341,7 +341,7 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula4.mp3`,
+            audioSrc: `${AUDIO_BASE}/dialogo-aula4.mp3.mp3`,
             personagens: ['Linda', 'Peter'],
             falas: [
               { personagem: 'Peter', start: 1.2, end: 6.94, texto: 'Linda, can I talk to you? I am feeling a little down today.' },
@@ -534,3 +534,5 @@ export const myVoiceData = {
     ]
   }
 };
+
+export default myVoiceData;
