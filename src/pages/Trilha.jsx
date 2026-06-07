@@ -10,7 +10,19 @@ import { supabase }         from '../lib/supabaseClient';
 import myVoiceData            from '../data/myvoiceData';
 
 // ── DADOS DAS AULAS ───────────────────────────────────────────────────────────
-const AULAS_HC = myVoiceData.basico.aulas;
+const AULAS_HC = myVoiceData.basico.aulas.map(a => ({
+  ...a,
+  id: `hc-${a.id}`,
+  publicada: true,
+  // Preserva sections original (com audioSrc, timestamps, etc.)
+  // E cria secoes mapeadas para o modal do AdminDashboard
+  secoes: (a.sections || []).map((s, i) => ({
+    tipo:  s.type || s.tipo,
+    titulo: s.titulo,
+    conteudo: s,
+    ordem: i,
+  })),
+}));
 
 // ── PILLS ─────────────────────────────────────────────────────────────────────
 const PILLS = {
