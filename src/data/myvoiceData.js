@@ -449,27 +449,21 @@ export const myVoiceData = {
       {
         id: 'aula5',
         numero: 5,
-        titulo: 'Linda & Peter – Aula 5',
+        titulo: 'Dalit & Susie – Aula 5',
         subtitulo: 'Orgulho e Conquistas · Família · Simple Present & Past',
         tag: 'Iniciante',
         sections: [
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            personagens: ['Linda', 'Peter'],
+            audioSrc: `${AUDIO_BASE}/dialogo-aula5.mp3`,
+            personagens: ['Dalit'],
             falas: [
-              { personagem: 'Linda', texto: 'Peter, I heard about your sister Suzie. Congratulations!' },
-              { personagem: 'Peter', texto: 'Thank you! I am so proud of her. She is amazing.' },
-              { personagem: 'Linda', texto: 'Tell me more. What did she do?' },
-              { personagem: 'Peter', texto: 'She is a soccer star. She has chosen to play in a new team. It is a big deal.' },
-              { personagem: 'Linda', texto: 'That is wonderful! How does your family feel?' },
-              { personagem: 'Peter', texto: 'We are all very happy. My grandmother is especially proud. She always believed in Suzie.' },
-              { personagem: 'Linda', texto: 'Your grandmother sounds very special. Is she still doing well?' },
-              { personagem: 'Peter', texto: 'Yes! She is in her eighties, but she is still very wise and full of energy.' },
-              { personagem: 'Linda', texto: 'I am so happy to hear that. She must be a great example for your family.' },
-              { personagem: 'Peter', texto: 'She is. She always says: work hard, be kind, and never give up.' },
-              { personagem: 'Linda', texto: 'That is beautiful. I feel inspired just hearing that.' },
-              { personagem: 'Peter', texto: 'Of course! And I am happy you are here to celebrate with us, Linda.' },
+              { personagem: 'Dalit', start: 0.5,  end: 5.1,  texto: "Of course, Susie, I'm listening." },
+              { personagem: 'Dalit', start: 5.9,  end: 8.7,  texto: "That's very special." },
+              { personagem: 'Dalit', start: 9.5,  end: 14.2, texto: 'Your grandmother sounds very wise.' },
+              { personagem: 'Dalit', start: 15.0, end: 16.8, texto: "That's wonderful." },
+              { personagem: 'Dalit', start: 17.6, end: 23.2, texto: "I'm happy to hear that, Susie." }
             ]
           },
           {
