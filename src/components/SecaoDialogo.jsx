@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, Play, Square, Volume2 } from 'lucide-react';
 
-// ── Diálogo com Áudio Real + TTS fallback + Destaque Sincronizado ─────────────
 export const SecaoDialogo = ({ section: rawSection }) => {
   const section = {
     ...rawSection,
     personagens: rawSection?.personagens ?? rawSection?.conteudo?.personagens ?? [],
     falas:       rawSection?.falas       ?? rawSection?.conteudo?.falas       ?? [],
     titulo:      rawSection?.titulo      ?? '',
+    audioSrc:    rawSection?.audioSrc    ?? rawSection?.conteudo?.audioSrc    ?? null,
   };
 
   const [isPlaying, setIsPlaying]         = useState(false);
@@ -16,11 +16,10 @@ export const SecaoDialogo = ({ section: rawSection }) => {
   const [speed, setSpeed]                 = useState(0.9);
   const [voicesReady, setVoicesReady]     = useState(false);
 
-  const cancelledRef  = useRef(false);
-  const timersRef     = useRef([]);
-  const audioRef      = useRef(null); // HTMLAudio atual
+  const cancelledRef = useRef(false);
+  const timersRef    = useRef([]);
+  const audioRef     = useRef(null);
 
-  // Carrega vozes TTS
   useEffect(() => {
     const load = () => { if (window.speechSynthesis.getVoices().length > 0) setVoicesReady(true); };
     load();
@@ -49,12 +48,8 @@ export const SecaoDialogo = ({ section: rawSection }) => {
   }, [section.personagens]);
 
   const estimateWordDurations = (words, rate) => {
-    const BASE_CHAR_MS = 68;
-    const BASE_PAUSE   = 55;
-    return words.map(w => {
-      const chars = w.replace(/[^a-zA-Z]/g, '').length || 1;
-      return Math.round((chars * BASE_CHAR_MS + BASE_PAUSE) / rate);
-    });
+    const BASE_CHAR_MS = 68, BASE_PAUSE = 55;
+    return words.map(w => Math.round(((w.replace(/[^a-zA-Z]/g,'').length || 1) * BASE_CHAR_MS + BASE_PAUSE) / rate));
   };
 
   const stop = useCallback(() => {
@@ -63,67 +58,95 @@ export const SecaoDialogo = ({ section: rawSection }) => {
     window.speechSynthesis.cancel();
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = '';
-      audioRef.current = null;
+      audioRef.current.currentTime = 0;
     }
     setIsPlaying(false);
     setActiveFala(-1);
     setActiveWordIdx(-1);
   }, []);
 
-  // ── Toca uma fala via arquivo de áudio real ───────────────────────────────
-  const playFalaAudio = (fala, fi, onEnded) => {
-    const audio = new Audio(fala.audioUrl);
+  // ── MODO 1: Áudio único com timestamps por fala ──────────────────────────
+  const playComAudioSrc = useCallback(() => {
+    if (!section.audioSrc) return;
+    cancelledRef.current = false;
+    setIsPlaying(true);
+
+    const audio = audioRef.current || new Audio(section.audioSrc);
     audio.playbackRate = speed;
     audioRef.current = audio;
+    audio.currentTime = 0;
 
-    setActiveFala(fi);
-    setActiveWordIdx(-1);
+    const falas = section.falas;
 
-    // Destaque palavra por estimativa de tempo (sem boundary nativo)
-    const words = fala.texto.split(/\s+/);
-    const durs  = estimateWordDurations(words, speed);
-    let elapsed = 80;
-    words.forEach((_, wi) => {
-      const t = setTimeout(() => {
-        if (!cancelledRef.current) setActiveWordIdx(wi);
-      }, elapsed);
-      timersRef.current.push(t);
-      elapsed += durs[wi];
+    // Agendar destaque de cada fala pelo timestamp start
+    falas.forEach((fala, fi) => {
+      if (fala.start == null) return;
+
+      // Destacar a fala no momento certo
+      const tFala = setTimeout(() => {
+        if (cancelledRef.current) return;
+        setActiveFala(fi);
+        setActiveWordIdx(-1);
+
+        // Destacar palavras proporcionalmente dentro da fala
+        const words = fala.texto.split(/\s+/);
+        const durFala = ((fala.end ?? fala.start + 3) - fala.start) / speed * 1000;
+        const msPerWord = durFala / words.length;
+        words.forEach((_, wi) => {
+          const tw = setTimeout(() => {
+            if (!cancelledRef.current) setActiveWordIdx(wi);
+          }, wi * msPerWord);
+          timersRef.current.push(tw);
+        });
+      }, (fala.start / speed) * 1000);
+
+      timersRef.current.push(tFala);
     });
 
     audio.onended = () => {
       if (!cancelledRef.current) {
         clearTimers();
+        setIsPlaying(false);
+        setActiveFala(-1);
         setActiveWordIdx(-1);
-        setTimeout(onEnded, 350);
       }
     };
-    audio.onerror = () => {
-      if (!cancelledRef.current) {
-        clearTimers();
-        onEnded(); // fallback: pula para próxima
-      }
-    };
+    audio.onerror = () => { stop(); };
 
-    audio.play().catch(() => {
-      if (!cancelledRef.current) { clearTimers(); onEnded(); }
+    audio.play().catch(() => stop());
+  }, [section.audioSrc, section.falas, speed, stop]);
+
+  // ── MODO 2: Fala por fala (audioUrl individual ou TTS) ───────────────────
+  const playFalaAudio = (fala, fi, onEnded) => {
+    const audio = new Audio(fala.audioUrl);
+    audio.playbackRate = speed;
+    audioRef.current = audio;
+    setActiveFala(fi);
+    setActiveWordIdx(-1);
+
+    const words = fala.texto.split(/\s+/);
+    const durs  = estimateWordDurations(words, speed);
+    let elapsed = 80;
+    words.forEach((_, wi) => {
+      const t = setTimeout(() => { if (!cancelledRef.current) setActiveWordIdx(wi); }, elapsed);
+      timersRef.current.push(t);
+      elapsed += durs[wi];
     });
+
+    audio.onended = () => { if (!cancelledRef.current) { clearTimers(); setActiveWordIdx(-1); setTimeout(onEnded, 350); } };
+    audio.onerror = () => { if (!cancelledRef.current) { clearTimers(); onEnded(); } };
+    audio.play().catch(() => { if (!cancelledRef.current) { clearTimers(); onEnded(); } });
   };
 
-  // ── Toca uma fala via TTS ─────────────────────────────────────────────────
   const playFalaTTS = (fala, fi, onEnded) => {
     const words = fala.texto.split(/\s+/);
     const durs  = estimateWordDurations(words, speed);
-
     setActiveFala(fi);
     setActiveWordIdx(-1);
 
     let elapsed = 80;
     words.forEach((_, wi) => {
-      const t = setTimeout(() => {
-        if (!cancelledRef.current) setActiveWordIdx(wi);
-      }, elapsed);
+      const t = setTimeout(() => { if (!cancelledRef.current) setActiveWordIdx(wi); }, elapsed);
       timersRef.current.push(t);
       elapsed += durs[wi];
     });
@@ -145,46 +168,40 @@ export const SecaoDialogo = ({ section: rawSection }) => {
     };
     utter.onend   = () => { if (!cancelledRef.current) { clearTimers(); setActiveWordIdx(-1); onEnded(); } };
     utter.onerror = () => { if (!cancelledRef.current) { clearTimers(); onEnded(); } };
-
     window.speechSynthesis.speak(utter);
   };
 
-  // ── Toca todo o diálogo sequencialmente ──────────────────────────────────
-  const playAll = useCallback(() => {
+  const playSequencial = useCallback(() => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     clearTimers();
     cancelledRef.current = false;
     setIsPlaying(true);
-
     let idx = 0;
-
     const speakNext = () => {
       if (cancelledRef.current || idx >= section.falas.length) {
-        setIsPlaying(false);
-        setActiveFala(-1);
-        setActiveWordIdx(-1);
-        return;
+        setIsPlaying(false); setActiveFala(-1); setActiveWordIdx(-1); return;
       }
-
       const fala = section.falas[idx];
       const next = () => { idx++; setTimeout(speakNext, 350); };
-
-      if (fala.audioUrl) {
-        playFalaAudio(fala, idx, next);
-      } else {
-        playFalaTTS(fala, idx, next);
-      }
+      if (fala.audioUrl) playFalaAudio(fala, idx, next);
+      else playFalaTTS(fala, idx, next);
     };
-
     speakNext();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section.falas, section.personagens, speed, getVoice]);
 
-  useEffect(() => () => { stop(); }, [stop]);
+  // ── Decide qual modo usar ─────────────────────────────────────────────────
+  const hasAudioSrc    = !!section.audioSrc;
+  const hasRealAudio   = section.falas.some(f => f.audioUrl);
+  const modoUnicoAudio = hasAudioSrc;
 
-  // ── Verifica se alguma fala tem áudio real ────────────────────────────────
-  const hasRealAudio = section.falas.some(f => f.audioUrl);
+  const handlePlay = () => {
+    if (isPlaying) { stop(); return; }
+    if (modoUnicoAudio) playComAudioSrc();
+    else playSequencial();
+  };
+
+  useEffect(() => () => { stop(); }, [stop]);
 
   const styles = {
     sectionBlock: { marginBottom:'1.5rem' },
@@ -216,23 +233,24 @@ export const SecaoDialogo = ({ section: rawSection }) => {
     bubbleText: { fontSize:'0.88rem', lineHeight:1.55, color:'#e2e8f0' },
     word: { transition:'background 0.1s', borderRadius:3, padding:'0 1px' },
     wordActive: { background:'rgba(139,92,246,0.4)', color:'#fff', fontWeight:700 },
-    realAudioBadge: { fontSize:'0.65rem', padding:'2px 7px', borderRadius:999,
-      background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)',
-      color:'#86efac', marginLeft:4 },
+    badge: { fontSize:'0.65rem', padding:'2px 7px', borderRadius:999, marginLeft:4 },
+    badgeReal: { background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)', color:'#86efac' },
+    badgeSync: { background:'rgba(139,92,246,0.2)', border:'1px solid rgba(139,92,246,0.4)', color:'#a78bfa' },
   };
 
   return (
     <div style={styles.sectionBlock}>
       <h3 style={styles.sectionTitle}>
         <MessageCircle size={18} style={{marginRight:6}}/> {section.titulo}
-        {hasRealAudio && <span style={styles.realAudioBadge}>🎙 Áudio Real</span>}
+        {modoUnicoAudio && <span style={{...styles.badge,...styles.badgeSync}}>🎵 Áudio Sincronizado</span>}
+        {!modoUnicoAudio && hasRealAudio && <span style={{...styles.badge,...styles.badgeReal}}>🎙 Áudio Real</span>}
       </h3>
 
       <div style={styles.audioBar}>
         <button
           style={{...styles.playBtn, ...(isPlaying ? styles.playBtnActive : {})}}
-          onClick={isPlaying ? stop : playAll}
-          disabled={!voicesReady && !hasRealAudio}
+          onClick={handlePlay}
+          disabled={!voicesReady && !hasRealAudio && !modoUnicoAudio}
         >
           {isPlaying ? <Square size={14}/> : <Play size={14}/>}
           <span style={{marginLeft:6}}>{isPlaying ? 'Parar' : 'Ouvir Diálogo'}</span>
@@ -241,8 +259,7 @@ export const SecaoDialogo = ({ section: rawSection }) => {
         <div style={styles.speedControl}>
           <Volume2 size={13} style={{color:'#94a3b8'}}/>
           {[0.75, 0.9, 1, 1.25].map(s => (
-            <button
-              key={s}
+            <button key={s}
               style={{...styles.speedBtn, ...(speed === s ? styles.speedActive : {})}}
               onClick={() => { setSpeed(s); if (isPlaying) stop(); }}
             >
@@ -264,7 +281,7 @@ export const SecaoDialogo = ({ section: rawSection }) => {
               <p style={styles.bubbleText}>
                 {active
                   ? words.map((w, wi) => (
-                      <span key={wi} style={{...styles.word, ...(wi === activeWordIdx ? styles.wordActive : '')}}>
+                      <span key={wi} style={{...styles.word, ...(wi === activeWordIdx ? styles.wordActive : {})}}>
                         {w}{' '}
                       </span>
                     ))
