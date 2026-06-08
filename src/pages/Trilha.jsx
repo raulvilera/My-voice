@@ -74,7 +74,7 @@ const Modal = ({ aula, onClose }) => {
         background:'#1e293b', border:'1px solid rgba(255,255,255,0.12)',
         borderRadius:20, width:'100%', maxWidth:680,
         marginTop:'2rem', marginBottom:'2rem',
-        display:'flex', flexDirection:'column', maxHeight:'90vh', overflowY:'auto',
+        display:'flex', flexDirection:'column', maxHeight:'90vh', overflow:'hidden',
       }}>
         {/* Header */}
         <div style={{
@@ -113,7 +113,7 @@ const Modal = ({ aula, onClose }) => {
         </div>
 
         {/* Body */}
-        <div style={{ padding:'1.25rem 1.5rem', flex:1 }}>
+        <div style={{ padding:'1.25rem 1.5rem', flex:1, overflowY:'auto' }}>
           {toShow.map((s, i) => renderSec(s, i))}
         </div>
 
