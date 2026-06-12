@@ -14,110 +14,152 @@ export const myVoiceData = {
     descricao: 'Do zero à conversação. Comece sua voz em inglês aqui.',
     cor: '#8b5cf6',
     aulas: [
+      // ─────────────────────────────────────────────────────────────────────────────
+// AULA 1 – Substitua o objeto da aula1 em src/data/myvoiceData.js
+// ─────────────────────────────────────────────────────────────────────────────
+
       {
         id: 'aula1',
         numero: 1,
         titulo: 'Linda & Glynda – Aula 1',
-        subtitulo: 'Verbo To Be · Vocabulário do Dia a Dia',
+        subtitulo: 'Verbo To Be · Pronomes · Afirmativo e Negativo',
         tag: 'Iniciante',
         sections: [
+          // ── DIÁLOGO (original preservado) ──────────────────────────────
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
             audioSrc: `${AUDIO_BASE}/dialogo-aula1.mp3`,
             personagens: ['Linda', 'Glynda'],
             falas: [
-              { personagem: 'Linda', start: 1.0, end: 4.24, texto: 'Hi, Glynda. How are you?' },
-              { personagem: 'Linda', start: 4.84, end: 11.97, texto: 'I understand. I love my job, but my days are busy.' },
-              { personagem: 'Linda', start: 12.57, end: 14.52, texto: 'Really? Why not?' },
-              { personagem: 'Linda', start: 15.12, end: 24.85, texto: 'I see… I have three children, and I spend a lot of time with them.' },
-              { personagem: 'Glynda', start: 25.45, end: 36.47, texto: 'That is very good. I have one son, and I want to spend more time with him.' },
-              { personagem: 'Linda', start: 37.07, end: 41.61, texto: 'Maybe you can start with small changes.' },
-              { personagem: 'Glynda', start: 42.21, end: 46.1, texto: 'Yes… I think I need that.' }
+              { personagem: 'Linda',  start: 1.0,  end: 4.24,  texto: 'Hi, Glynda. How are you?' },
+              { personagem: 'Linda',  start: 4.84, end: 11.97, texto: 'I understand. I love my job, but my days are busy.' },
+              { personagem: 'Linda',  start: 12.57,end: 14.52, texto: 'Really? Why not?' },
+              { personagem: 'Linda',  start: 15.12,end: 24.85, texto: 'I see… I have three children, and I spend a lot of time with them.' },
+              { personagem: 'Glynda', start: 25.45,end: 36.47, texto: 'That is very good. I have one son, and I want to spend more time with him.' },
+              { personagem: 'Linda',  start: 37.07,end: 41.61, texto: 'Maybe you can start with small changes.' },
+              { personagem: 'Glynda', start: 42.21,end: 46.1,  texto: 'Yes… I think I need that.' }
             ]
           },
+
+          // ── PRONOMES ────────────────────────────────────────────────────
           {
             type: 'verbos',
-            titulo: '📘 Verbos do Diálogo',
+            titulo: '📘 Pronomes em Inglês (Pronouns)',
             verbos: [
-              { verbo: 'TO BE (ser/estar)',           presente: 'am / is / are', passado: 'was / were', participio: 'been' },
-              { verbo: 'TO LOVE (amar)',               presente: 'love',          passado: 'loved',      participio: 'loved' },
-              { verbo: 'TO UNDERSTAND (entender)',     presente: 'understand',    passado: 'understood', participio: 'understood' },
-              { verbo: 'TO HAVE (ter)',                presente: 'have',          passado: 'had',        participio: 'had' },
-              { verbo: 'TO SPEND (gastar/passar tempo)',presente: 'spend',        passado: 'spent',      participio: 'spent' },
-              { verbo: 'TO TRY (tentar)',              presente: 'try',           passado: 'tried',      participio: 'tried' },
+              { verbo: 'I',    presente: 'Eu',          passado: '1ª pessoa singular', participio: '' },
+              { verbo: 'You',  presente: 'Você',        passado: '2ª pessoa singular', participio: '' },
+              { verbo: 'He',   presente: 'Ele',         passado: '3ª pessoa singular', participio: '' },
+              { verbo: 'She',  presente: 'Ela',         passado: '3ª pessoa singular', participio: '' },
+              { verbo: 'It',   presente: 'Isto/Aquilo', passado: '3ª pessoa singular', participio: '' },
+              { verbo: 'We',   presente: 'Nós',         passado: '1ª pessoa plural',   participio: '' },
+              { verbo: 'You',  presente: 'Vocês',       passado: '2ª pessoa plural',   participio: '' },
+              { verbo: 'They', presente: 'Eles/Elas',   passado: '3ª pessoa plural',   participio: '' },
             ]
           },
+
+          // ── VERBO TO BE ─────────────────────────────────────────────────
+          {
+            type: 'verbos',
+            titulo: '📘 Verbo TO BE – Ser/Estar',
+            verbos: [
+              { verbo: 'I AM…',           presente: 'Eu sou/estou',        passado: '1ª pessoa', participio: 'Afirmativo' },
+              { verbo: 'YOU ARE…',        presente: 'Você é/está',         passado: '2ª pessoa', participio: 'Afirmativo' },
+              { verbo: 'HE/SHE/IT IS…',  presente: 'Ele/Ela é/está',      passado: '3ª pessoa', participio: 'Afirmativo' },
+              { verbo: 'WE ARE…',         presente: 'Nós somos/estamos',   passado: 'Plural',    participio: 'Afirmativo' },
+              { verbo: 'THEY ARE…',       presente: 'Eles/Elas são/estão', passado: 'Plural',    participio: 'Afirmativo' },
+              { verbo: 'I AM NOT…',       presente: 'Eu não sou/estou',    passado: '1ª pessoa', participio: 'Negativo' },
+              { verbo: 'YOU ARE NOT…',    presente: 'Você não é/está',     passado: '2ª pessoa', participio: 'Negativo' },
+              { verbo: 'HE/SHE IS NOT…', presente: 'Ele/Ela não é/está',  passado: '3ª pessoa', participio: 'Negativo' },
+              { verbo: 'WE ARE NOT…',     presente: 'Nós não somos',       passado: 'Plural',    participio: 'Negativo' },
+              { verbo: 'THEY ARE NOT…',   presente: 'Eles não são/estão',  passado: 'Plural',    participio: 'Negativo' },
+            ]
+          },
+
+          // ── VOCABULÁRIO ─────────────────────────────────────────────────
           {
             type: 'vocabulario',
-            titulo: '📖 Vocabulary',
+            titulo: '📖 Vocabulary – Adjetivos e Palavras Essenciais',
             palavras: [
-              { en: 'teacher',       pt: 'professora' },
-              { en: 'secretary',     pt: 'secretária' },
-              { en: 'mother',        pt: 'mãe' },
-              { en: 'son',           pt: 'filho' },
-              { en: 'children',      pt: 'filhos' },
-              { en: 'job',           pt: 'trabalho' },
-              { en: 'busy',          pt: 'ocupada' },
-              { en: 'days',          pt: 'dias' },
-              { en: 'happy',         pt: 'feliz' },
-              { en: 'tired',         pt: 'cansada' },
-              { en: 'not happy',     pt: 'não feliz / insatisfeita' },
-              { en: 'always',        pt: 'sempre' },
-              { en: 'a lot',         pt: 'muito' },
-              { en: 'a lot of time', pt: 'muito tempo' },
-              { en: 'How are you?',  pt: 'Como você está?' },
-              { en: 'I understand',  pt: 'Eu entendo' },
-              { en: 'That\'s nice',  pt: 'Que bom' },
-              { en: 'Really?',       pt: 'Sério?' },
-              { en: 'Why?',          pt: 'Por quê?' },
-              { en: 'Thank you',     pt: 'Obrigada' },
-              { en: 'I am trying',   pt: 'Eu estou tentando' },
+              { en: 'tall',       pt: 'alto(a)' },
+              { en: 'happy',      pt: 'feliz' },
+              { en: 'Brazilian',  pt: 'brasileiro(a)' },
+              { en: 'warm',       pt: 'quente / calor' },
+              { en: 'good',       pt: 'bom / boa' },
+              { en: 'hungry',     pt: 'com fome' },
+              { en: 'thirsty',    pt: 'com sede' },
+              { en: 'tired',      pt: 'cansado(a)' },
+              { en: 'fast',       pt: 'rápido(a)' },
+              { en: 'big',        pt: 'grande' },
+              { en: 'teacher',    pt: 'professor(a)' },
+              { en: 'mother',     pt: 'mãe' },
+              { en: 'son',        pt: 'filho' },
+              { en: 'children',   pt: 'filhos / crianças' },
+              { en: 'job',        pt: 'trabalho / emprego' },
+              { en: 'busy',       pt: 'ocupado(a)' },
+              { en: 'a lot',      pt: 'muito(s)' },
+              { en: 'How are you?', pt: 'Como você está?' },
+              { en: 'I understand', pt: 'Eu entendo' },
+              { en: 'Really?',    pt: 'Sério?' },
+              { en: 'Why?',       pt: 'Por quê?' },
             ]
           },
+
+          // ── EXERCÍCIOS ──────────────────────────────────────────────────
           {
             type: 'exercicios',
             titulo: '✏️ Exercícios – Verbo TO BE',
             grupos: [
               {
-                instrucao: 'Complete com am / is / are:',
+                instrucao: 'Complete com a forma correta do verbo TO BE (am / is / are):',
                 questoes: [
-                  { pergunta: 'I ___ happy.',       resposta: 'am' },
-                  { pergunta: 'She ___ a teacher.', resposta: 'is' },
-                  { pergunta: 'They ___ tired.',    resposta: 'are' },
-                  { pergunta: 'He ___ busy.',       resposta: 'is' },
-                  { pergunta: 'We ___ friends.',    resposta: 'are' },
+                  { pergunta: 'I ___ happy.',                      resposta: 'am' },
+                  { pergunta: 'She ___ a teacher.',                 resposta: 'is' },
+                  { pergunta: 'They ___ tired.',                    resposta: 'are' },
+                  { pergunta: 'He ___ busy.',                       resposta: 'is' },
+                  { pergunta: 'We ___ Brazilians.',                 resposta: 'are' },
+                  { pergunta: 'Alex and Bruno ___ hungry.',         resposta: 'are' },
+                  { pergunta: 'São Paulo ___ big.',                 resposta: 'is' },
+                  { pergunta: 'You ___ fast.',                      resposta: 'are' },
+                  { pergunta: 'Fernando ___ tired.',                resposta: 'is' },
+                  { pergunta: 'Daniel and I ___ good.',             resposta: 'are' },
                 ]
               },
               {
-                instrucao: 'Forma negativa (adicione not):',
+                instrucao: 'Forma NEGATIVA — adicione NOT:',
                 questoes: [
-                  { pergunta: 'I am happy → I am ___ happy',       resposta: 'not' },
-                  { pergunta: 'She is busy → She is ___ busy',     resposta: 'not' },
-                  { pergunta: 'They are tired → They are ___ tired',resposta: 'not' },
+                  { pergunta: 'I am tall → I am ___ tall.',             resposta: 'not' },
+                  { pergunta: 'She is busy → She is ___ busy.',         resposta: 'not' },
+                  { pergunta: 'He is Brazilian → He is ___ Brazilian.', resposta: 'not' },
+                  { pergunta: 'It is warm → It is ___ warm.',           resposta: 'not' },
+                  { pergunta: 'They are tired → They are ___ tired.',   resposta: 'not' },
                 ]
               },
               {
-                instrucao: 'Transforme em pergunta:',
+                instrucao: 'Transforme em PERGUNTA (troque a ordem sujeito–verbo):',
                 questoes: [
-                  { pergunta: 'You are happy → ___ you happy?',    resposta: 'Are' },
+                  { pergunta: 'You are happy → ___ you happy?',        resposta: 'Are' },
                   { pergunta: 'She is a teacher → ___ she a teacher?', resposta: 'Is' },
-                  { pergunta: 'They are busy → ___ they busy?',    resposta: 'Are' },
+                  { pergunta: 'They are busy → ___ they busy?',        resposta: 'Are' },
+                  { pergunta: 'He is Brazilian → ___ he Brazilian?',   resposta: 'Is' },
+                  { pergunta: 'It is warm → ___ it warm?',             resposta: 'Is' },
                 ]
               },
               {
-                instrucao: 'Respostas curtas:',
+                instrucao: 'Arrume as palavras na ordem correta:',
                 questoes: [
-                  { pergunta: 'Are you tired? → Yes, I ___',        resposta: 'am' },
-                  { pergunta: 'Is she a teacher? → Yes, she ___',   resposta: 'is' },
-                  { pergunta: 'Are they busy? → Yes, they ___',     resposta: 'are' },
+                  { pergunta: 'am / fast / I',             resposta: 'I am fast.' },
+                  { pergunta: 'is / good / she',           resposta: 'She is good.' },
+                  { pergunta: 'we / happy / are',          resposta: 'We are happy.' },
+                  { pergunta: 'big / the black car / is',  resposta: 'The black car is big.' },
+                  { pergunta: 'big / the black cars / are',resposta: 'The black cars are big.' },
                 ]
               }
             ]
           }
         ]
       },
-      {
+
         id: 'aula2',
         numero: 2,
         titulo: 'Linda & Glynda – Aula 2',
