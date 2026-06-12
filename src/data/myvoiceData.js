@@ -159,118 +159,167 @@ export const myVoiceData = {
           }
         ]
       },
+// ─────────────────────────────────────────────────────────────────────────────
+// AULA 2 – Substitua o objeto da aula2 em src/data/myvoiceData.js
+// ─────────────────────────────────────────────────────────────────────────────
 
+      {
         id: 'aula2',
         numero: 2,
         titulo: 'Linda & Glynda – Aula 2',
         subtitulo: 'Perguntas com To Be · Família · Profissões',
         tag: 'Iniciante',
         sections: [
+          // ── DIÁLOGO (original preservado) ──────────────────────────────
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
             audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             personagens: ['Linda', 'Glynda'],
             falas: [
-              { personagem: 'Glynda', start: 1.0, end: 4.29, texto: 'Hello, Linda. You are quiet today. Are you okay?' },
-              { personagem: 'Linda', start: 4.89, end: 7.81, texto: 'No, I am not okay. I am sad.' },
+              { personagem: 'Glynda', start: 1.0,  end: 4.29,  texto: 'Hello, Linda. You are quiet today. Are you okay?' },
+              { personagem: 'Linda',  start: 4.89, end: 7.81,  texto: 'No, I am not okay. I am sad.' },
               { personagem: 'Glynda', start: 8.41, end: 10.97, texto: 'Why are you sad? Is everything ok?' },
-              { personagem: 'Glynda', start: 11.57, end: 13.03, texto: 'Really? Where is he?' },
-              { personagem: 'Linda', start: 13.63, end: 15.09, texto: 'He is in Salvador.' },
-              { personagem: 'Glynda', start: 15.69, end: 17.15, texto: 'Why is he there?' },
-              { personagem: 'Linda', start: 17.75, end: 19.58, texto: 'Because he is a businessman.' },
-              { personagem: 'Glynda', start: 20.18, end: 23.1, texto: 'What about your mother? Is she a businesswoman?' },
-              { personagem: 'Linda', start: 23.7, end: 25.53, texto: 'No, she is a teacher.' },
-              { personagem: 'Glynda', start: 26.13, end: 27.96, texto: 'Is she a good teacher?' },
-              { personagem: 'Linda', start: 28.56, end: 31.12, texto: 'Yes, she is a very good teacher.' },
-              { personagem: 'Glynda', start: 31.72, end: 35.37, texto: 'I have to go now. See you later. Bye, Linda.' },
-              { personagem: 'Linda', start: 35.97, end: 36.7, texto: 'Bye, Glynda.' }
+              { personagem: 'Glynda', start: 11.57,end: 13.03, texto: 'Really? Where is he?' },
+              { personagem: 'Linda',  start: 13.63,end: 15.09, texto: 'He is in Salvador.' },
+              { personagem: 'Glynda', start: 15.69,end: 17.15, texto: 'Why is he there?' },
+              { personagem: 'Linda',  start: 17.75,end: 19.58, texto: 'Because he is a businessman.' },
+              { personagem: 'Glynda', start: 20.18,end: 23.1,  texto: 'What about your mother? Is she a businesswoman?' },
+              { personagem: 'Linda',  start: 23.7, end: 25.53, texto: 'No, she is a teacher.' },
+              { personagem: 'Glynda', start: 26.13,end: 27.96, texto: 'Is she a good teacher?' },
+              { personagem: 'Linda',  start: 28.56,end: 31.12, texto: 'Yes, she is a very good teacher.' },
+              { personagem: 'Glynda', start: 31.72,end: 35.37, texto: 'I have to go now. See you later. Bye, Linda.' },
+              { personagem: 'Linda',  start: 35.97,end: 36.7,  texto: 'Bye, Glynda.' }
             ]
           },
+
+          // ── FORMANDO PERGUNTAS COM TO BE ────────────────────────────────
           {
             type: 'verbos',
-            titulo: '📘 Verbos da Aula',
+            titulo: '📘 Formando Perguntas com To Be',
             verbos: [
-              { verbo: 'TO BE (ser/estar)',         presente: 'am / is / are',  passado: 'was / were', participio: 'been' },
-              { verbo: 'TO COME (vir)',             presente: 'come',           passado: 'came',       participio: 'come' },
-              { verbo: 'TO HAVE (ter)',             presente: 'have / has',     passado: 'had',        participio: 'had' },
-              { verbo: 'TO GO (ir)',                presente: 'go',             passado: 'went',       participio: 'gone' },
-              { verbo: 'TO SEE (ver)',              presente: 'see',            passado: 'saw',        participio: 'seen' },
-              { verbo: 'TO UNDERSTAND (entender)', presente: 'understand',     passado: 'understood', participio: 'understood' },
-              { verbo: 'TO CALL (ligar/chamar)',    presente: 'call',           passado: 'called',     participio: 'called' },
-              { verbo: 'TO WORK (trabalhar)',       presente: 'work',           passado: 'worked',     participio: 'worked' },
+              { verbo: 'ARE you happy?',    presente: 'Yes, I AM happy.',       passado: 'No, I AM NOT happy.',       participio: 'troca I↔You' },
+              { verbo: 'IS she a teacher?', presente: 'Yes, she IS a teacher.', passado: 'No, she IS NOT a teacher.', participio: '3ª pessoa' },
+              { verbo: 'IS he Brazilian?',  presente: 'Yes, he IS Brazilian.',  passado: 'No, he IS NOT Brazilian.',  participio: '3ª pessoa' },
+              { verbo: 'ARE they tired?',   presente: 'Yes, they ARE tired.',   passado: 'No, they ARE NOT tired.',   participio: 'plural' },
+              { verbo: 'ARE we friends?',   presente: 'Yes, we ARE friends.',   passado: 'No, we ARE NOT friends.',   participio: 'plural' },
+              { verbo: 'IS it warm?',       presente: 'Yes, it IS warm.',       passado: 'No, it IS NOT warm.',       participio: '3ª pessoa' },
             ]
           },
+
+          // ── MAIS VERBOS ─────────────────────────────────────────────────
+          {
+            type: 'verbos',
+            titulo: '📘 Mais Verbos – Presente · Passado · Particípio',
+            verbos: [
+              { verbo: 'TO BE (ser/estar)',   presente: 'am / is / are', passado: 'was / were', participio: 'been' },
+              { verbo: 'TO WANT (querer)',    presente: 'want',          passado: 'wanted',     participio: 'wanted' },
+              { verbo: 'TO EAT (comer)',      presente: 'eat',           passado: 'ate',        participio: 'eaten' },
+              { verbo: 'TO GO (ir)',          presente: 'go',            passado: 'went',       participio: 'gone' },
+              { verbo: 'TO HAVE (ter)',       presente: 'have / has',    passado: 'had',        participio: 'had' },
+              { verbo: 'TO LIKE (gostar)',    presente: 'like',          passado: 'liked',      participio: 'liked' },
+              { verbo: 'TO READ (ler)',       presente: 'read',          passado: 'read',       participio: 'read' },
+              { verbo: 'TO SEE (ver)',        presente: 'see',           passado: 'saw',        participio: 'seen' },
+              { verbo: 'TO WORK (trabalhar)', presente: 'work',          passado: 'worked',     participio: 'worked' },
+              { verbo: 'TO COME (vir)',       presente: 'come',          passado: 'came',       participio: 'come' },
+            ]
+          },
+
+          // ── VOCABULÁRIO ─────────────────────────────────────────────────
           {
             type: 'vocabulario',
-            titulo: '📖 Vocabulary',
+            titulo: '📖 Vocabulary – Família, Profissões e Mais',
             palavras: [
-              { en: 'father',          pt: 'pai' },
-              { en: 'mother',          pt: 'mãe' },
-              { en: 'family',          pt: 'família' },
-              { en: 'children',        pt: 'filhos / crianças' },
-              { en: 'son',             pt: 'filho' },
-              { en: 'teacher',         pt: 'professor(a)' },
-              { en: 'businessman',     pt: 'homem de negócios' },
-              { en: 'businesswoman',   pt: 'mulher de negócios' },
-              { en: 'here',            pt: 'aqui' },
-              { en: 'there',           pt: 'lá' },
-              { en: 'holiday',         pt: 'feriado' },
-              { en: 'sad',             pt: 'triste' },
-              { en: 'happy',           pt: 'feliz' },
-              { en: 'okay / ok',       pt: 'bem' },
-              { en: 'busy',            pt: 'ocupado' },
-              { en: 'excited',         pt: 'animado' },
-              { en: 'Are you okay?',   pt: 'Você está bem?' },
-              { en: 'Where is he?',    pt: 'Onde ele está?' },
-              { en: 'Is he on vacation?', pt: 'Ele está de férias?' },
-              { en: 'Is she a teacher?',  pt: 'Ela é professora?' },
-              { en: 'Are they happy?', pt: 'Eles estão felizes?' },
-              { en: 'today',           pt: 'hoje' },
-              { en: 'now',             pt: 'agora' },
-              { en: 'with',            pt: 'com' },
-              { en: 'without',         pt: 'sem' },
-              { en: 'because',         pt: 'porque' },
-              { en: 'very',            pt: 'muito' },
+              { en: 'father',        pt: 'pai' },
+              { en: 'mother',        pt: 'mãe' },
+              { en: 'family',        pt: 'família' },
+              { en: 'brother',       pt: 'irmão' },
+              { en: 'sister',        pt: 'irmã' },
+              { en: 'son',           pt: 'filho' },
+              { en: 'children',      pt: 'filhos / crianças' },
+              { en: 'teacher',       pt: 'professor(a)' },
+              { en: 'businessman',   pt: 'homem de negócios' },
+              { en: 'businesswoman', pt: 'mulher de negócios' },
+              { en: 'the',           pt: 'o / a / os / as' },
+              { en: 'a / an',        pt: 'um / uma' },
+              { en: 'mall',          pt: 'shopping' },
+              { en: 'beach',         pt: 'praia' },
+              { en: 'car',           pt: 'carro' },
+              { en: 'food',          pt: 'comida' },
+              { en: 'water',         pt: 'água' },
+              { en: 'sad',           pt: 'triste' },
+              { en: 'happy',         pt: 'feliz' },
+              { en: 'okay / ok',     pt: 'bem' },
+              { en: 'hot',           pt: 'quente' },
+              { en: 'black',         pt: 'preto(a)' },
+              { en: 'blue',          pt: 'azul' },
+              { en: 'today',         pt: 'hoje' },
+              { en: 'because',       pt: 'porque' },
+              { en: 'very',          pt: 'muito' },
+              { en: 'there',         pt: 'lá / ali' },
+              { en: 'here',          pt: 'aqui' },
+              { en: 'Are you okay?', pt: 'Você está bem?' },
+              { en: 'Where is he?',  pt: 'Onde ele está?' },
+              { en: 'See you later', pt: 'Até logo' },
             ]
           },
+
+          // ── EXERCÍCIOS ──────────────────────────────────────────────────
           {
             type: 'exercicios',
-            titulo: '✏️ Exercícios – Perguntas com To Be',
+            titulo: '✏️ Exercícios – Perguntas com To Be e Vocabulário',
             grupos: [
               {
-                instrucao: 'Forme perguntas (troque a ordem do sujeito e verbo):',
+                instrucao: 'Forme PERGUNTAS trocando a ordem sujeito–verbo:',
                 questoes: [
-                  { pergunta: 'She is sad. → ___ she sad?',               resposta: 'Is' },
+                  { pergunta: 'She is sad. → ___ she sad?',                   resposta: 'Is' },
                   { pergunta: 'He is a businessman. → ___ he a businessman?', resposta: 'Is' },
-                  { pergunta: 'They are here. → ___ they here?',          resposta: 'Are' },
-                  { pergunta: 'You are okay. → ___ you okay?',            resposta: 'Are' },
-                  { pergunta: 'It is a holiday. → ___ it a holiday?',     resposta: 'Is' },
+                  { pergunta: 'They are here. → ___ they here?',              resposta: 'Are' },
+                  { pergunta: 'You are okay. → ___ you okay?',                resposta: 'Are' },
+                  { pergunta: 'It is warm. → ___ it warm?',                   resposta: 'Is' },
+                  { pergunta: 'The beach is hot. → ___ the beach hot?',       resposta: 'Is' },
+                  { pergunta: 'The water is blue. → ___ the water blue?',     resposta: 'Is' },
                 ]
               },
               {
-                instrucao: 'Complete com o verbo TO BE correto:',
+                instrucao: 'Complete com a forma correta do verbo TO BE:',
                 questoes: [
-                  { pergunta: 'My father ___ in Salvador.',       resposta: 'is' },
-                  { pergunta: 'My parents ___ happy.',            resposta: 'are' },
-                  { pergunta: 'She ___ not a businesswoman.',     resposta: 'is' },
-                  { pergunta: 'I ___ not okay today.',            resposta: 'am' },
-                  { pergunta: 'Where ___ he?',                    resposta: 'is' },
+                  { pergunta: 'My father ___ in Salvador.',    resposta: 'is' },
+                  { pergunta: 'My parents ___ happy.',         resposta: 'are' },
+                  { pergunta: 'She ___ not a businesswoman.',  resposta: 'is' },
+                  { pergunta: 'I ___ not okay today.',         resposta: 'am' },
+                  { pergunta: 'Where ___ he?',                 resposta: 'is' },
+                  { pergunta: 'The food ___ hot.',             resposta: 'is' },
+                  { pergunta: 'The black cars ___ fast.',      resposta: 'are' },
+                ]
+              },
+              {
+                instrucao: 'Escreva a forma NEGATIVA ou a PERGUNTA conforme indicado:',
+                questoes: [
+                  { pergunta: 'You are happy → negativo: You are ___ happy.',         resposta: 'not' },
+                  { pergunta: 'Bruno is hungry → negativo: Bruno is ___ hungry.',     resposta: 'not' },
+                  { pergunta: 'The water is blue → pergunta: ___ the water blue?',    resposta: 'Is' },
+                  { pergunta: 'He is Brazilian → pergunta: ___ he Brazilian?',        resposta: 'Is' },
+                  { pergunta: 'The tall man is hungry → pergunta: ___ the tall man hungry?', resposta: 'Is' },
                 ]
               },
               {
                 instrucao: 'Resposta curta (Yes/No):',
                 questoes: [
-                  { pergunta: 'Is Linda sad? → Yes, ___ ___',               resposta: 'she is' },
-                  { pergunta: 'Is her father in São Paulo? → No, ___ ___',  resposta: 'he isn\'t' },
-                  { pergunta: 'Is her mother a teacher? → Yes, ___ ___',    resposta: 'she is' },
-                  { pergunta: 'Are they at home? → No, ___ ___',            resposta: 'they aren\'t' },
+                  { pergunta: 'Is Linda sad? → Yes, ___ ___.',             resposta: 'she is' },
+                  { pergunta: 'Is her father in São Paulo? → No, ___ ___.',resposta: "he isn't" },
+                  { pergunta: 'Is her mother a teacher? → Yes, ___ ___.',  resposta: 'she is' },
+                  { pergunta: 'Are they at home? → No, ___ ___.',          resposta: "they aren't" },
+                  { pergunta: 'Are you happy? → Yes, ___ ___.',            resposta: 'I am' },
                 ]
               }
             ]
           }
         ]
       },
+
+        
+      
       {
         id: 'aula3',
         numero: 3,
