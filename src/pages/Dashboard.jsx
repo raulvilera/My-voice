@@ -8,19 +8,21 @@ import styles from './Dashboard.module.css';
 
 const capaDefault = "/my_voice_default.png";
 
+// Aulas hardcoded com id prefixado — fonte de verdade para aulas 1 e 2
+const AULAS_HC = myVoiceData.basico.aulas.map(a => ({
+  ...a,
+  id: `hc-${a.id}`,
+  publicada: true,
+  imagem_url: a.imagem_url || capaDefault
+}));
 
+// Conjunto dos números das aulas hardcoded (ex: {1, 2})
+const NUMEROS_HC = new Set(AULAS_HC.map(a => a.numero));
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
-  const [aulas, setAulas] = useState(() => {
-    return myVoiceData.basico.aulas.map(a => ({
-      ...a,
-      id: `hc-${a.id}`,
-      publicada: true,
-      imagem_url: a.imagem_url || capaDefault
-    }));
-  });
+  const [aulas, setAulas] = useState(AULAS_HC);
   const [loading, setLoading] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
@@ -60,15 +62,10 @@ const Dashboard = () => {
           .order('numero');
         
         if (data && data.length > 0) {
-          const aulasHardcoded = myVoiceData.basico.aulas.map(a => ({
-            ...a,
-            id: `hc-${a.id}`,
-            publicada: true,
-            imagem_url: a.imagem_url || capaDefault
-          }));
-          const numerosDB = new Set(data.map(a => a.numero));
-          const filtradas = aulasHardcoded.filter(a => !numerosDB.has(a.numero));
-          setAulas([...filtradas, ...data].sort((a, b) => a.numero - b.numero));
+          // FIX: hardcoded sempre prevalece — banco só adiciona aulas NOVAS
+          // (números que não existem no hardcoded, ex: 3, 4, 5...)
+          const aulasNovas = data.filter(a => !NUMEROS_HC.has(a.numero));
+          setAulas([...AULAS_HC, ...aulasNovas].sort((a, b) => a.numero - b.numero));
         }
       } catch (e) {
         console.error(e);
