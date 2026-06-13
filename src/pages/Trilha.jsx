@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, LogOut, ChevronRight } from 'lucide-react';
+import { LogOut, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SecaoDialogo }     from '../components/SecaoDialogo';
 import { SecaoVerbos }      from '../components/SecaoVerbos';
@@ -9,22 +9,15 @@ import { SecaoExercicios }  from '../components/SecaoExercicios';
 import { supabase }         from '../lib/supabaseClient';
 import myVoiceData            from '../data/myvoiceData';
 
-// ── DADOS DAS AULAS ───────────────────────────────────────────────────────────
+// ── AULAS HARDCODED ───────────────────────────────────────────────────────────
+// sections originais preservadas INTACTAS — não remapear aqui
 const AULAS_HC = myVoiceData.basico.aulas.map(a => ({
   ...a,
   id: `hc-${a.id}`,
   publicada: true,
-  // Preserva sections original (com audioSrc, timestamps, etc.)
-  // E cria secoes mapeadas para o modal do AdminDashboard
-  secoes: (a.sections || []).map((s, i) => ({
-    tipo:  s.type || s.tipo,
-    titulo: s.titulo,
-    conteudo: s,
-    ordem: i,
-  })),
+  _source: 'hc', // marca a origem para o Modal saber qual array usar
 }));
 
-// Conjunto dos números das aulas hardcoded (ex: {1, 2})
 const NUMEROS_HC = new Set(AULAS_HC.map(a => a.numero));
 
 // ── PILLS ─────────────────────────────────────────────────────────────────────
@@ -40,20 +33,18 @@ const Modal = ({ aula, onClose }) => {
   const [secType, setSecType] = useState('tudo');
   if (!aula) return null;
 
-  const secs = (aula.sections || aula.secoes || []).map(s => {
-    // Normaliza: hardcoded tem dados diretos; banco tem .conteudo JSONB
-    const base = (s.conteudo && typeof s.conteudo === 'object') ? s.conteudo : {};
-    return {
-      tipo:        s.type        || s.tipo        || '',
-      titulo:      s.titulo      || base.titulo   || '',
-      audioSrc:    s.audioSrc    || base.audioSrc || null,
-      personagens: s.personagens || base.personagens || [],
-      falas:       s.falas       || base.falas       || [],
-      verbos:      s.verbos      || base.verbos       || [],
-      palavras:    s.palavras    || base.palavras     || [],
-      grupos:      s.grupos      || base.grupos       || [],
-    };
-  });
+  // Para aulas HC: usar sections direto (tipo está em .type)
+  // Para aulas do banco: usar secoes (tipo está em .tipo ou .conteudo.tipo)
+  const rawSecs = aula._source === 'hc'
+    ? (aula.sections || [])
+    : (aula.secoes   || []);
+
+  // Normaliza para { tipo, ...dadosOriginais } preservando tudo
+  const secs = rawSecs.map(s => ({
+    ...s,
+    tipo: s.type || s.tipo || (s.conteudo?.type) || (s.conteudo?.tipo) || '',
+  }));
+
   const toShow = secType === 'tudo' ? secs : secs.filter(s => s.tipo === secType);
 
   const renderSec = (s, i) => {
@@ -65,6 +56,9 @@ const Modal = ({ aula, onClose }) => {
       default: return null;
     }
   };
+
+  // Tipos únicos para as tabs (evita duplicar se houver duas seções de verbos)
+  const tiposUnicos = [...new Set(secs.map(s => s.tipo).filter(Boolean))];
 
   return (
     <div onClick={onClose} style={{
@@ -101,13 +95,15 @@ const Modal = ({ aula, onClose }) => {
 
         {/* Tabs */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:'0.4rem', padding:'0.875rem 1.5rem 0', flexShrink:0 }}>
-          {[{ type:'tudo', emoji:'📋', label:'Tudo' }, ...secs.map(s => ({ type:s.type, ...PILLS[s.type] }))].map(t => (
-            <button key={t.type} onClick={() => setSecType(t.type)} style={{
+          {[{ tipo:'tudo', emoji:'📋', label:'Tudo' },
+            ...tiposUnicos.map(t => ({ tipo: t, ...(PILLS[t] || { emoji:'📄', label: t }) }))
+          ].map(t => (
+            <button key={t.tipo} onClick={() => setSecType(t.tipo)} style={{
               fontSize:'0.75rem', padding:'0.3rem 0.8rem', borderRadius:9999,
-              border: secType === t.type ? '1px solid rgba(139,92,246,0.4)' : '1px solid rgba(255,255,255,0.1)',
-              background: secType === t.type ? 'rgba(139,92,246,0.2)' : 'transparent',
-              color: secType === t.type ? '#c084fc' : '#94a3b8',
-              fontWeight: secType === t.type ? 700 : 400,
+              border: secType === t.tipo ? '1px solid rgba(139,92,246,0.4)' : '1px solid rgba(255,255,255,0.1)',
+              background: secType === t.tipo ? 'rgba(139,92,246,0.2)' : 'transparent',
+              color: secType === t.tipo ? '#c084fc' : '#94a3b8',
+              fontWeight: secType === t.tipo ? 700 : 400,
               cursor:'pointer', fontFamily:'inherit',
             }}>
               {t.emoji} {t.label}
@@ -117,7 +113,12 @@ const Modal = ({ aula, onClose }) => {
 
         {/* Body */}
         <div style={{ padding:'1.25rem 1.5rem', flex:1, overflowY:'auto' }}>
-          {toShow.map((s, i) => renderSec(s, i))}
+          {toShow.length === 0
+            ? <p style={{ color:'#64748b', textAlign:'center', marginTop:'2rem' }}>
+                Nenhum conteúdo para exibir.
+              </p>
+            : toShow.map((s, i) => renderSec(s, i))
+          }
         </div>
 
         <div style={{
@@ -147,9 +148,7 @@ export default function Trilha({ modoVisualizacao = false }) {
           .eq('publicada', true)
           .order('numero', { ascending: true });
         if (!mounted || error || !data?.length) return;
-
-        // FIX: hardcoded sempre prevalece — banco só adiciona aulas NOVAS
-        // (números que não existem no hardcoded, ex: 3, 4, 5...)
+        // Hardcoded prevalece — banco só adiciona aulas novas (3, 4, 5…)
         const aulasNovas = data.filter(a => !NUMEROS_HC.has(a.numero));
         setAulas([...AULAS_HC, ...aulasNovas].sort((a, b) => a.numero - b.numero));
       } catch { /* mantém hardcoded */ }
@@ -205,6 +204,7 @@ export default function Trilha({ modoVisualizacao = false }) {
 
         <div style={{ display:'flex', flexDirection:'column', gap:'0.875rem' }}>
           {aulas.map(aula => {
+            // Pills na listagem: sections (HC) ou secoes (banco)
             const secs = aula.sections || aula.secoes || [];
             return (
               <div key={aula.id} onClick={() => setModalAula(aula)} style={{
@@ -239,15 +239,13 @@ export default function Trilha({ modoVisualizacao = false }) {
                       const pill = PILLS[tipo];
                       if (!pill) return null;
                       return (
-                        <button key={si}
-                          onClick={e => { e.stopPropagation(); setModalAula(aula); }}
-                          style={{
-                            fontSize:'0.7rem', padding:'0.22rem 0.65rem',
-                            background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.12)',
-                            borderRadius:9999, color:'#cbd5e1', cursor:'pointer',
-                          }}>
+                        <span key={si} style={{
+                          fontSize:'0.7rem', padding:'0.22rem 0.65rem',
+                          background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.12)',
+                          borderRadius:9999, color:'#cbd5e1',
+                        }}>
                           {pill.emoji} {pill.label}
-                        </button>
+                        </span>
                       );
                     })}
                   </div>
