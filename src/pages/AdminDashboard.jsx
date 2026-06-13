@@ -106,11 +106,11 @@ const PreviewAulas = ({ plano = 'basico' }) => {
 
         if (isMounted) {
           const aulasDB    = soAulas || [];
-          const numerosDB  = new Set(aulasDB.map(a => a.numero));
           const aulasHC    = (myVoiceData?.basico?.aulas || []).map(a => ({
             ...a,
             id: `hc-${a.id}`,
             publicada: true,
+            _isHC: true,
             secoes: (a.sections || []).map((s, i) => ({
               tipo: s.type || s.tipo,
               titulo: s.titulo,
@@ -118,8 +118,12 @@ const PreviewAulas = ({ plano = 'basico' }) => {
               ordem: i,
             })),
           }));
-          const filtradas  = aulasHC.filter(a => !numerosDB.has(a.numero));
-          const merged     = [...filtradas, ...aulasDB].sort((a, b) => a.numero - b.numero);
+
+          // HC sempre prevalece sobre o banco quando tem sections definidas.
+          // Entradas do banco só entram se NÃO existem no HC (aulas criadas via admin).
+          const numerosHC  = new Set(aulasHC.map(a => a.numero));
+          const apenasDB   = aulasDB.filter(a => !numerosHC.has(a.numero));
+          const merged     = [...aulasHC, ...apenasDB].sort((a, b) => a.numero - b.numero);
           setAulas(merged);
           setLoading(false);
         }
