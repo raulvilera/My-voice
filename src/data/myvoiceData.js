@@ -364,14 +364,14 @@ export const myVoiceData = {
             titulo: '📘 Verbos do Diálogo',
             audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
-              { verbo: 'TO LISTEN (ouvir)',         presente: 'listen',    passado: 'listened',    participio: 'listened' },
-              { verbo: 'TO SMILE (sorrir)',          presente: 'smile',     passado: 'smiled',      participio: 'smiled' },
-              { verbo: 'TO WORRY (preocupar)',       presente: 'worry',     passado: 'worried',     participio: 'worried' },
-              { verbo: 'TO RETURN (voltar)',         presente: 'return',    passado: 'returned',    participio: 'returned' },
-              { verbo: 'TO REMEMBER (lembrar)',      presente: 'remember',  passado: 'remembered',  participio: 'remembered' },
-              { verbo: 'TO STAY (ficar)',            presente: 'stay',      passado: 'stayed',      participio: 'stayed' },
-              { verbo: 'TO TRUST (confiar)',         presente: 'trust',     passado: 'trusted',     participio: 'trusted' },
-              { verbo: 'TO UNDERSTAND (entender)',   presente: 'understand',passado: 'understood',  participio: 'understood' },
+              { verbo: 'TO LISTEN (ouvir)',       presente: 'listen',    passado: 'listened',    participio: 'listened',    start: 2.47,  end: 6.05  },
+              { verbo: 'TO SMILE (sorrir)',        presente: 'smile',     passado: 'smiled',      participio: 'smiled',      start: 7.51,  end: 9.14  },
+              { verbo: 'TO WORRY (preocupar)',     presente: 'worry',     passado: 'worried',     participio: 'worried',     start: 10.77, end: 13.28 },
+              { verbo: 'TO RETURN (voltar)',       presente: 'return',    passado: 'returned',    participio: 'returned',    start: 15.29, end: 17.22 },
+              { verbo: 'TO REMEMBER (lembrar)',    presente: 'remember',  passado: 'remembered',  participio: 'remembered',  start: 19.08, end: 20.90 },
+              { verbo: 'TO STAY (ficar)',          presente: 'stay',      passado: 'stayed',      participio: 'stayed',      start: 22.38, end: 24.86 },
+              { verbo: 'TO TRUST (confiar)',       presente: 'trust',     passado: 'trusted',     participio: 'trusted',     start: 26.89, end: 28.79 },
+              { verbo: 'TO UNDERSTAND (entender)', presente: 'understand',passado: 'understood',  participio: 'understood',  start: 30.62, end: 36.94 },
             ]
           },
           {
