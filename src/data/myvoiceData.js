@@ -468,15 +468,19 @@ export const myVoiceData = {
           {
             type: 'verbos',
             titulo: '📘 Verbos do Diálogo',
+            audioSrc: `${AUDIO_BASE}/verbos-aula4.mp3`,
             verbos: [
-              { verbo: 'TO MISS (sentir falta)',     presente: 'miss',    passado: 'missed',  participio: 'missed' },
-              { verbo: 'TO FEEL (sentir)',            presente: 'feel',    passado: 'felt',    participio: 'felt' },
-              { verbo: 'TO HAPPEN (acontecer)',       presente: 'happen',  passado: 'happened',participio: 'happened' },
-              { verbo: 'TO SPEND (passar tempo)',     presente: 'spend',   passado: 'spent',   participio: 'spent' },
-              { verbo: 'TO LOVE (amar)',              presente: 'love',    passado: 'loved',   participio: 'loved' },
-              { verbo: 'TO KNOW (saber/conhecer)',    presente: 'know',    passado: 'knew',    participio: 'known' },
-              { verbo: 'TO TELL (contar)',            presente: 'tell',    passado: 'told',    participio: 'told' },
-              { verbo: 'TO LISTEN (ouvir)',           presente: 'listen',  passado: 'listened',participio: 'listened' },
+              { verbo: 'TO BE (ser/estar)',           presente: 'am/is/are', passado: 'was/were',   participio: 'been',        start:  2.66, end:  5.36 },
+              { verbo: 'TO FEEL (sentir)',            presente: 'feel',      passado: 'felt',        participio: 'felt',        start:  7.20, end:  8.72 },
+              { verbo: 'TO HAPPEN (acontecer)',       presente: 'happen',    passado: 'happened',    participio: 'happened',    start: 10.84, end: 12.46 },
+              { verbo: 'TO MISS (sentir falta)',      presente: 'miss',      passado: 'missed',      participio: 'missed',      start: 14.64, end: 16.52 },
+              { verbo: 'TO UNDERSTAND (entender)',    presente: 'understand', passado: 'understood', participio: 'understood',  start: 18.28, end: 20.97 },
+              { verbo: 'TO HEAR (ouvir)',             presente: 'hear',      passado: 'heard',       participio: 'heard',       start: 23.19, end: 24.53 },
+              { verbo: 'TO TALK (conversar)',         presente: 'talk',      passado: 'talked',      participio: 'talked',      start: 27.66, end: 28.39 },
+              { verbo: 'TO STAY (ficar)',             presente: 'stay',      passado: 'stayed',      participio: 'stayed',      start: 32.21, end: 33.94 },
+              { verbo: 'TO TRUST (confiar)',          presente: 'trust',     passado: 'trusted',     participio: 'trusted',     start: 36.13, end: 38.04 },
+              { verbo: 'TO SOUND (soar)',             presente: 'sound',     passado: 'sounded',     participio: 'sounded',     start: 39.97, end: 42.39 },
+              { verbo: 'TO LOVE (amar)',              presente: 'love',      passado: 'loved',       participio: 'loved',       start: 44.28, end: 45.97 },
             ]
           },
           {
