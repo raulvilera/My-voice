@@ -8,6 +8,7 @@ export const SecaoVerbos = ({ section }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration]       = useState(0);
   const [speed, setSpeed]             = useState(1);
+  const [erro, setErro]               = useState(false);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -23,12 +24,18 @@ export const SecaoVerbos = ({ section }) => {
       audio.pause(); audio.currentTime = 0;
       setIsPlaying(false); setCurrentTime(0);
     } else {
-      audio.playbackRate = speed;
-      audio.play();
-      setIsPlaying(true);
-      audio.ontimeupdate   = () => setCurrentTime(audio.currentTime);
+      setErro(false);
+      // Registra handlers ANTES do play para não perder eventos
       audio.onloadedmetadata = () => setDuration(audio.duration);
-      audio.onended        = () => { setIsPlaying(false); setCurrentTime(0); };
+      audio.ontimeupdate     = () => setCurrentTime(audio.currentTime);
+      audio.onended          = () => { setIsPlaying(false); setCurrentTime(0); };
+      audio.onerror          = () => { setIsPlaying(false); setCurrentTime(0); setErro(true); };
+      audio.playbackRate = speed;
+      // load() garante que o arquivo é buscado antes do play (preload="none")
+      audio.load();
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => { setIsPlaying(false); setErro(true); });
     }
   };
 
@@ -53,6 +60,7 @@ export const SecaoVerbos = ({ section }) => {
     speedBtn: { fontSize:'0.68rem', padding:'0.2rem 0.5rem', borderRadius:6, background:'transparent', border:'1px solid rgba(255,255,255,0.12)', color:'#94a3b8', cursor:'pointer' },
     speedActive: { background:'rgba(139,92,246,0.25)', color:'#a78bfa', border:'1px solid rgba(139,92,246,0.4)' },
     voiceInfo: { fontSize:'0.7rem', color:'#94a3b8', marginLeft:'auto' },
+    erroMsg: { fontSize:'0.72rem', color:'#f87171', marginTop:'0.35rem' },
     tableWrapper: { overflowX:'auto' },
     verbTable: { width:'100%', borderCollapse:'collapse', fontSize:'0.82rem' },
     verbTh: { textAlign:'left', padding:'0.5rem 0.75rem', background:'rgba(139,92,246,0.15)', color:'#a78bfa', fontWeight:700, fontSize:'0.72rem', textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid rgba(255,255,255,0.1)' },
@@ -81,6 +89,11 @@ export const SecaoVerbos = ({ section }) => {
             </button>
           ))}
           <span style={styles.voiceInfo}>🎙 Áudio original</span>
+          {erro && (
+            <span style={styles.erroMsg}>
+              ⚠️ Arquivo não encontrado. Verifique se <code>verbos-aula4.mp3</code> está no bucket.
+            </span>
+          )}
         </div>
       )}
 
