@@ -364,14 +364,14 @@ export const myVoiceData = {
             titulo: '📘 Verbos do Diálogo',
             audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
-              { verbo: 'TO LISTEN (ouvir)',       presente: 'listen',    passado: 'listened',    participio: 'listened',    start: 2.47,  end: 6.05  },
-              { verbo: 'TO SMILE (sorrir)',        presente: 'smile',     passado: 'smiled',      participio: 'smiled',      start: 7.51,  end: 9.14  },
-              { verbo: 'TO WORRY (preocupar)',     presente: 'worry',     passado: 'worried',     participio: 'worried',     start: 10.77, end: 13.28 },
-              { verbo: 'TO RETURN (voltar)',       presente: 'return',    passado: 'returned',    participio: 'returned',    start: 15.29, end: 17.22 },
-              { verbo: 'TO REMEMBER (lembrar)',    presente: 'remember',  passado: 'remembered',  participio: 'remembered',  start: 19.08, end: 20.90 },
-              { verbo: 'TO STAY (ficar)',          presente: 'stay',      passado: 'stayed',      participio: 'stayed',      start: 22.38, end: 24.86 },
-              { verbo: 'TO TRUST (confiar)',       presente: 'trust',     passado: 'trusted',     participio: 'trusted',     start: 26.89, end: 28.79 },
-              { verbo: 'TO UNDERSTAND (entender)', presente: 'understand',passado: 'understood',  participio: 'understood',  start: 30.62, end: 36.94 },
+              { verbo: 'TO LISTEN (ouvir)',       presente: 'listen',    passado: 'listened',    participio: 'listened',    start: 1.93,  end: 5.40  },
+              { verbo: 'TO SMILE (sorrir)',        presente: 'smile',     passado: 'smiled',      participio: 'smiled',      start: 6.97,  end: 8.55  },
+              { verbo: 'TO WORRY (preocupar)',     presente: 'worry',     passado: 'worried',     participio: 'worried',     start: 10.23, end: 12.67 },
+              { verbo: 'TO RETURN (voltar)',       presente: 'return',    passado: 'returned',    participio: 'returned',    start: 14.75, end: 16.63 },
+              { verbo: 'TO REMEMBER (lembrar)',    presente: 'remember',  passado: 'remembered',  participio: 'remembered',  start: 19.25, end: 20.35 },
+              { verbo: 'TO STAY (ficar)',          presente: 'stay',      passado: 'stayed',      participio: 'stayed',      start: 21.84, end: 24.20 },
+              { verbo: 'TO TRUST (confiar)',       presente: 'trust',     passado: 'trusted',     participio: 'trusted',     start: 26.39, end: 28.19 },
+              { verbo: 'TO UNDERSTAND (entender)', presente: 'understand',passado: 'understood',  participio: 'understood',  start: 30.08, end: 35.44 },
             ]
           },
           {
