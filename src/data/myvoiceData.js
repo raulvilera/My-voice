@@ -364,14 +364,15 @@ export const myVoiceData = {
             titulo: '📘 Verbos do Diálogo',
             audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
-              { verbo: 'TO LISTEN (ouvir)',       presente: 'listen',    passado: 'listened',    participio: 'listened',    start: 1.93,  end: 5.40  },
-              { verbo: 'TO SMILE (sorrir)',        presente: 'smile',     passado: 'smiled',      participio: 'smiled',      start: 6.97,  end: 8.55  },
-              { verbo: 'TO WORRY (preocupar)',     presente: 'worry',     passado: 'worried',     participio: 'worried',     start: 10.23, end: 12.67 },
-              { verbo: 'TO RETURN (voltar)',       presente: 'return',    passado: 'returned',    participio: 'returned',    start: 14.75, end: 16.63 },
-              { verbo: 'TO REMEMBER (lembrar)',    presente: 'remember',  passado: 'remembered',  participio: 'remembered',  start: 19.25, end: 20.35 },
-              { verbo: 'TO STAY (ficar)',          presente: 'stay',      passado: 'stayed',      participio: 'stayed',      start: 21.84, end: 24.20 },
-              { verbo: 'TO TRUST (confiar)',       presente: 'trust',     passado: 'trusted',     participio: 'trusted',     start: 26.39, end: 28.19 },
-              { verbo: 'TO UNDERSTAND (entender)', presente: 'understand',passado: 'understood',  participio: 'understood',  start: 30.08, end: 35.44 },
+              { verbo: 'TO LISTEN (ouvir)',     presente: 'listen',   passado: 'listened',    participio: 'listened',    start: 3.64,  end: 5.50  },
+              { verbo: 'TO COME (vir)',         presente: 'come',     passado: 'came',        participio: 'come',        start: 6.97,  end: 8.59  },
+              { verbo: 'TO RETURN (voltar)',    presente: 'return',   passado: 'returned',    participio: 'returned',    start: 10.23, end: 12.73 },
+              { verbo: 'TO HOPE (esperar)',     presente: 'hope',     passado: 'hoped',       participio: 'hoped',       start: 14.74, end: 16.67 },
+              { verbo: 'TO HELP (ajudar)',      presente: 'help',     passado: 'helped',      participio: 'helped',      start: 18.54, end: 20.36 },
+              { verbo: 'TO SMILE (sorrir)',     presente: 'smile',    passado: 'smiled',      participio: 'smiled',      start: 21.84, end: 24.31 },
+              { verbo: 'TO PRAY (rezar)',       presente: 'pray',     passado: 'prayed',      participio: 'prayed',      start: 26.35, end: 28.24 },
+              { verbo: 'TO WORRY (preocupar)', presente: 'worry',    passado: 'worried',     participio: 'worried',     start: 30.08, end: 32.28 },
+              { verbo: 'TO REMEMBER (lembrar)',presente: 'remember', passado: 'remembered',  participio: 'remembered',  start: 33.83, end: 36.39 },
             ]
           },
           {
