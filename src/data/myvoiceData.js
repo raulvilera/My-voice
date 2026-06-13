@@ -362,6 +362,7 @@ export const myVoiceData = {
           {
             type: 'verbos',
             titulo: '📘 Verbos do Diálogo',
+            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
               { verbo: 'TO LISTEN (ouvir)',         presente: 'listen',    passado: 'listened',    participio: 'listened' },
               { verbo: 'TO SMILE (sorrir)',          presente: 'smile',     passado: 'smiled',      participio: 'smiled' },
@@ -560,7 +561,6 @@ export const myVoiceData = {
           {
             type: 'verbos',
             titulo: '📘 Verbos do Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
               { verbo: 'TO HEAR (ouvir/saber)',      presente: 'hear',      passado: 'heard',     participio: 'heard' },
               { verbo: 'TO BELIEVE (acreditar)',     presente: 'believe',   passado: 'believed',  participio: 'believed' },
