@@ -466,7 +466,7 @@ export const myVoiceData = {
           {
             type: 'verbos',
             titulo: '📘 Verbos do Diálogo',
-            audioSrc: `${AUDIO_BASE}/verbos-aula4.mp3`,
+            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
               { verbo: 'TO MISS (sentir falta)',     presente: 'miss',    passado: 'missed',  participio: 'missed' },
               { verbo: 'TO FEEL (sentir)',            presente: 'feel',    passado: 'felt',    participio: 'felt' },
