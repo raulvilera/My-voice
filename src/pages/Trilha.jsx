@@ -24,6 +24,9 @@ const AULAS_HC = myVoiceData.basico.aulas.map(a => ({
   })),
 }));
 
+// Conjunto dos números das aulas hardcoded (ex: {1, 2})
+const NUMEROS_HC = new Set(AULAS_HC.map(a => a.numero));
+
 // ── PILLS ─────────────────────────────────────────────────────────────────────
 const PILLS = {
   dialogo:     { emoji: '💬', label: 'Diálogo'    },
@@ -144,9 +147,11 @@ export default function Trilha({ modoVisualizacao = false }) {
           .eq('publicada', true)
           .order('numero', { ascending: true });
         if (!mounted || error || !data?.length) return;
-        const numerosDB = new Set(data.map(a => a.numero));
-        const filtradas = AULAS_HC.filter(a => !numerosDB.has(a.numero));
-        setAulas([...filtradas, ...data].sort((a, b) => a.numero - b.numero));
+
+        // FIX: hardcoded sempre prevalece — banco só adiciona aulas NOVAS
+        // (números que não existem no hardcoded, ex: 3, 4, 5...)
+        const aulasNovas = data.filter(a => !NUMEROS_HC.has(a.numero));
+        setAulas([...AULAS_HC, ...aulasNovas].sort((a, b) => a.numero - b.numero));
       } catch { /* mantém hardcoded */ }
     })();
     return () => { mounted = false; };
