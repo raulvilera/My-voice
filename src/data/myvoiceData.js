@@ -466,7 +466,6 @@ export const myVoiceData = {
           {
             type: 'verbos',
             titulo: '📘 Verbos do Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
               { verbo: 'TO MISS (sentir falta)',     presente: 'miss',    passado: 'missed',  participio: 'missed' },
               { verbo: 'TO FEEL (sentir)',            presente: 'feel',    passado: 'felt',    participio: 'felt' },
@@ -561,6 +560,7 @@ export const myVoiceData = {
           {
             type: 'verbos',
             titulo: '📘 Verbos do Diálogo',
+            audioSrc: `${AUDIO_BASE}/dialogo-aula2.mp3`,
             verbos: [
               { verbo: 'TO HEAR (ouvir/saber)',      presente: 'hear',      passado: 'heard',     participio: 'heard' },
               { verbo: 'TO BELIEVE (acreditar)',     presente: 'believe',   passado: 'believed',  participio: 'believed' },
