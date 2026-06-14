@@ -33,12 +33,12 @@ export const myVoiceData = {
             personagens: ['Linda', 'Glynda'],
             falas: [
               { personagem: 'Linda',  start: 1.0,  end: 4.24,  texto: 'Hi, Glynda. How are you?' },
-              { personagem: 'Linda',  start: 4.84, end: 11.97, texto: 'I understand. I love my job, but my days are busy.' },
+              { personagem: 'Glynda', start: 4.84, end: 11.97, texto: 'I understand. I love my job, but my days are busy.' },
               { personagem: 'Linda',  start: 12.57,end: 14.52, texto: 'Really? Why not?' },
-              { personagem: 'Linda',  start: 15.12,end: 24.85, texto: 'I see… I have three children, and I spend a lot of time with them.' },
-              { personagem: 'Glynda', start: 25.45,end: 36.47, texto: 'That is very good. I have one son, and I want to spend more time with him.' },
-              { personagem: 'Linda',  start: 37.07,end: 41.61, texto: 'Maybe you can start with small changes.' },
-              { personagem: 'Glynda', start: 42.21,end: 46.1,  texto: 'Yes… I think I need that.' }
+              { personagem: 'Glynda', start: 15.12,end: 24.85, texto: 'I see… I have three children, and I spend a lot of time with them.' },
+              { personagem: 'Linda',  start: 25.45,end: 36.47, texto: 'That is very good. I have one son, and I want to spend more time with him.' },
+              { personagem: 'Glynda', start: 37.07,end: 41.61, texto: 'Maybe you can start with small changes.' },
+              { personagem: 'Linda',  start: 42.21,end: 46.1,  texto: 'Yes… I think I need that.' }
             ]
           },
 
