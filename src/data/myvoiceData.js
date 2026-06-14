@@ -29,7 +29,6 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula1.mp3`,
             personagens: ['Linda', 'Glynda'],
             falas: [
               { personagem: 'Linda',  start: 1.0,  end: 4.24,  texto: 'Hi, Glynda. How are you?' },
