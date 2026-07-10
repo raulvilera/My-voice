@@ -551,20 +551,14 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula4.mp3`,
-            personagens: ['Susie', 'Dalit'],
+            audioSrc: `${AUDIO_BASE}/dialogo-aula5.mp3`,
+            personagens: ['Dalit'],
             falas: [
-              { personagem: 'Susie',  start: 0.90, end: 2.51,  texto: 'Dalit, can I tell you something else?' },
-              { personagem: 'Dalit',  start: 2.69, end: 4.13,  texto: "Of course, Susie. I'm listening." },
-              { personagem: 'Susie',  start: 4.25, end: 6.26,  texto: 'My grandmother always talks to me on the phone.' },
-              { personagem: 'Dalit',  start: 6.42, end: 7.32,  texto: "That's very special." },
-              { personagem: 'Susie',  start: 7.51, end: 9.85,  texto: 'Yes, she tells me to stay strong and trust God.' },
-              { personagem: 'Dalit',  start: 10.22, end: 11.82, texto: 'Your grandmother sounds very wise.' },
-              { personagem: 'Susie',  start: 12.17, end: 12.53, texto: 'She is.' },
-              { personagem: 'Susie',  start: 12.73, end: 14.28, texto: 'I love listening to her stories.' },
-              { personagem: 'Dalit',  start: 14.65, end: 15.42, texto: "That's wonderful." },
-              { personagem: 'Susie',  start: 15.81, end: 17.26, texto: 'I already feel a little better now.' },
-              { personagem: 'Dalit',  start: 17.51, end: 18.86, texto: "I'm happy to hear that, Susie." }
+              { personagem: 'Dalit', start: 2.68,  end: 4.36,  texto: "Of course, Susie, I'm listening." },
+              { personagem: 'Dalit', start: 7.45,  end: 8.78,  texto: "That's very special." },
+              { personagem: 'Dalit', start: 12.49, end: 14.56, texto: 'Your grandmother sounds very wise.' },
+              { personagem: 'Dalit', start: 17.22, end: 18.34, texto: "That's wonderful." },
+              { personagem: 'Dalit', start: 20.76, end: 22.72, texto: "I'm happy to hear that, Susie." }
             ]
           },
           {
