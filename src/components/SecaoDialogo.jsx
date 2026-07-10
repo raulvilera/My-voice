@@ -19,6 +19,16 @@ export const SecaoDialogo = ({ section: rawSection }) => {
   const cancelledRef = useRef(false);
   const timersRef    = useRef([]);
   const audioRef     = useRef(null);
+  const bubbleRefs   = useRef([]);
+
+  // Rola a tela para acompanhar a fala ativa conforme o áudio/descrição avança
+  useEffect(() => {
+    if (activeFala < 0) return;
+    const el = bubbleRefs.current[activeFala];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }
+  }, [activeFala]);
 
   useEffect(() => {
     const load = () => { if (window.speechSynthesis.getVoices().length > 0) setVoicesReady(true); };
@@ -282,7 +292,11 @@ export const SecaoDialogo = ({ section: rawSection }) => {
           const active = activeFala === fi;
           const words  = fala.texto.split(/\s+/);
           return (
-            <div key={fi} style={{...styles.bubble, ...(isA?styles.bubbleA:styles.bubbleB), ...(active?styles.bubbleActive:{})}}>
+            <div
+              key={fi}
+              ref={el => { bubbleRefs.current[fi] = el; }}
+              style={{...styles.bubble, ...(isA?styles.bubbleA:styles.bubbleB), ...(active?styles.bubbleActive:{})}}
+            >
               <span style={styles.bubbleName}>{fala.personagem}</span>
               <p style={styles.bubbleText}>
                 {active
