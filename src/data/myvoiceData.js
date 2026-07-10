@@ -564,12 +564,15 @@ export const myVoiceData = {
           {
             type: 'verbos',
             titulo: '📘 Verbos do Diálogo',
+            useTTS: true,
             verbos: [
-              { verbo: 'TO HEAR (ouvir/saber)',      presente: 'hear',      passado: 'heard',     participio: 'heard' },
+              { verbo: 'TO HEAR (ouvir/saber)',      presente: 'hear',      passado: 'heard',     participio: 'heard',
+                audioClip: { src: `${AUDIO_BASE}/verbos-aula4.mp3`, start: 23.19, end: 24.53 } },
               { verbo: 'TO BELIEVE (acreditar)',     presente: 'believe',   passado: 'believed',  participio: 'believed' },
               { verbo: 'TO CHOOSE (escolher)',       presente: 'choose',    passado: 'chose',     participio: 'chosen' },
               { verbo: 'TO CELEBRATE (celebrar)',    presente: 'celebrate', passado: 'celebrated',participio: 'celebrated' },
-              { verbo: 'TO FEEL (sentir)',            presente: 'feel',      passado: 'felt',      participio: 'felt' },
+              { verbo: 'TO FEEL (sentir)',            presente: 'feel',      passado: 'felt',      participio: 'felt',
+                audioClip: { src: `${AUDIO_BASE}/verbos-aula4.mp3`, start: 7.20, end: 8.72 } },
               { verbo: 'TO GIVE UP (desistir)',       presente: 'give up',   passado: 'gave up',   participio: 'given up' },
               { verbo: 'TO INSPIRE (inspirar)',      presente: 'inspire',   passado: 'inspired',  participio: 'inspired' },
               { verbo: 'TO WORK (trabalhar)',        presente: 'work',      passado: 'worked',    participio: 'worked' },
