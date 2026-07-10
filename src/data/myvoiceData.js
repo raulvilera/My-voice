@@ -450,17 +450,17 @@ export const myVoiceData = {
             audioSrc: `${AUDIO_BASE}/dialogo-aula4.mp3`,
             personagens: ['Susie', 'Dalit'],
             falas: [
-              { personagem: 'Susie',  start: 0.0,  end: 2.7,  texto: 'Dalit, can I tell you something else?' },
-              { personagem: 'Dalit',  start: 2.7,  end: 4.2,  texto: "Of course, Susie. I'm listening." },
-              { personagem: 'Susie',  start: 4.2,  end: 6.4,  texto: 'My grandmother always talks to me on the phone.' },
-              { personagem: 'Dalit',  start: 6.4,  end: 7.5,  texto: "That's very special." },
-              { personagem: 'Susie',  start: 7.5,  end: 10.2, texto: 'Yes, she tells me to stay strong and trust God.' },
-              { personagem: 'Dalit',  start: 10.2, end: 12.1, texto: 'Your grandmother sounds very wise.' },
-              { personagem: 'Susie',  start: 12.1, end: 12.9, texto: 'She is.' },
-              { personagem: 'Susie',  start: 12.9, end: 14.6, texto: 'I love listening to her stories.' },
-              { personagem: 'Dalit',  start: 14.6, end: 15.8, texto: "That's wonderful." },
-              { personagem: 'Susie',  start: 15.8, end: 17.5, texto: 'I already feel a little better now.' },
-              { personagem: 'Dalit',  start: 17.5, end: 19.0, texto: "I'm happy to hear that, Susie." }
+              { personagem: 'Susie',  start: 0.90, end: 2.51,  texto: 'Dalit, can I tell you something else?' },
+              { personagem: 'Dalit',  start: 2.69, end: 4.13,  texto: "Of course, Susie. I'm listening." },
+              { personagem: 'Susie',  start: 4.25, end: 6.26,  texto: 'My grandmother always talks to me on the phone.' },
+              { personagem: 'Dalit',  start: 6.42, end: 7.32,  texto: "That's very special." },
+              { personagem: 'Susie',  start: 7.51, end: 9.85,  texto: 'Yes, she tells me to stay strong and trust God.' },
+              { personagem: 'Dalit',  start: 10.22, end: 11.82, texto: 'Your grandmother sounds very wise.' },
+              { personagem: 'Susie',  start: 12.17, end: 12.53, texto: 'She is.' },
+              { personagem: 'Susie',  start: 12.73, end: 14.28, texto: 'I love listening to her stories.' },
+              { personagem: 'Dalit',  start: 14.65, end: 15.42, texto: "That's wonderful." },
+              { personagem: 'Susie',  start: 15.81, end: 17.26, texto: 'I already feel a little better now.' },
+              { personagem: 'Dalit',  start: 17.51, end: 18.86, texto: "I'm happy to hear that, Susie." }
             ]
           },
           {
@@ -551,14 +551,20 @@ export const myVoiceData = {
           {
             type: 'dialogo',
             titulo: '💬 Diálogo',
-            audioSrc: `${AUDIO_BASE}/dialogo-aula5.mp3`,
-            personagens: ['Dalit'],
+            audioSrc: `${AUDIO_BASE}/dialogo-aula4.mp3`,
+            personagens: ['Susie', 'Dalit'],
             falas: [
-              { personagem: 'Dalit', start: 0.5,  end: 5.1,  texto: "Of course, Susie, I'm listening." },
-              { personagem: 'Dalit', start: 5.9,  end: 8.7,  texto: "That's very special." },
-              { personagem: 'Dalit', start: 9.5,  end: 14.2, texto: 'Your grandmother sounds very wise.' },
-              { personagem: 'Dalit', start: 15.0, end: 16.8, texto: "That's wonderful." },
-              { personagem: 'Dalit', start: 17.6, end: 23.2, texto: "I'm happy to hear that, Susie." }
+              { personagem: 'Susie',  start: 0.90, end: 2.51,  texto: 'Dalit, can I tell you something else?' },
+              { personagem: 'Dalit',  start: 2.69, end: 4.13,  texto: "Of course, Susie. I'm listening." },
+              { personagem: 'Susie',  start: 4.25, end: 6.26,  texto: 'My grandmother always talks to me on the phone.' },
+              { personagem: 'Dalit',  start: 6.42, end: 7.32,  texto: "That's very special." },
+              { personagem: 'Susie',  start: 7.51, end: 9.85,  texto: 'Yes, she tells me to stay strong and trust God.' },
+              { personagem: 'Dalit',  start: 10.22, end: 11.82, texto: 'Your grandmother sounds very wise.' },
+              { personagem: 'Susie',  start: 12.17, end: 12.53, texto: 'She is.' },
+              { personagem: 'Susie',  start: 12.73, end: 14.28, texto: 'I love listening to her stories.' },
+              { personagem: 'Dalit',  start: 14.65, end: 15.42, texto: "That's wonderful." },
+              { personagem: 'Susie',  start: 15.81, end: 17.26, texto: 'I already feel a little better now.' },
+              { personagem: 'Dalit',  start: 17.51, end: 18.86, texto: "I'm happy to hear that, Susie." }
             ]
           },
           {
