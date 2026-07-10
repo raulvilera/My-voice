@@ -88,14 +88,20 @@ export const SecaoDialogo = ({ section: rawSection }) => {
         setActiveFala(fi);
         setActiveWordIdx(-1);
 
-        // Destacar palavras proporcionalmente dentro da fala
+        // Destacar palavras proporcionalmente ao tamanho de cada palavra dentro da fala
+        // (palavras maiores levam mais tempo para serem pronunciadas do que palavras curtas,
+        // então dividir o tempo igualmente entre todas defasava o destaque da pronúncia real)
         const words = fala.texto.split(/\s+/);
         const durFala = ((fala.end ?? fala.start + 3) - fala.start) / speed * 1000;
-        const msPerWord = durFala / words.length;
+        const pesos = words.map(w => (w.replace(/[^a-zA-Zà-úÀ-Ú]/g, '').length || 1) + 1.5);
+        const pesoTotal = pesos.reduce((a, b) => a + b, 0);
+        let acumulado = 0;
         words.forEach((_, wi) => {
+          const offset = (acumulado / pesoTotal) * durFala;
+          acumulado += pesos[wi];
           const tw = setTimeout(() => {
             if (!cancelledRef.current) setActiveWordIdx(wi);
-          }, wi * msPerWord);
+          }, offset);
           timersRef.current.push(tw);
         });
       }, (fala.start / speed) * 1000);
