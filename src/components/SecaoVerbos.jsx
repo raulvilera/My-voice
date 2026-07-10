@@ -22,6 +22,15 @@ export const SecaoVerbos = ({ section }) => {
   const [ttsSupport,  setTtsSupport]  = useState(true);
   const ttsQueueRef  = useRef([]);
   const ttsCancelRef = useRef(false);
+  const rowRefs      = useRef([]);
+
+  // Rola a tela para acompanhar o verbo em destaque (áudio MP3 ou TTS)
+  useEffect(() => {
+    const idx = hasSync ? activeVerbo : (hasTTS && ttsPlaying ? ttsIdx : -1);
+    if (idx < 0) return;
+    const el = rowRefs.current[idx];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  }, [activeVerbo, ttsIdx, hasSync, hasTTS, ttsPlaying]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.speechSynthesis) setTtsSupport(false);
@@ -291,7 +300,7 @@ export const SecaoVerbos = ({ section }) => {
                 activeTTS && ttsField === field ? { ...tdStyle, ...s.cellHL } : tdStyle;
 
               return (
-                <tr key={i} style={rowStyle}>
+                <tr key={i} ref={el => { rowRefs.current[i] = el; }} style={rowStyle}>
                   <td style={active ? { ...tdV, ...(activeTTS && ttsField === 'verbo' ? s.cellHL : {}) } : tdV}
                       onClick={() => hasTTS && speakCell(v.verbo)}>
                     {v.verbo}
