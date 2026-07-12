@@ -156,76 +156,134 @@ export default function GravacaoAula() {
       stream?.getTracks().forEach(t => t.stop());
       clearInterval(timerRef.current);
       if (urlPreview) URL.revokeObjectURL(urlPreview);
+      if (recorderRef.current && recorderRef.current.state !== 'inactive') {
+        try { recorderRef.current.stop(); } catch { /* já finalizado */ }
+      }
     };
   }, [stream, urlPreview]);
+
+  // Se o navegador não suporta pause()/resume() nativos do MediaRecorder
+  // (alguns WebViews/Safari antigos), escondemos o botão de pausa em vez de
+  // deixar a professora clicar num botão que nunca funciona.
+  const [pausaSuportada, setPausaSuportada] = useState(true);
+
+  // Escolhe o melhor mimeType SUPORTADO DE FATO pelo navegador atual.
+  // Importante: nunca "chutar" um mimeType não verificado (ex: 'video/mp4'
+  // sem checar isTypeSupported) — em Chrome/Firefox isso faz o construtor
+  // do MediaRecorder lançar NotSupportedError e a gravação nem começa.
+  const escolherMimeType = () => {
+    const candidatos = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm',
+      'video/mp4;codecs=h264,aac',
+      'video/mp4',
+    ];
+    for (const tipo of candidatos) {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported?.(tipo)) return tipo;
+    }
+    return ''; // deixa o navegador decidir como último recurso
+  };
 
   // ── Iniciar gravação ─────────────────────────────────────────────────────
   const iniciarGravacao = () => {
     if (!stream) return;
+
+    if (!window.MediaRecorder) {
+      setErro('Este navegador não suporta gravação de vídeo (MediaRecorder indisponível). Tente atualizar o navegador ou use o botão de câmera nativa do celular abaixo.');
+      return;
+    }
+
     chunksRef.current = [];
-    
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9'
-      : MediaRecorder.isTypeSupported('video/webm')
-        ? 'video/webm'
-        : 'video/mp4';
+    const mimeType = escolherMimeType();
 
     try {
-      const rec = new MediaRecorder(stream, { mimeType });
-      
-      rec.ondataavailable = (e) => { 
-        if (e.data.size > 0) chunksRef.current.push(e.data); 
+      const rec = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      const mimeFinal = rec.mimeType || mimeType || 'video/webm';
+
+      // Detecta suporte real a pause/resume neste navegador
+      setPausaSuportada(typeof rec.pause === 'function' && typeof rec.resume === 'function');
+
+      rec.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
       };
-      
+
       rec.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: mimeType });
+        if (chunksRef.current.length === 0) {
+          setErro('A gravação não produziu nenhum dado de vídeo. Tente novamente.');
+          setEtapa('gravar');
+          return;
+        }
+        const blob = new Blob(chunksRef.current, { type: mimeFinal });
         setBlobGravado(blob);
         const url = URL.createObjectURL(blob);
         setUrlPreview(url);
         setEtapa('revisar');
       };
-      
+
       rec.onerror = (e) => {
         console.error('[GravacaoAula] Erro no MediaRecorder:', e);
-        setErro('Erro ao gravar: ' + e.error);
+        setErro('Erro durante a gravação: ' + (e.error?.message || e.error || 'erro desconhecido'));
       };
-      
-      rec.start(1000);
+
+      // NÃO passar um "timeslice" (ex: rec.start(1000)) aqui.
+      // Vários navegadores (principalmente Chrome) têm um bug conhecido em
+      // que gravar com timeslice + pause()/resume() corrompe o trecho
+      // gravado após a retomada, gerando um vídeo que não reproduz na
+      // revisão. Gravando em um único blob (sem timeslice) evita esse bug.
+      rec.start();
       recorderRef.current = rec;
 
       setGravando(true);
       setPausado(false);
       setDuracao(0);
+
+      const inicioMs = Date.now();
       timerRef.current = setInterval(() => {
-        setDuracao(d => {
-          if (d + 1 >= MAX_DURACAO_SEG) {
-            pararGravacao();
-            return d + 1;
-          }
-          return d + 1;
-        });
+        const decorridos = Math.floor((Date.now() - inicioMs) / 1000);
+        setDuracao(decorridos);
+        if (decorridos >= MAX_DURACAO_SEG) {
+          pararGravacao();
+        }
       }, 1000);
     } catch (e) {
       console.error('[GravacaoAula] Erro ao iniciar gravação:', e);
-      setErro('Erro ao iniciar gravação: ' + e.message);
+      setErro(
+        'Erro ao iniciar gravação: ' + (e.message || 'formato de vídeo não suportado por este navegador.') +
+        ' Tente usar o botão de câmera nativa do celular abaixo.'
+      );
     }
   };
 
   // ── Pausar / Retomar ─────────────────────────────────────────────────────
   const togglePausa = () => {
-    if (!recorderRef.current) return;
+    const rec = recorderRef.current;
+    if (!rec) return;
+
     try {
       if (pausado) {
-        recorderRef.current.resume();
-        timerRef.current = setInterval(() => setDuracao(d => d + 1), 1000);
+        if (rec.state !== 'paused') {
+          setPausado(false);
+          return;
+        }
+        rec.resume();
+        const inicioMs = Date.now() - duracao * 1000;
+        timerRef.current = setInterval(() => {
+          setDuracao(Math.floor((Date.now() - inicioMs) / 1000));
+        }, 1000);
+        setPausado(false);
       } else {
-        recorderRef.current.pause();
+        if (rec.state !== 'recording') {
+          setPausado(rec.state === 'paused');
+          return;
+        }
+        rec.pause();
         clearInterval(timerRef.current);
+        setPausado(true);
       }
-      setPausado(p => !p);
     } catch (e) {
       console.error('[GravacaoAula] Erro ao pausar/retomar:', e);
-      setErro('Erro ao pausar/retomar gravação');
+      setErro('Não foi possível pausar/retomar a gravação neste navegador. Você ainda pode clicar em "Parar e Revisar".');
     }
   };
 
@@ -233,12 +291,18 @@ export default function GravacaoAula() {
   const pararGravacao = () => {
     try {
       clearInterval(timerRef.current);
-      recorderRef.current?.stop();
+      const rec = recorderRef.current;
+      // stop() em estado 'inactive' lança InvalidStateError — evita o erro.
+      if (rec && rec.state !== 'inactive') {
+        rec.stop();
+      }
       setGravando(false);
+      setPausado(false);
       stream?.getTracks().forEach(t => t.stop());
       setStream(null);
     } catch (e) {
       console.error('[GravacaoAula] Erro ao parar gravação:', e);
+      setErro('Erro ao finalizar a gravação: ' + (e.message || ''));
     }
   };
 
@@ -460,10 +524,12 @@ export default function GravacaoAula() {
 
             {gravando && (
               <>
-                <button className={styles.btnPause} onClick={togglePausa}>
-                  {pausado ? <Play size={18} /> : <Pause size={18} />}
-                  {pausado ? 'Retomar' : 'Pausar'}
-                </button>
+                {pausaSuportada && (
+                  <button className={styles.btnPause} onClick={togglePausa}>
+                    {pausado ? <Play size={18} /> : <Pause size={18} />}
+                    {pausado ? 'Retomar' : 'Pausar'}
+                  </button>
+                )}
                 <button className={styles.btnStop} onClick={pararGravacao}>
                   <StopCircle size={18} /> Parar e Revisar
                 </button>
