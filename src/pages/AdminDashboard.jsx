@@ -40,6 +40,9 @@ import VideoEducacional from '../components/VideoEducacional';
 const GravacaoAula = lazy(() =>
   import('../components/GravacaoAula').catch(() => ({ default: () => <p style={{color:'#94a3b8',padding:'2rem'}}>Componente de gravação não encontrado. Verifique se GravacaoAula.jsx está em src/components/.</p> }))
 );
+const TransmissaoAoVivo = lazy(() =>
+  import('../components/TransmissaoAoVivo').catch(() => ({ default: () => <p style={{color:'#94a3b8',padding:'2rem'}}>Componente de transmissão ao vivo não encontrado. Verifique se TransmissaoAoVivo.jsx está em src/components/.</p> }))
+);
 import { SecaoDialogo }    from '../components/SecaoDialogo';
 import { SecaoVerbos }     from '../components/SecaoVerbos';
 import { SecaoVocabulario }from '../components/SecaoVocabulario';
@@ -530,6 +533,7 @@ const AdminDashboard = () => {
     { id: 'nova',    label: 'Nova Aula',       icon: <Plus size={16}/> },
     { id: 'upload',  label: 'Importar Doc',    icon: <Upload size={16}/> },
     { id: 'gravar',  label: 'Gravar Aula',     icon: <Video size={16}/> },
+    { id: 'aovivo',  label: 'Ao Vivo',         icon: <Video size={16}/> },
     { id: 'alunos',  label: 'Alunos',          icon: <Users size={16}/> },
     { id: 'planos',  label: 'Planos',          icon: <CreditCard size={16}/> },
   ];
@@ -606,6 +610,11 @@ const AdminDashboard = () => {
         {aba === 'gravar' && (
           <Suspense fallback={<p style={{color:'#94a3b8',padding:'2rem'}}>Carregando gravador…</p>}>
             <GravacaoAula />
+          </Suspense>
+        )}
+        {aba === 'aovivo' && (
+          <Suspense fallback={<p style={{color:'#94a3b8',padding:'2rem'}}>Carregando transmissão ao vivo…</p>}>
+            <TransmissaoAoVivo />
           </Suspense>
         )}
         {aba === 'alunos' && <GerenciarAlunos />}
