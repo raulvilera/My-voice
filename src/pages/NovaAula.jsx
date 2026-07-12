@@ -188,6 +188,8 @@ const NovaAula = ({ onSalvo }) => {
   const [titulo,    setTitulo]    = useState('');
   const [subtitulo, setSubtitulo] = useState('');
   const [tag,       setTag]       = useState('Iniciante');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [isLive,    setIsLive]    = useState(false);
   const [secoes,    setSecoes]    = useState([]);
   const [salvando,  setSalvando]  = useState(false);
   const [erro,      setErro]      = useState('');
@@ -234,7 +236,15 @@ const NovaAula = ({ onSalvo }) => {
       // Insere a aula
       const { data: aula, error: aulaErr } = await supabase
         .from('aulas')
-        .insert({ numero, titulo: titulo.trim(), subtitulo: subtitulo.trim(), tag, publicada: publicar })
+        .insert({ 
+          numero, 
+          titulo: titulo.trim(), 
+          subtitulo: subtitulo.trim(), 
+          tag, 
+          publicada: publicar,
+          youtube_live_url: youtubeUrl.trim() || null,
+          is_live: isLive
+        })
         .select().single();
       if (aulaErr) throw aulaErr;
 
@@ -290,6 +300,14 @@ const NovaAula = ({ onSalvo }) => {
               <option>Intermediário</option>
               <option>Avançado</option>
             </select>
+          </div>
+          <div className={styles.metaField}>
+            <label>Link do YouTube (Live / Vídeo)</label>
+            <input value={youtubeUrl} onChange={e => setYoutubeUrl(e.target.value)} placeholder="Ex: https://youtube.com/watch?v=... ou youtu.be/..."/>
+          </div>
+          <div className={styles.metaField} style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => setIsLive(!isLive)}>
+            <input type="checkbox" checked={isLive} onChange={e => setIsLive(e.target.checked)} style={{ cursor: 'pointer' }} />
+            <label style={{ margin: 0, cursor: 'pointer' }}>Marcar aula como AO VIVO</label>
           </div>
         </div>
       </div>

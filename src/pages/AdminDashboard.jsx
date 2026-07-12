@@ -215,6 +215,11 @@ const PreviewAulas = ({ plano = 'basico' }) => {
               <span className={`${styles.statusBadge} ${aula.publicada ? styles.ativo : styles.bloqueado}`}>
                 {aula.publicada ? 'Publicada' : 'Rascunho'}
               </span>
+              {aula.is_live && (
+                <span className={styles.statusBadge} style={{ background: '#ef4444', color: '#fff', marginLeft: '8px' }}>
+                  AO VIVO
+                </span>
+              )}
               <h3>{aula.titulo}</h3>
               <p>{aula.subtitulo}</p>
 

@@ -28,6 +28,13 @@ const PILLS = {
   exercicios:  { emoji: '✏️', label: 'Exercícios' },
 };
 
+// ── HELPER YOUTUBE ─────────────────────────────────────────────────────────────
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]+)/);
+  return match ? match[1] : null;
+};
+
 // ── MODAL ─────────────────────────────────────────────────────────────────────
 const Modal = ({ aula, onClose }) => {
   const [secType, setSecType] = useState('tudo');
@@ -113,6 +120,28 @@ const Modal = ({ aula, onClose }) => {
 
         {/* Body */}
         <div style={{ padding:'1.25rem 1.5rem', flex:1, overflowY:'auto' }}>
+          
+          {aula.youtube_live_url && (secType === 'tudo') && (
+            <div style={{ marginBottom: '1.5rem', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+              {aula.is_live && (
+                <div style={{ background: '#ef4444', color: '#fff', padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ width: 8, height: 8, background: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+                  AULA AO VIVO AGORA
+                </div>
+              )}
+              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+                <iframe
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                  src={`https://www.youtube.com/embed/${getYouTubeId(aula.youtube_live_url)}?autoplay=${aula.is_live ? 1 : 0}`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          )}
+
           {toShow.length === 0
             ? <p style={{ color:'#64748b', textAlign:'center', marginTop:'2rem' }}>
                 Nenhum conteúdo para exibir.
@@ -228,9 +257,15 @@ export default function Trilha({ modoVisualizacao = false }) {
                 {/* Info */}
                 <div style={{ flex:1 }}>
                   <span style={{ fontSize:'0.68rem', fontWeight:700, letterSpacing:'0.08em',
-                    textTransform:'uppercase', color:'#06b6d4', display:'block', marginBottom:2 }}>
+                    textTransform:'uppercase', color:'#06b6d4', display:'inline-block', marginBottom:2, marginRight: 8 }}>
                     {aula.tag || 'Iniciante'}
                   </span>
+                  {aula.is_live && (
+                    <span style={{ fontSize:'0.68rem', fontWeight:700, letterSpacing:'0.08em',
+                      background:'#ef4444', color:'#fff', padding:'2px 6px', borderRadius: 4, display:'inline-block', marginBottom:2 }}>
+                      🔴 AO VIVO
+                    </span>
+                  )}
                   <h3 style={{ fontSize:'1rem', fontWeight:700, margin:'2px 0' }}>{aula.titulo}</h3>
                   <p style={{ fontSize:'0.82rem', color:'#94a3b8', marginBottom:8 }}>{aula.subtitulo}</p>
                   <div style={{ display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
