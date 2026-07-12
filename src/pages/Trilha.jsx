@@ -26,6 +26,9 @@ const PILLS = {
   dialogo:     { emoji: '💬', label: 'Diálogo'    },
   verbos:      { emoji: '📘', label: 'Verbos'      },
   vocabulario: { emoji: '📖', label: 'Vocab'       },
+  exercicios:  { emoji: '📝', label: 'Exercícios'  },
+};
+
 // ── MODAL ─────────────────────────────────────────────────────────────────────
 const Modal = ({ aula, onClose }) => {
   const [secType, setSecType] = useState('tudo');
