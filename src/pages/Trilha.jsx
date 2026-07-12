@@ -6,6 +6,7 @@ import { SecaoDialogo }     from '../components/SecaoDialogo';
 import { SecaoVerbos }      from '../components/SecaoVerbos';
 import { SecaoVocabulario } from '../components/SecaoVocabulario';
 import { SecaoExercicios }  from '../components/SecaoExercicios';
+import SalaLiveKit          from '../components/SalaLiveKit';
 import { supabase }         from '../lib/supabaseClient';
 import myVoiceData            from '../data/myvoiceData';
 
@@ -25,16 +26,6 @@ const PILLS = {
   dialogo:     { emoji: '💬', label: 'Diálogo'    },
   verbos:      { emoji: '📘', label: 'Verbos'      },
   vocabulario: { emoji: '📖', label: 'Vocab'       },
-  exercicios:  { emoji: '✏️', label: 'Exercícios' },
-};
-
-// ── HELPER YOUTUBE ─────────────────────────────────────────────────────────────
-const getYouTubeId = (url) => {
-  if (!url) return null;
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]+)/);
-  return match ? match[1] : null;
-};
-
 // ── MODAL ─────────────────────────────────────────────────────────────────────
 const Modal = ({ aula, onClose }) => {
   const [secType, setSecType] = useState('tudo');
@@ -121,24 +112,13 @@ const Modal = ({ aula, onClose }) => {
         {/* Body */}
         <div style={{ padding:'1.25rem 1.5rem', flex:1, overflowY:'auto' }}>
           
-          {aula.youtube_live_url && (secType === 'tudo') && (
+          {aula.is_live && (secType === 'tudo') && (
             <div style={{ marginBottom: '1.5rem', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-              {aula.is_live && (
-                <div style={{ background: '#ef4444', color: '#fff', padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ width: 8, height: 8, background: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-                  AULA AO VIVO AGORA
-                </div>
-              )}
-              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
-                <iframe
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                  src={`https://www.youtube.com/embed/${getYouTubeId(aula.youtube_live_url)}?autoplay=${aula.is_live ? 1 : 0}`}
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+              <div style={{ background: '#ef4444', color: '#fff', padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ width: 8, height: 8, background: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+                AULA AO VIVO AGORA
               </div>
+              <SalaLiveKit aulaId={aula.id} modo="aluno" />
             </div>
           )}
 
