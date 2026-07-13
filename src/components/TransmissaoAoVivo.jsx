@@ -8,17 +8,62 @@ export default function TransmissaoAoVivo() {
   const [aulas, setAulas] = useState([]);
   const [aulaSelecionada, setAulaSelecionada] = useState('');
   const [transmitindo, setTransmitindo] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+
+  const carregarAulas = async () => {
+    const { data, error } = await supabase
+      .from('aulas')
+      .select('id, numero, titulo, is_live')
+      .order('numero', { ascending: false });
+    if (!error) setAulas(data || []);
+  };
 
   useEffect(() => {
-    (async () => {
-      // Busca apenas aulas marcadas como Ao Vivo ou todas, dependendo de como preferir.
-      const { data, error } = await supabase
-        .from('aulas')
-        .select('id, numero, titulo, is_live')
-        .order('numero', { ascending: false });
-      if (!error) setAulas(data || []);
-    })();
+    carregarAulas();
   }, []);
+
+  // Se a professora fechar/atualizar a aba enquanto transmite, encerra a marcação no banco.
+  useEffect(() => {
+    if (!transmitindo || !aulaSelecionada) return;
+
+    const encerrarAoSair = () => {
+      // fire-and-forget: o navegador pode fechar antes da resposta, mas o navigator.sendBeacon
+      // não funciona bem com Supabase, então tentamos o update normal mesmo assim.
+      supabase.from('aulas').update({ is_live: false }).eq('id', aulaSelecionada);
+    };
+
+    window.addEventListener('beforeunload', encerrarAoSair);
+    return () => window.removeEventListener('beforeunload', encerrarAoSair);
+  }, [transmitindo, aulaSelecionada]);
+
+  const iniciarTransmissao = async () => {
+    if (!aulaSelecionada) return alert('Selecione uma aula primeiro!');
+    setSalvando(true);
+    const { error } = await supabase
+      .from('aulas')
+      .update({ is_live: true })
+      .eq('id', aulaSelecionada);
+    setSalvando(false);
+    if (error) {
+      alert('Não foi possível iniciar a transmissão: ' + error.message);
+      return;
+    }
+    setTransmitindo(true);
+  };
+
+  const encerrarTransmissao = async () => {
+    setSalvando(true);
+    const { error } = await supabase
+      .from('aulas')
+      .update({ is_live: false })
+      .eq('id', aulaSelecionada);
+    setSalvando(false);
+    if (error) {
+      alert('A transmissão foi encerrada localmente, mas houve um erro ao atualizar o status: ' + error.message);
+    }
+    setTransmitindo(false);
+    carregarAulas();
+  };
 
   if (transmitindo && aulaSelecionada) {
     return (
@@ -29,10 +74,11 @@ export default function TransmissaoAoVivo() {
             Transmitindo Ao Vivo
           </h3>
           <button 
-            onClick={() => setTransmitindo(false)}
-            style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.4rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+            onClick={encerrarTransmissao}
+            disabled={salvando}
+            style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.4rem 1rem', borderRadius: '8px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold', opacity: salvando ? 0.7 : 1 }}
           >
-            Encerrar Transmissão
+            {salvando ? 'Encerrando...' : 'Encerrar Transmissão'}
           </button>
         </div>
         <div style={{ flex: 1 }}>
@@ -76,14 +122,11 @@ export default function TransmissaoAoVivo() {
         </div>
 
         <button 
-          onClick={() => {
-            if (!aulaSelecionada) return alert('Selecione uma aula primeiro!');
-            setTransmitindo(true);
-          }}
-          disabled={!aulaSelecionada}
-          style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: aulaSelecionada ? '#8b5cf6' : '#475569', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: aulaSelecionada ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+          onClick={iniciarTransmissao}
+          disabled={!aulaSelecionada || salvando}
+          style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: aulaSelecionada ? '#8b5cf6' : '#475569', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: (aulaSelecionada && !salvando) ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', opacity: salvando ? 0.7 : 1 }}
         >
-          <Video size={18} /> Iniciar Câmera e Transmitir
+          <Video size={18} /> {salvando ? 'Iniciando...' : 'Iniciar Câmera e Transmitir'}
         </button>
       </div>
     </div>
