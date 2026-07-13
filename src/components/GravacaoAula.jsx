@@ -325,7 +325,11 @@ export default function GravacaoAula() {
   // ── Pausar / Retomar ─────────────────────────────────────────────────────
   const togglePausa = () => {
     const rec = recorderRef.current;
-    if (!rec) return;
+    if (!rec || !gravando) {
+      setErro('Inicie uma gravação primeiro para poder pausar.');
+      return;
+    }
+    setErro('');
 
     try {
       if (pausado) {
@@ -365,6 +369,10 @@ export default function GravacaoAula() {
 
   // ── Parar gravação ───────────────────────────────────────────────────────
   const pararGravacao = () => {
+    if (!gravando && !recorderRef.current) {
+      setErro('Não há nenhuma gravação em andamento para parar.');
+      return;
+    }
     try {
       clearInterval(timerRef.current);
       const rec = recorderRef.current;
@@ -591,26 +599,26 @@ export default function GravacaoAula() {
                 >
                   <Monitor size={16} /> <span>Gravar tela</span>
                 </button>
-              </div>
 
-              {fonte === 'camera' && (
-                <div className={styles.toggleRow} style={{ marginTop: '0.5rem' }}>
-                  <button
-                    className={`${styles.toggleDev} ${semCamera ? styles.toggleOff : styles.toggleOn}`}
-                    onClick={() => setSemCamera(c => !c)}
-                  >
-                    {semCamera ? <VideoOff size={16} /> : <Camera size={16} />}
-                    <span>{semCamera ? 'Câmera desligada (só áudio)' : 'Câmera ligada'}</span>
-                  </button>
-                  <button
-                    className={`${styles.toggleDev} ${semMic ? styles.toggleOff : styles.toggleOn}`}
-                    onClick={() => setSemMic(m => !m)}
-                  >
-                    {semMic ? <MicOff size={16} /> : <Mic size={16} />}
-                    <span>{semMic ? 'Microfone desligado' : 'Microfone ligado'}</span>
-                  </button>
-                </div>
-              )}
+                {fonte === 'camera' && (
+                  <>
+                    <button
+                      className={`${styles.toggleDev} ${semCamera ? styles.toggleOff : styles.toggleOn}`}
+                      onClick={() => setSemCamera(c => !c)}
+                    >
+                      {semCamera ? <VideoOff size={16} /> : <Camera size={16} />}
+                      <span>{semCamera ? 'Câmera desligada (só áudio)' : 'Câmera ligada'}</span>
+                    </button>
+                    <button
+                      className={`${styles.toggleDev} ${semMic ? styles.toggleOff : styles.toggleOn}`}
+                      onClick={() => setSemMic(m => !m)}
+                    >
+                      {semMic ? <MicOff size={16} /> : <Mic size={16} />}
+                      <span>{semMic ? 'Microfone desligado' : 'Microfone ligado'}</span>
+                    </button>
+                  </>
+                )}
+              </div>
 
               {/* Seleção de dispositivo específico (útil quando há mais de uma câmera/mic, ex: webcam externa) */}
               {fonte === 'camera' && (camsDisponiveis.length > 1 || micsDisponiveis.length > 1) && (
@@ -709,7 +717,6 @@ export default function GravacaoAula() {
             <button
               className={styles.btnPause}
               onClick={togglePausa}
-              disabled={!gravando || !pausaSuportada}
             >
               {pausado ? <Play size={18} /> : <Pause size={18} />}
               {pausado ? 'Retomar' : 'Pausar'}
@@ -718,7 +725,6 @@ export default function GravacaoAula() {
             <button
               className={styles.btnStop}
               onClick={pararGravacao}
-              disabled={!gravando}
             >
               <StopCircle size={18} /> Parar e Revisar
             </button>
