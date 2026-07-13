@@ -436,6 +436,155 @@
   color: #64748b !important;
 }
 
+/* ── Overlay de contagem regressiva ── */
+.contagemOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.contagemOverlay span {
+  font-size: 5rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 4px 24px rgba(139, 92, 246, 0.6);
+  animation: contagemPulso 0.8s ease-in-out;
+}
+
+@keyframes contagemPulso {
+  0% { transform: scale(0.5); opacity: 0; }
+  40% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Barra de Controle Profissional ── */
+.barraPro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.1rem;
+  background: rgba(10, 15, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  flex-wrap: wrap;
+  position: sticky;
+  bottom: 0.5rem;
+  z-index: 5;
+  backdrop-filter: blur(10px);
+}
+
+.barraProGrupo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.barraProCentro {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0 auto;
+}
+
+.tempoGrande {
+  font-variant-numeric: tabular-nums;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  min-width: 3.6rem;
+  text-align: center;
+}
+
+.miniBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.miniBtn:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-1px); }
+.miniBtn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+.miniBtnOff {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.miniBtnAlerta {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fbbf24;
+  animation: blink 0.8s infinite;
+}
+
+.btnRecRedondo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 3px solid #ef4444;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.btnRecRedondo:hover { transform: scale(1.05); }
+.btnRecRedondo:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.recCirculo {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.stopQuadrado {
+  width: 16px; height: 16px;
+  border-radius: 3px;
+  background: #ef4444;
+}
+
+.medidorAudio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #64748b;
+  padding-left: 0.35rem;
+}
+
+.medidorBarra {
+  width: 56px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.medidorNivel {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399, #fbbf24, #ef4444);
+  transition: width 0.08s linear;
+}
+
+@media (max-width: 600px) {
+  .barraPro { justify-content: center; }
+  .barraProCentro { order: -1; width: 100%; justify-content: center; margin-bottom: 0.35rem; }
+}
+
 /* ── Dica ── */
 .dica {
   font-size: 0.78rem;
