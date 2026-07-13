@@ -7,6 +7,12 @@ const VideoAulaProfessora = lazy(() =>
     .catch(() => ({ default: () => null }))
 );
 
+const MateriaisAula = lazy(() =>
+  import('./MateriaisAula')
+    .then(m => ({ default: m.MateriaisAula }))
+    .catch(() => ({ default: () => null }))
+);
+
 // ── Exercícios ────────────────────────────────────────────────────────────────
 // aulaId: opcional — quando fornecido, exibe o vídeo da professora acima dos exercícios
 export const SecaoExercicios = ({ section: rawSection, aulaId }) => {
@@ -80,6 +86,7 @@ export const SecaoExercicios = ({ section: rawSection, aulaId }) => {
       {aulaId && (
         <Suspense fallback={null}>
           <VideoAulaProfessora aulaId={aulaId} />
+          <MateriaisAula aulaId={aulaId} />
         </Suspense>
       )}
 
