@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Trilha from './pages/Trilha';
 import AdminDashboard from './pages/AdminDashboard';
+import Manual from './pages/Manual';
 
 const Loader = () => (
   <div style={{
@@ -57,6 +58,7 @@ const AppRoutes = () => (
     <Route path="/dashboard" element={<PrivateRoute requireRole="aluno"><Dashboard /></PrivateRoute>} />
     <Route path="/trilha"    element={<PrivateRoute requireRole="aluno"><Trilha /></PrivateRoute>} />
     <Route path="/admin"     element={<PrivateRoute requireRole="professor"><AdminDashboard /></PrivateRoute>} />
+    <Route path="/manual"    element={<PrivateRoute requireRole="professor"><Manual /></PrivateRoute>} />
     <Route path="*"          element={<Navigate to="/" replace />} />
   </Routes>
 );

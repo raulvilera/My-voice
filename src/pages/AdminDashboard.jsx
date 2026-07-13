@@ -5,7 +5,7 @@ import {
   Mic, LogOut, Users, ToggleLeft, ToggleRight, Search,
   Plus, Eye, X, Upload, FileText, Loader2,
   MessageCircle, BookMarked, Grid3x3, PenLine, GraduationCap,
-  CreditCard, Crown, Zap, Bot, Video,
+  CreditCard, Crown, Zap, Bot, Video, BookOpen,
 } from 'lucide-react';
 import Trilha from './Trilha';
 import { useAuth } from '../contexts/AuthContext';
@@ -574,6 +574,9 @@ const AdminDashboard = () => {
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>
           <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>
             <GraduationCap size={16}/> Ver como Aluno
+          </button>
+          <button className={styles.manualBtn} onClick={() => navigate('/manual')}>
+            <BookOpen size={16}/> Manual
           </button>
           <button className={styles.logoutBtn} onClick={handleLogout}><LogOut size={18}/> Sair</button>
         </div>

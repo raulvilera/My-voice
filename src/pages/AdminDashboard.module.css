@@ -71,6 +71,30 @@
   box-shadow: 0 4px 14px rgba(124,58,237,0.35);
 }
 
+/* ── Botão Manual do Professor ── */
+.manualBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(229, 192, 92, 0.1));
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: var(--color-tertiary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.manualBtn:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(229, 192, 92, 0.2));
+  border-color: var(--color-primary);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+}
+
 .logoutBtn {
   display: flex; align-items: center; gap: 0.4rem;
   font-size: 0.85rem; color: var(--color-text-muted);
