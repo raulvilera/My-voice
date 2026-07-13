@@ -14,6 +14,8 @@ import {
   Video, StopCircle, Play, Pause, Trash2, Upload,
   CheckCircle, Loader2, Camera, Mic, MicOff, VideoOff,
   ChevronDown, BookOpen, AlertCircle, RefreshCw, Eye, Edit3,
+  RotateCcw, Settings, Maximize2, Minimize2, Monitor, XCircle,
+  Volume2, Download,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -56,6 +58,18 @@ export default function GravacaoAula() {
   const [erro, setErro] = useState('');
   const [etapa, setEtapa] = useState('gravar'); // 'gravar' | 'revisar' | 'editar' | 'publicar' | 'concluido'
 
+  // Estado dos controles profissionais (barra inferior)
+  const [fonte, setFonte] = useState('camera');       // 'camera' | 'tela'
+  const [micMutado, setMicMutado] = useState(false);
+  const [cameraDesligada, setCameraDesligada] = useState(false);
+  const [facingMode, setFacingMode] = useState('user'); // frontal/traseira
+  const [qualidade, setQualidade] = useState('720p');   // '480p' | '720p' | '1080p'
+  const [mostrarConfig, setMostrarConfig] = useState(false);
+  const [contagem, setContagem] = useState(null);       // 3,2,1 antes de gravar
+  const [telaCheia, setTelaCheia] = useState(false);
+  const [nivelAudio, setNivelAudio] = useState(0);
+  const [confirmandoDescarte, setConfirmandoDescarte] = useState(false);
+
   // Refs
   const videoRef = useRef(null);         // preview ao vivo
   const previewRef = useRef(null);       // replay da gravação
@@ -63,6 +77,8 @@ export default function GravacaoAula() {
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);     // fallback mobile nativo
+  const videoBoxRef = useRef(null);      // container para tela cheia
+  const contagemTimerRef = useRef(null);
 
   // ── Busca aulas cadastradas ──────────────────────────────────────────────
   useEffect(() => {
@@ -86,6 +102,15 @@ export default function GravacaoAula() {
     })();
   }, []);
 
+  // ── Resolução conforme qualidade selecionada ─────────────────────────────
+  const resolucaoIdeal = useCallback(() => {
+    switch (qualidade) {
+      case '480p': return { width: 640, height: 480 };
+      case '1080p': return { width: 1920, height: 1080 };
+      default: return { width: 1280, height: 720 };
+    }
+  }, [qualidade]);
+
   // ── Inicia câmera ────────────────────────────────────────────────────────
   const iniciarCamera = useCallback(async () => {
     setIniciando(true);
@@ -95,11 +120,12 @@ export default function GravacaoAula() {
         throw new Error('Seu navegador ou conexão (HTTP/origem não segura) não suporta gravação de mídia. Por favor, certifique-se de acessar via HTTPS.');
       }
 
+      const { width, height } = resolucaoIdeal();
       const constraints = {
         video: !semCamera ? { 
-          width: { ideal: 1280 }, 
-          height: { ideal: 720 }, 
-          facingMode: 'user' 
+          width: { ideal: width }, 
+          height: { ideal: height }, 
+          facingMode 
         } : false,
         audio: !semMic,
       };
@@ -113,6 +139,8 @@ export default function GravacaoAula() {
         s = await navigator.mediaDevices.getUserMedia({ video: !semCamera, audio: !semMic });
       }
       setStream(s);
+      setMicMutado(false);
+      setCameraDesligada(false);
       
       if (videoRef.current) {
         videoRef.current.srcObject = s;
@@ -140,7 +168,58 @@ export default function GravacaoAula() {
     } finally {
       setIniciando(false);
     }
-  }, [semCamera, semMic]);
+  }, [semCamera, semMic, facingMode, resolucaoIdeal]);
+
+  // ── Inicia compartilhamento de tela (para aulas com slides/quadro) ───────
+  const iniciarTela = useCallback(async () => {
+    setIniciando(true);
+    setErro('');
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        throw new Error('Seu navegador não suporta compartilhamento de tela.');
+      }
+      const telaStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+
+      let audioTrack = null;
+      if (!semMic) {
+        try {
+          const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioTrack = audioStream.getAudioTracks()[0];
+        } catch (e) {
+          console.warn('[GravacaoAula] Microfone indisponível para narrar a tela:', e);
+        }
+      }
+
+      const tracks = [...telaStream.getVideoTracks()];
+      if (audioTrack) tracks.push(audioTrack);
+      else tracks.push(...telaStream.getAudioTracks());
+
+      const combinado = new MediaStream(tracks);
+
+      // Se a professora parar o compartilhamento pelo painel do navegador,
+      // finaliza a gravação automaticamente em vez de travar a tela.
+      telaStream.getVideoTracks()[0].addEventListener('ended', () => {
+        pararGravacao();
+      });
+
+      setStream(combinado);
+      setMicMutado(false);
+      setCameraDesligada(false);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = combinado;
+        try { await videoRef.current.play(); } catch { /* silencioso */ }
+      }
+    } catch (e) {
+      console.error('[GravacaoAula] Erro ao compartilhar tela:', e);
+      const mensagem = (e.name === 'NotAllowedError')
+        ? 'Permissão para compartilhar a tela foi negada ou cancelada.'
+        : (e.message || 'Não foi possível iniciar o compartilhamento de tela.');
+      setErro(mensagem);
+    } finally {
+      setIniciando(false);
+    }
+  }, [semMic]);
 
   // Conecta stream ao elemento de vídeo quando stream muda
   useEffect(() => {
@@ -155,6 +234,7 @@ export default function GravacaoAula() {
     return () => {
       stream?.getTracks().forEach(t => t.stop());
       clearInterval(timerRef.current);
+      clearInterval(contagemTimerRef.current);
       if (urlPreview) URL.revokeObjectURL(urlPreview);
       if (recorderRef.current && recorderRef.current.state !== 'inactive') {
         try { recorderRef.current.stop(); } catch { /* já finalizado */ }
@@ -286,6 +366,175 @@ export default function GravacaoAula() {
       setErro('Não foi possível pausar/retomar a gravação neste navegador. Você ainda pode clicar em "Parar e Revisar".');
     }
   };
+
+  // ── Silenciar / Ativar microfone (funciona antes e durante a gravação) ───
+  const alternarMic = () => {
+    if (!stream) return;
+    const track = stream.getAudioTracks()[0];
+    if (!track) return;
+    track.enabled = micMutado; // se estava mutado, liga; senão desliga
+    setMicMutado(m => !m);
+  };
+
+  // ── Ligar / Desligar câmera (funciona antes e durante a gravação) ────────
+  const alternarCamera = () => {
+    if (!stream || fonte === 'tela') return;
+    const track = stream.getVideoTracks()[0];
+    if (!track) return;
+    track.enabled = cameraDesligada;
+    setCameraDesligada(c => !c);
+  };
+
+  // ── Trocar câmera frontal/traseira (celular) ─────────────────────────────
+  const trocarCamera = async () => {
+    if (!stream || gravando || fonte === 'tela') return;
+    const novoFacing = facingMode === 'user' ? 'environment' : 'user';
+    try {
+      const { width, height } = resolucaoIdeal();
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: !semCamera ? { facingMode: novoFacing, width: { ideal: width }, height: { ideal: height } } : false,
+        audio: !semMic,
+      });
+      stream.getTracks().forEach(t => t.stop());
+      setFacingMode(novoFacing);
+      setStream(s);
+      setMicMutado(false);
+      setCameraDesligada(false);
+      if (videoRef.current) {
+        videoRef.current.srcObject = s;
+        videoRef.current.play().catch(() => {});
+      }
+    } catch (e) {
+      console.error('[GravacaoAula] Erro ao trocar câmera:', e);
+      setErro('Não foi possível alternar a câmera neste dispositivo.');
+    }
+  };
+
+  // ── Contagem regressiva profissional antes de iniciar (3, 2, 1) ──────────
+  const iniciarComContagem = () => {
+    if (!stream || contagem) return;
+    setErro('');
+    let n = 3;
+    setContagem(n);
+    contagemTimerRef.current = setInterval(() => {
+      n -= 1;
+      if (n <= 0) {
+        clearInterval(contagemTimerRef.current);
+        setContagem(null);
+        iniciarGravacao();
+      } else {
+        setContagem(n);
+      }
+    }, 800);
+  };
+
+  // ── Cancelar gravação em andamento (exige confirmação) ───────────────────
+  const cancelarGravacao = () => {
+    if (!confirmandoDescarte) {
+      setConfirmandoDescarte(true);
+      setTimeout(() => setConfirmandoDescarte(false), 4000);
+      return;
+    }
+    clearInterval(timerRef.current);
+    const rec = recorderRef.current;
+    if (rec) {
+      rec.ondataavailable = null;
+      rec.onstop = null;
+      if (rec.state !== 'inactive') { try { rec.stop(); } catch { /* já finalizado */ } }
+    }
+    chunksRef.current = [];
+    stream?.getTracks().forEach(t => t.stop());
+    setStream(null);
+    setGravando(false);
+    setPausado(false);
+    setDuracao(0);
+    setConfirmandoDescarte(false);
+    setEtapa('gravar');
+  };
+
+  // ── Baixar cópia local de segurança (backup) ─────────────────────────────
+  const baixarCopiaLocal = () => {
+    if (!blobGravado) return;
+    const ext = blobGravado.type?.includes('mp4') ? 'mp4' : 'webm';
+    const url = URL.createObjectURL(blobGravado);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `aula-gravada-${Date.now()}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // ── Tela cheia no preview de vídeo ────────────────────────────────────────
+  const alternarTelaCheia = async () => {
+    const el = videoBoxRef.current;
+    if (!el) return;
+    try {
+      if (!document.fullscreenElement) {
+        await el.requestFullscreen?.();
+      } else {
+        await document.exitFullscreen?.();
+      }
+    } catch (e) {
+      console.warn('[GravacaoAula] Tela cheia indisponível:', e);
+    }
+  };
+
+  useEffect(() => {
+    const handler = () => setTelaCheia(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
+
+  // ── Atalhos de teclado: Espaço pausa/retoma, Esc finaliza ────────────────
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (etapa !== 'gravar' || !gravando) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePausa();
+      } else if (e.key === 'Escape') {
+        pararGravacao();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etapa, gravando, pausado]);
+
+  // ── Medidor de nível de áudio (feedback visual profissional) ─────────────
+  useEffect(() => {
+    const audioTrack = stream?.getAudioTracks?.()[0];
+    if (!audioTrack) { setNivelAudio(0); return; }
+
+    let raf;
+    let ctx;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      ctx = new AudioCtx();
+      const source = ctx.createMediaStreamSource(new MediaStream([audioTrack]));
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      const tick = () => {
+        analyser.getByteFrequencyData(data);
+        const media = data.reduce((a, b) => a + b, 0) / data.length;
+        setNivelAudio(Math.min(100, Math.round((media / 128) * 100)));
+        raf = requestAnimationFrame(tick);
+      };
+      tick();
+    } catch (e) {
+      console.warn('[GravacaoAula] Medidor de áudio indisponível:', e);
+    }
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ctx?.close?.().catch(() => {});
+    };
+  }, [stream]);
 
   // ── Parar gravação ───────────────────────────────────────────────────────
   const pararGravacao = () => {
@@ -462,32 +711,67 @@ export default function GravacaoAula() {
           {/* Configurações de dispositivo */}
           {!stream && !gravando && (
             <div className={styles.configDispositivo}>
-              <h3 className={styles.subTitle}>Configurar Dispositivos</h3>
+              <h3 className={styles.subTitle}>Fonte de Gravação</h3>
               <div className={styles.toggleRow}>
                 <button
-                  className={`${styles.toggleDev} ${semCamera ? styles.toggleOff : styles.toggleOn}`}
-                  onClick={() => setSemCamera(c => !c)}
+                  className={`${styles.toggleDev} ${fonte === 'camera' ? styles.toggleOn : ''}`}
+                  onClick={() => setFonte('camera')}
                 >
-                  {semCamera ? <VideoOff size={16} /> : <Camera size={16} />}
-                  <span>{semCamera ? 'Câmera desligada (só áudio)' : 'Câmera ligada'}</span>
+                  <Camera size={16} />
+                  <span>Câmera</span>
                 </button>
                 <button
-                  className={`${styles.toggleDev} ${semMic ? styles.toggleOff : styles.toggleOn}`}
-                  onClick={() => setSemMic(m => !m)}
+                  className={`${styles.toggleDev} ${fonte === 'tela' ? styles.toggleOn : ''}`}
+                  onClick={() => setFonte('tela')}
                 >
-                  {semMic ? <MicOff size={16} /> : <Mic size={16} />}
-                  <span>{semMic ? 'Microfone desligado' : 'Microfone ligado'}</span>
+                  <Monitor size={16} />
+                  <span>Compartilhar Tela (slides/quadro)</span>
                 </button>
+              </div>
+
+              {fonte === 'camera' && (
+                <>
+                  <h3 className={styles.subTitle} style={{ marginTop: '0.5rem' }}>Configurar Dispositivos</h3>
+                  <div className={styles.toggleRow}>
+                    <button
+                      className={`${styles.toggleDev} ${semCamera ? styles.toggleOff : styles.toggleOn}`}
+                      onClick={() => setSemCamera(c => !c)}
+                    >
+                      {semCamera ? <VideoOff size={16} /> : <Camera size={16} />}
+                      <span>{semCamera ? 'Câmera desligada (só áudio)' : 'Câmera ligada'}</span>
+                    </button>
+                    <button
+                      className={`${styles.toggleDev} ${semMic ? styles.toggleOff : styles.toggleOn}`}
+                      onClick={() => setSemMic(m => !m)}
+                    >
+                      {semMic ? <MicOff size={16} /> : <Mic size={16} />}
+                      <span>{semMic ? 'Microfone desligado' : 'Microfone ligado'}</span>
+                    </button>
+                  </div>
+                </>
+              )}
+
+              <h3 className={styles.subTitle} style={{ marginTop: '0.5rem' }}>Qualidade de Vídeo</h3>
+              <div className={styles.toggleRow}>
+                {['480p', '720p', '1080p'].map(q => (
+                  <button
+                    key={q}
+                    className={`${styles.toggleDev} ${qualidade === q ? styles.toggleOn : ''}`}
+                    onClick={() => setQualidade(q)}
+                  >
+                    <span>{q}{q === '720p' ? ' (recomendado)' : ''}</span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
           {/* Área de vídeo ao vivo */}
-          <div className={styles.videoBox}>
+          <div className={styles.videoBox} ref={videoBoxRef}>
             {!stream && !gravando ? (
               <div className={styles.videoPlaceholder}>
-                <Camera size={48} className={styles.placeholderIcon} />
-                <p>Câmera não iniciada</p>
+                {fonte === 'tela' ? <Monitor size={48} className={styles.placeholderIcon} /> : <Camera size={48} className={styles.placeholderIcon} />}
+                <p>{fonte === 'tela' ? 'Tela não compartilhada' : 'Câmera não iniciada'}</p>
               </div>
             ) : (
               <video
@@ -505,37 +789,140 @@ export default function GravacaoAula() {
                 <span>REC {formatarTempo(duracao)}</span>
               </div>
             )}
+
+            {contagem && (
+              <div className={styles.contagemOverlay}>
+                <span>{contagem}</span>
+              </div>
+            )}
           </div>
 
-          {/* Controles */}
-          <div className={styles.controles}>
-            {!stream && !gravando && (
-              <button className={styles.btnPrimary} onClick={iniciarCamera} disabled={iniciando}>
-                {iniciando ? <Loader2 size={18} className={styles.spin} /> : <Camera size={18} />}
-                {iniciando ? 'Iniciando...' : 'Ligar Câmera'}
+          {/* Botão inicial (ligar câmera/tela) — só aparece antes do stream existir */}
+          {!stream && !gravando && (
+            <div className={styles.controles}>
+              <button
+                className={styles.btnPrimary}
+                onClick={fonte === 'tela' ? iniciarTela : iniciarCamera}
+                disabled={iniciando}
+              >
+                {iniciando ? <Loader2 size={18} className={styles.spin} /> : (fonte === 'tela' ? <Monitor size={18} /> : <Camera size={18} />)}
+                {iniciando ? 'Iniciando...' : (fonte === 'tela' ? 'Iniciar Compartilhamento' : 'Ligar Câmera')}
               </button>
-            )}
+            </div>
+          )}
 
-            {stream && !gravando && (
-              <button className={styles.btnRec} onClick={iniciarGravacao}>
-                <Mic size={18} /> Iniciar Gravação
-              </button>
-            )}
+          {/* ══════════ Barra de Controle Profissional ══════════ */}
+          {stream && (
+            <div className={styles.barraPro}>
+              <div className={styles.barraProGrupo}>
+                <button
+                  className={`${styles.miniBtn} ${micMutado ? styles.miniBtnOff : ''}`}
+                  onClick={alternarMic}
+                  title={micMutado ? 'Ativar microfone' : 'Silenciar microfone'}
+                >
+                  {micMutado ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
+                <button
+                  className={`${styles.miniBtn} ${cameraDesligada ? styles.miniBtnOff : ''}`}
+                  onClick={alternarCamera}
+                  disabled={fonte === 'tela'}
+                  title={fonte === 'tela' ? 'Indisponível ao compartilhar tela' : (cameraDesligada ? 'Ligar câmera' : 'Desligar câmera')}
+                >
+                  {cameraDesligada ? <VideoOff size={18} /> : <Camera size={18} />}
+                </button>
+                <button
+                  className={styles.miniBtn}
+                  onClick={trocarCamera}
+                  disabled={gravando || fonte === 'tela'}
+                  title="Trocar câmera (frontal/traseira)"
+                >
+                  <RotateCcw size={18} />
+                </button>
+                <div className={styles.medidorAudio} title="Nível de áudio captado">
+                  <Volume2 size={14} />
+                  <div className={styles.medidorBarra}>
+                    <div className={styles.medidorNivel} style={{ width: `${nivelAudio}%` }} />
+                  </div>
+                </div>
+              </div>
 
-            {gravando && (
-              <>
-                {pausaSuportada && (
-                  <button className={styles.btnPause} onClick={togglePausa}>
-                    {pausado ? <Play size={18} /> : <Pause size={18} />}
-                    {pausado ? 'Retomar' : 'Pausar'}
+              <div className={styles.barraProCentro}>
+                <span className={styles.tempoGrande}>{formatarTempo(duracao)}</span>
+
+                {!gravando ? (
+                  <button
+                    className={styles.btnRecRedondo}
+                    onClick={iniciarComContagem}
+                    disabled={!!contagem}
+                    title="Iniciar gravação (Espaço)"
+                  >
+                    <div className={styles.recCirculo} />
+                  </button>
+                ) : (
+                  <>
+                    {pausaSuportada && (
+                      <button className={styles.miniBtn} onClick={togglePausa} title={pausado ? 'Retomar (Espaço)' : 'Pausar (Espaço)'}>
+                        {pausado ? <Play size={18} /> : <Pause size={18} />}
+                      </button>
+                    )}
+                    <button
+                      className={styles.btnRecRedondo}
+                      onClick={pararGravacao}
+                      title="Finalizar gravação e revisar (Esc)"
+                    >
+                      <div className={styles.stopQuadrado} />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className={styles.barraProGrupo}>
+                {gravando && (
+                  <button
+                    className={`${styles.miniBtn} ${confirmandoDescarte ? styles.miniBtnAlerta : ''}`}
+                    onClick={cancelarGravacao}
+                    title={confirmandoDescarte ? 'Clique novamente para confirmar o cancelamento' : 'Cancelar gravação'}
+                  >
+                    <XCircle size={18} />
                   </button>
                 )}
-                <button className={styles.btnStop} onClick={pararGravacao}>
-                  <StopCircle size={18} /> Parar e Revisar
+                {!gravando && (
+                  <button
+                    className={styles.miniBtn}
+                    onClick={() => setMostrarConfig(c => !c)}
+                    title="Qualidade de vídeo"
+                  >
+                    <Settings size={18} />
+                  </button>
+                )}
+                <button className={styles.miniBtn} onClick={alternarTelaCheia} title={telaCheia ? 'Sair da tela cheia' : 'Tela cheia'}>
+                  {telaCheia ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
                 </button>
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
+
+          {mostrarConfig && !gravando && (
+            <div className={styles.configDispositivo}>
+              <h3 className={styles.subTitle}>Qualidade de Vídeo</h3>
+              <div className={styles.toggleRow}>
+                {['480p', '720p', '1080p'].map(q => (
+                  <button
+                    key={q}
+                    className={`${styles.toggleDev} ${qualidade === q ? styles.toggleOn : ''}`}
+                    onClick={() => setQualidade(q)}
+                  >
+                    <span>{q}{q === '720p' ? ' (recomendado)' : ''}</span>
+                  </button>
+                ))}
+              </div>
+              <p className={styles.dica}>A nova qualidade vale a partir da próxima vez que ligar a câmera.</p>
+            </div>
+          )}
+
+          <p className={styles.dica}>
+            Atalhos de teclado: <b>Espaço</b> pausa/retoma a gravação · <b>Esc</b> finaliza e leva para a revisão.
+          </p>
 
           {erro && (
             <div className={styles.erroBox} style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
@@ -596,6 +983,9 @@ export default function GravacaoAula() {
             </button>
             <button className={styles.btnSecundario} onClick={() => setEtapa('publicar')}>
               <CheckCircle size={18} /> Pular edição e publicar
+            </button>
+            <button className={styles.btnSecundario} onClick={baixarCopiaLocal}>
+              <Download size={18} /> Baixar cópia (backup)
             </button>
             <button className={styles.btnSecundario} onClick={descartar}>
               <Trash2 size={18} /> Descartar e regravar
