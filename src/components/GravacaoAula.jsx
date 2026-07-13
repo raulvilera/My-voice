@@ -717,6 +717,7 @@ export default function GravacaoAula() {
             <button
               className={styles.btnPause}
               onClick={togglePausa}
+              disabled={!gravando}
             >
               {pausado ? <Play size={18} /> : <Pause size={18} />}
               {pausado ? 'Retomar' : 'Pausar'}
@@ -725,6 +726,7 @@ export default function GravacaoAula() {
             <button
               className={styles.btnStop}
               onClick={pararGravacao}
+              disabled={!gravando}
             >
               <StopCircle size={18} /> Parar e Revisar
             </button>
@@ -757,27 +759,35 @@ export default function GravacaoAula() {
             <div className={styles.erroBox} style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
               <AlertCircle size={16} /> <span>{erro}</span>
 
-              {/* Botão de Fallback para App de Câmera Nativa do Celular */}
-              <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
-                <p style={{ fontSize: '0.85rem', marginBottom: '8px', color: '#cbd5e1' }}>
-                  Não quer mexer nas configurações? Grave usando a câmera nativa do seu celular:
-                </p>
-                <button 
-                  className={styles.btnPrimary} 
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{ width: '100%', display: 'flex', justifyContent: 'center', backgroundColor: '#8b5cf6' }}
-                >
-                  <Camera size={18} /> Usar Câmera do Celular
-                </button>
-                <input 
-                  type="file" 
-                  accept="video/*" 
-                  capture="environment" 
-                  ref={fileInputRef} 
-                  style={{ display: 'none' }} 
-                  onChange={handleFileChange} 
-                />
-              </div>
+              {/* Botão de Fallback para App de Câmera Nativa do Celular (Apenas se for erro de dispositivo/permissão/suporte) */}
+              {(erro.toLowerCase().includes('permissão') ||
+                erro.toLowerCase().includes('negada') ||
+                erro.toLowerCase().includes('suporta') ||
+                erro.toLowerCase().includes('indisponível') ||
+                erro.toLowerCase().includes('encontrado') ||
+                erro.toLowerCase().includes('acessar') ||
+                erro.toLowerCase().includes('erro ao iniciar gravação')) && (
+                <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.85rem', marginBottom: '8px', color: '#cbd5e1' }}>
+                    Não quer mexer nas configurações? Grave usando a câmera nativa do seu celular:
+                  </p>
+                  <button 
+                    className={styles.btnPrimary} 
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ width: '100%', display: 'flex', justifyContent: 'center', backgroundColor: '#8b5cf6' }}
+                  >
+                    <Camera size={18} /> Usar Câmera do Celular
+                  </button>
+                  <input 
+                    type="file" 
+                    accept="video/*" 
+                    capture="environment" 
+                    ref={fileInputRef} 
+                    style={{ display: 'none' }} 
+                    onChange={handleFileChange} 
+                  />
+                </div>
+              )}
             </div>
           )}
 
