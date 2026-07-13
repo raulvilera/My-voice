@@ -162,6 +162,14 @@
   max-width: 220px;
 }
 
+/* O navegador renderiza a lista suspensa (popup) de <option> com cores nativas do
+   sistema operacional, ignorando o "color" do elemento pai — por isso força-se aqui
+   um contraste explícito (texto escuro sobre fundo claro) para não ficar invisível. */
+.selectDev option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
 .controles button:disabled,
 .controles .toggleDev:disabled {
   opacity: 0.4;
