@@ -13,7 +13,18 @@ export const myVoiceData = {
     nome: 'Inglês Básico',
     descricao: 'Do zero à conversação. Comece sua voz em inglês aqui.',
     cor: '#8b5cf6',
-    aulas: [
+    // A partir de agora todas as aulas ficam cadastradas no banco de dados (Supabase),
+    // não mais fixas neste arquivo. A professora pediu para remover as aulas de teste
+    // que estavam aqui embutidas no código.
+    aulas: [],
+  },
+};
+
+/* Conteúdo anterior (aulas de teste embutidas no código) removido a pedido da professora.
+   Segue abaixo comentado apenas como referência histórica, caso seja necessário recuperar
+   algum trecho específico no futuro. Pode ser apagado com segurança.
+
+    aulas_removidas: [
       // ─────────────────────────────────────────────────────────────────────────────
 // AULA 1 – Substitua o objeto da aula1 em src/data/myvoiceData.js
 // ─────────────────────────────────────────────────────────────────────────────
@@ -639,7 +650,6 @@ export const myVoiceData = {
         ]
       }
     ]
-  }
-};
+*/
 
 export default myVoiceData;
