@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { RadioTower, ChevronDown, Video } from 'lucide-react';
+import { RadioTower, ChevronDown, Video, Paperclip, Upload, Loader2, Trash2, FileText, Link as LinkIcon } from 'lucide-react';
 import SalaLiveKit from './SalaLiveKit';
 import styles from './TransmissaoAoVivo.module.css';
 
@@ -9,6 +9,93 @@ export default function TransmissaoAoVivo() {
   const [aulaSelecionada, setAulaSelecionada] = useState('');
   const [transmitindo, setTransmitindo] = useState(false);
   const [salvando, setSalvando] = useState(false);
+
+  // Materiais anexados à aula
+  const [materiais, setMateriais] = useState([]);
+  const [tituloMaterial, setTituloMaterial] = useState('');
+  const [linkMaterial, setLinkMaterial] = useState('');
+  const [arquivoMaterial, setArquivoMaterial] = useState(null);
+  const [enviandoMaterial, setEnviandoMaterial] = useState(false);
+  const [erroMaterial, setErroMaterial] = useState('');
+
+  const carregarMateriais = async (aulaId) => {
+    if (!aulaId) { setMateriais([]); return; }
+    const { data, error } = await supabase
+      .from('materiais_aula')
+      .select('id, titulo, url, tipo, created_at')
+      .eq('aula_id', aulaId)
+      .order('created_at', { ascending: false });
+    if (!error) setMateriais(data || []);
+  };
+
+  useEffect(() => {
+    carregarMateriais(aulaSelecionada);
+    setTituloMaterial('');
+    setLinkMaterial('');
+    setArquivoMaterial(null);
+    setErroMaterial('');
+  }, [aulaSelecionada]);
+
+  const enviarMaterial = async () => {
+    if (!aulaSelecionada) return;
+    if (!tituloMaterial.trim()) {
+      setErroMaterial('Dê um nome para o material antes de enviar.');
+      return;
+    }
+    if (!arquivoMaterial && !linkMaterial.trim()) {
+      setErroMaterial('Escolha um arquivo ou cole um link.');
+      return;
+    }
+
+    setEnviandoMaterial(true);
+    setErroMaterial('');
+
+    try {
+      let url = '';
+      let tipo = 'arquivo';
+
+      if (linkMaterial.trim()) {
+        url = linkMaterial.trim();
+        tipo = 'link';
+      } else {
+        const ext = (arquivoMaterial.name.split('.').pop() || '').toLowerCase();
+        tipo = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext) ? 'imagem' : (ext === 'pdf' ? 'pdf' : 'arquivo');
+        const nomeArquivo = `aula-${aulaSelecionada}-${Date.now()}.${ext}`;
+        const caminho = `materiais/${nomeArquivo}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from('videos') // reaproveita o mesmo bucket público já usado para os vídeos-aula
+          .upload(caminho, arquivoMaterial, { contentType: arquivoMaterial.type, upsert: false });
+
+        if (uploadErr) throw new Error('Erro ao enviar arquivo: ' + uploadErr.message);
+
+        const { data: urlData } = supabase.storage.from('videos').getPublicUrl(caminho);
+        url = urlData?.publicUrl;
+        if (!url) throw new Error('URL do material não foi gerada.');
+      }
+
+      const { error: dbErr } = await supabase
+        .from('materiais_aula')
+        .insert({ aula_id: parseInt(aulaSelecionada), titulo: tituloMaterial.trim(), url, tipo });
+
+      if (dbErr) throw new Error('Erro ao registrar material: ' + dbErr.message);
+
+      setTituloMaterial('');
+      setLinkMaterial('');
+      setArquivoMaterial(null);
+      await carregarMateriais(aulaSelecionada);
+    } catch (e) {
+      setErroMaterial(e.message || 'Erro ao anexar material.');
+    } finally {
+      setEnviandoMaterial(false);
+    }
+  };
+
+  const removerMaterial = async (id) => {
+    if (!window.confirm('Remover este material? Os alunos deixarão de vê-lo.')) return;
+    const { error } = await supabase.from('materiais_aula').delete().eq('id', id);
+    if (!error) setMateriais(m => m.filter(item => item.id !== id));
+  };
 
   const carregarAulas = async () => {
     const { data, error } = await supabase
@@ -67,7 +154,7 @@ export default function TransmissaoAoVivo() {
 
   if (transmitindo && aulaSelecionada) {
     return (
-      <div style={{ height: '70vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: 'auto', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: '#1e293b', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ width: 10, height: 10, background: '#ef4444', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
@@ -81,9 +168,23 @@ export default function TransmissaoAoVivo() {
             {salvando ? 'Encerrando...' : 'Encerrar Transmissão'}
           </button>
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ height: '65vh' }}>
           <SalaLiveKit aulaId={aulaSelecionada} modo="professora" />
         </div>
+
+        <PainelMateriais
+          materiais={materiais}
+          tituloMaterial={tituloMaterial}
+          setTituloMaterial={setTituloMaterial}
+          linkMaterial={linkMaterial}
+          setLinkMaterial={setLinkMaterial}
+          arquivoMaterial={arquivoMaterial}
+          setArquivoMaterial={setArquivoMaterial}
+          enviandoMaterial={enviandoMaterial}
+          erroMaterial={erroMaterial}
+          enviarMaterial={enviarMaterial}
+          removerMaterial={removerMaterial}
+        />
       </div>
     );
   }
@@ -127,6 +228,96 @@ export default function TransmissaoAoVivo() {
           style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: aulaSelecionada ? '#8b5cf6' : '#475569', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: (aulaSelecionada && !salvando) ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', opacity: salvando ? 0.7 : 1 }}
         >
           <Video size={18} /> {salvando ? 'Iniciando...' : 'Iniciar Câmera e Transmitir'}
+        </button>
+
+        {aulaSelecionada && (
+          <PainelMateriais
+            materiais={materiais}
+            tituloMaterial={tituloMaterial}
+            setTituloMaterial={setTituloMaterial}
+            linkMaterial={linkMaterial}
+            setLinkMaterial={setLinkMaterial}
+            arquivoMaterial={arquivoMaterial}
+            setArquivoMaterial={setArquivoMaterial}
+            enviandoMaterial={enviandoMaterial}
+            erroMaterial={erroMaterial}
+            enviarMaterial={enviarMaterial}
+            removerMaterial={removerMaterial}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Painel de materiais anexados à aula ──────────────────────────────────────
+// Uma vez anexado, o material fica disponível para TODOS os alunos que têm
+// acesso à aula (não só quem assistiu à transmissão ao vivo).
+function PainelMateriais({
+  materiais, tituloMaterial, setTituloMaterial, linkMaterial, setLinkMaterial,
+  arquivoMaterial, setArquivoMaterial, enviandoMaterial, erroMaterial,
+  enviarMaterial, removerMaterial,
+}) {
+  return (
+    <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#1e293b', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
+      <h4 style={{ margin: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
+        <Paperclip size={16} style={{ color: '#06b6d4' }} /> Materiais da Aula
+      </h4>
+      <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0 0 0.75rem' }}>
+        Anexe um PDF, imagem, documento ou link. Fica disponível automaticamente para todos os alunos dessa aula, mesmo quem não assistir ao vivo.
+      </p>
+
+      {materiais.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '0.9rem' }}>
+          {materiais.map(m => (
+            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.7rem', background: 'rgba(255,255,255,0.03)', borderRadius: 8, fontSize: '0.8rem' }}>
+              {m.tipo === 'link' ? <LinkIcon size={14} style={{ color: '#06b6d4' }} /> : <FileText size={14} style={{ color: '#06b6d4' }} />}
+              <a href={m.url} target="_blank" rel="noopener noreferrer" style={{ color: '#e2e8f0', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {m.titulo}
+              </a>
+              <button onClick={() => removerMaterial(m.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171', display: 'flex' }} title="Remover material">
+                <Trash2 size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <input
+          type="text"
+          placeholder="Nome do material (ex: Apostila Unidade 3)"
+          value={tituloMaterial}
+          onChange={e => setTituloMaterial(e.target.value)}
+          style={{ padding: '0.6rem 0.8rem', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.82rem' }}
+        />
+        <input
+          type="file"
+          onChange={e => { setArquivoMaterial(e.target.files?.[0] || null); setLinkMaterial(''); }}
+          style={{ fontSize: '0.78rem', color: '#94a3b8' }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ou</span>
+          <input
+            type="text"
+            placeholder="Colar um link (ex: Google Drive, YouTube...)"
+            value={linkMaterial}
+            onChange={e => { setLinkMaterial(e.target.value); setArquivoMaterial(null); }}
+            style={{ flex: 1, padding: '0.55rem 0.8rem', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.8rem' }}
+          />
+        </div>
+
+        {erroMaterial && (
+          <p style={{ color: '#f87171', fontSize: '0.78rem', margin: 0 }}>{erroMaterial}</p>
+        )}
+
+        <button
+          onClick={enviarMaterial}
+          disabled={enviandoMaterial}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.6rem', borderRadius: 8, background: '#06b6d4', color: '#0f172a', border: 'none', fontWeight: 'bold', cursor: enviandoMaterial ? 'not-allowed' : 'pointer', opacity: enviandoMaterial ? 0.7 : 1 }}
+        >
+          {enviandoMaterial ? <Loader2 size={16} className={styles.spin || ''} /> : <Upload size={16} />}
+          {enviandoMaterial ? 'Enviando...' : 'Anexar Material'}
         </button>
       </div>
     </div>
