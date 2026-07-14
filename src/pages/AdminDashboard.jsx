@@ -555,9 +555,9 @@ const AdminDashboard = () => {
     <div className={styles.adminContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <img src="/my_voice_default.png" alt="My Voice" style={{ width:'54px', height:'54px', borderRadius:'50%', objectFit:'cover' }} />
+          <img src="/my_voice_default.png" alt="The Lenz Voice" style={{ width:'54px', height:'54px', borderRadius:'50%', objectFit:'cover' }} />
           <div>
-            <h2>My Voice</h2>
+            <h2>The Lenz Voice</h2>
             <span className={styles.roleTag}>Área da Professora</span>
           </div>
         </div>
