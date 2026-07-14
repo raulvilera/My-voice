@@ -489,28 +489,12 @@ const ModoAluno = ({ onFechar }) => (
     background: 'var(--color-bg-primary, #0f172a)',
   }}>
     {/* Banner fixo */}
-    <div style={{
-      background: 'linear-gradient(135deg, #7c3aed, #db2777)',
-      padding: '0.6rem 1.25rem',
-      display: 'flex', alignItems: 'center',
-      justifyContent: 'space-between', gap: '1rem',
-      flexShrink: 0, zIndex: 400,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className={styles.modoAlunoBanner}>
+      <div className={styles.modoAlunoBannerTexto}>
         <GraduationCap size={18} color="#fff"/>
-        <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
-          Modo Visualização — você está vendo como o aluno vê
-        </span>
+        <span>Modo Visualização — você está vendo como o aluno vê</span>
       </div>
-      <button
-        onClick={onFechar}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '0.4rem',
-          background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)',
-          borderRadius: '999px', padding: '0.35rem 0.9rem',
-          color: '#fff', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
-        }}
-      >
+      <button className={styles.modoAlunoVoltarBtn} onClick={onFechar}>
         <X size={15}/> Voltar à área da professora
       </button>
     </div>
