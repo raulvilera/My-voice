@@ -562,15 +562,6 @@ const AdminDashboard = () => {
           </div>
         </div>
         <div className={styles.navRight}>
-          <button
-            className={styles.planoBadgeBtn}
-            style={{ '--plano-cor': planoBadgeInfo.cor }}
-            onClick={() => setAba('planos')}
-            title="Gerenciar plano"
-          >
-            {planoBadgeInfo.icone}
-            <span>{planoBadgeInfo.label}</span>
-          </button>
           <span className={styles.nomeProf}>Olá, {profile?.name?.split(' ')[0]} 👋</span>
           <button className={styles.verAlunoBtn} onClick={() => setModoAluno(true)}>
             <GraduationCap size={16}/> Ver como Aluno
