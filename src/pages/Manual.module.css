@@ -24,6 +24,24 @@
   border-bottom: 1px solid var(--glass-border);
 }
 
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .navActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .backBtn, .printBtn {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+  }
+}
+
 .logoInfo {
   display: flex;
   align-items: center;
@@ -51,7 +69,9 @@
 .navActions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 .backBtn, .printBtn {
@@ -605,11 +625,6 @@
 }
 
 @media (max-width: 520px) {
-  .bookScene {
-    width: 96vw;
-    max-height: 60vh;
-  }
-
   .controls {
     gap: 1rem;
   }
@@ -617,6 +632,71 @@
   .pageIndicator {
     font-size: 0.7rem;
     text-align: center;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   MODO MOBILE (≤700px): abandona o spread 3D de 2 páginas lado a lado.
+   Nessa largura o spread nunca cabia de forma legível — a página da
+   esquerda (resultado do flip em rotateY(-180deg)) ficava sempre cortada
+   pelo overflow-x:hidden do container raiz. Em vez disso, mostramos
+   apenas a folha ativa, com as duas faces (frente/verso) empilhadas em
+   coluna única, ocupando 100% da largura disponível.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .bookScene {
+    width: 100%;
+    aspect-ratio: auto;
+    max-height: none;
+    perspective: none;
+    display: block;
+  }
+
+  .bookContainer {
+    transform: none !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    display: block;
+    height: auto;
+  }
+
+  .bookContainer::before {
+    display: none;
+  }
+
+  .spineCrease {
+    display: none;
+  }
+
+  .sheet {
+    display: none;
+    position: static;
+    width: 100%;
+    height: auto;
+    transform: none !important;
+  }
+
+  /* Só a folha correspondente à página ativa aparece */
+  .sheetActiveMobile {
+    display: block;
+    pointer-events: auto;
+  }
+
+  .pageShadow {
+    display: none;
+  }
+
+  .pageFace {
+    position: static;
+    width: 100%;
+    height: auto;
+    min-height: 60vh;
+    transform: none !important;
+    border-radius: 8px;
+    overflow-x: hidden;
+  }
+
+  .pageFace + .pageFace {
+    margin-top: 1rem;
   }
 }
 
