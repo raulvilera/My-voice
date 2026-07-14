@@ -88,7 +88,7 @@ const Dashboard = () => {
     <div className={styles.dashboardContainer}>
       <nav className={styles.navbar}>
         <div className={styles.logoInfo}>
-          <img src="/my_voice_default.png" alt="My Voice Logo" style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '50%' }} />
+          <img src="/my_voice_default.png" alt="The Lenz Voice Logo" style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '50%' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {profile?.role === 'professor' && (
@@ -129,7 +129,7 @@ const Dashboard = () => {
           
           {showInstallBtn && (
             <button className={styles.installAppBtn} onClick={handleInstallClick}>
-              <Download size={18} /> Instalar Aplicativo My Voice
+              <Download size={18} /> Instalar Aplicativo The Lenz Voice
             </button>
           )}
         </header>
