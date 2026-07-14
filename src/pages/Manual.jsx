@@ -84,6 +84,32 @@ export default function Manual() {
   // Helper: retorna o conteúdo no idioma ativo — L(portugues, ingles)
   const L = (pt, en) => (lang === 'en' ? en : pt);
 
+  // Controla o modo de página expandida (ativado por duplo clique sobre o livro)
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Alterna o modo expandido ao dar duplo clique sobre a página.
+  // Ignora duplo clique em botões/links internos (navegação do sumário, setas, etc.)
+  // para não atrapalhar a navegação normal do usuário.
+  const toggleExpand = (e) => {
+    if (e.target.closest('button, a')) return;
+    setIsExpanded(prev => !prev);
+  };
+
+  // Enquanto expandido: permite fechar com a tecla ESC e trava o scroll do fundo
+  useEffect(() => {
+    if (!isExpanded) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsExpanded(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isExpanded]);
+
   // Toca o som quando muda de página/spread
   useEffect(() => {
     if (spread > 0) {
@@ -207,9 +233,23 @@ export default function Manual() {
         </aside>
 
         {/* ── CONTEÚDO DO LIVRO (FLIPBOOK 3D) ── */}
-        <div className={styles.bookWrapper}>
-          
-          <div className={styles.bookScene}>
+        <div className={`${styles.bookWrapper} ${isExpanded ? styles.bookWrapperExpanded : ''}`}>
+
+          {isExpanded && (
+            <button
+              className={styles.expandCloseBtn}
+              onClick={() => setIsExpanded(false)}
+              aria-label={L('Fechar visualização ampliada', 'Close expanded view')}
+            >
+              ✕
+            </button>
+          )}
+
+          <div
+            className={styles.bookScene}
+            onDoubleClick={toggleExpand}
+            title={L('Duplo clique para ampliar a página', 'Double-click to zoom the page')}
+          >
             <div className={styles.bookContainer}>
               <div className={styles.spineCrease}></div>
 
