@@ -182,13 +182,13 @@ export default function Trilha({ modoVisualizacao = false }) {
         backdropFilter:'blur(20px)', borderBottom:'1px solid rgba(255,255,255,0.1)',
       }}>
         <div style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
-          <img src="/my_voice_default.png" alt="My Voice"
+          <img src="/my_voice_default.png" alt="The Lenz Voice"
             style={{ width:46, height:46, borderRadius:'50%', objectFit:'cover' }} />
           <span style={{
             fontSize:'1.2rem', fontWeight:800,
             background:'linear-gradient(to right,#8b5cf6,#ec4899)',
             WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
-          }}>My Voice</span>
+          }}>The Lenz Voice</span>
         </div>
         {!modoVisualizacao && (
           <button onClick={() => navigate(-1)} style={{
