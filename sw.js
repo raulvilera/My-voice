@@ -1,45 +1,35 @@
-const CACHE = 'myvoice-v3';
-const ASSETS = ['/'];
+// Service Worker v2 — força limpeza do cache de icones PWA
+const CACHE_VERSION = 'myvoice-v3-lv';
+const ICON_URLS = ['/icon-48.png', '/icon-192.png', '/icon-512.png', '/icon-180.png', '/my_voice_default.png'];
 
-// URLs que NUNCA devem ser cacheadas (APIs externas)
-const BYPASS_URLS = [
-  'supabase.co',
-  'supabase.com',
-  'anthropic.com',
-  'googleapis.com',
-];
-
-const shouldBypass = (url) =>
-  BYPASS_URLS.some(domain => url.includes(domain));
-
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
-  );
+self.addEventListener('install', (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(ICON_URLS))
+  );
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
-  // Nunca intercepta chamadas à API
-  if (shouldBypass(e.request.url)) return;
-  if (e.request.method !== 'GET') return;
-
-  e.respondWith(
-    fetch(e.request)
-      .then(res => {
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-        return res;
-      })
-      .catch(() => caches.match(e.request))
-  );
+// Rede primeiro para icones, cache como fallback
+self.addEventListener('fetch', (event) => {
+  if (ICON_URLS.some((u) => event.request.url.endsWith(u))) {
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => {
+          const clone = res.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put(event.request, clone));
+          return res;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  }
 });
