@@ -186,14 +186,16 @@
 }
 
 .bookScene {
-  width: 100%;
+  width: min(920px, 94vw);
   aspect-ratio: 4 / 3;
-  max-height: 580px;
+  max-height: min(580px, 68vh);
   perspective: 1800px;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: zoom-in;
+  transition: width 0.3s ease, max-height 0.3s ease;
 }
 
 .bookContainer {
@@ -274,7 +276,7 @@
   background-color: #faf6ee; /* Cor de papel envelhecido elegante */
   background-image: radial-gradient(circle at 50% 50%, #ffffff 0%, #faf6ee 100%);
   color: #1e293b;
-  padding: 2.2rem;
+  padding: clamp(1rem, 4vw, 2.2rem);
   box-sizing: border-box;
   overflow-y: auto;
   border-radius: 0 4px 4px 0;
@@ -331,8 +333,8 @@
 }
 
 .coverLogo {
-  width: 90px;
-  height: 90px;
+  width: clamp(52px, 11vw, 90px);
+  height: clamp(52px, 11vw, 90px);
   border-radius: 50%;
   border: 2px solid var(--color-primary);
   margin-bottom: 1.5rem;
@@ -340,7 +342,7 @@
 }
 
 .coverBadge {
-  font-size: 0.75rem;
+  font-size: clamp(0.6rem, 1.6vw, 0.75rem);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--color-tertiary);
@@ -349,7 +351,7 @@
 }
 
 .coverTitle {
-  font-size: 2.2rem;
+  font-size: clamp(1.3rem, 5.5vw, 2.2rem);
   font-weight: 800;
   line-height: 1.1;
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-tertiary) 100%);
@@ -359,7 +361,7 @@
 }
 
 .coverSubtitle {
-  font-size: 0.95rem;
+  font-size: clamp(0.72rem, 2.3vw, 0.95rem);
   color: var(--color-text-muted);
   max-width: 80%;
   margin-bottom: 2rem;
@@ -389,7 +391,7 @@
 }
 
 .pageHeaderTitle {
-  font-size: 0.75rem;
+  font-size: clamp(0.6rem, 1.5vw, 0.75rem);
   font-weight: 800;
   text-transform: uppercase;
   color: #64748b;
@@ -397,20 +399,20 @@
 }
 
 .pageHeaderChapter {
-  font-size: 0.75rem;
+  font-size: clamp(0.6rem, 1.5vw, 0.75rem);
   font-weight: 700;
   color: #d4af37;
 }
 
 .pageBody {
   flex: 1;
-  font-size: 0.85rem;
+  font-size: clamp(0.66rem, 1.9vw, 0.85rem);
   line-height: 1.55;
   color: #334155;
 }
 
 .pageBody h2 {
-  font-size: 1.25rem;
+  font-size: clamp(0.95rem, 3.2vw, 1.25rem);
   font-weight: 800;
   color: #0f172a;
   margin-top: 0.5rem;
@@ -513,7 +515,7 @@
   margin-top: 1rem;
   display: flex;
   justify-content: space-between;
-  font-size: 0.72rem;
+  font-size: clamp(0.58rem, 1.4vw, 0.72rem);
   color: #64748b;
   font-weight: 600;
 }
@@ -559,59 +561,113 @@
   color: var(--color-text-muted);
 }
 
-/* Responsividade: Mobile */
+/* ─────────────────────────────────────────────────────────────────────────
+   Responsividade: o livro mantém sempre o MESMO FORMATO (spread de 2 páginas
+   com efeito de virar em 3D e som de papel) em qualquer tamanho de tela —
+   apenas a escala do livro e a tipografia (via clamp() nas regras acima)
+   se ajustam fluidamente. O que muda entre telas é só a disposição do
+   índice lateral, que passa a ficar acima do livro em telas estreitas.
+   ───────────────────────────────────────────────────────────────────────── */
 @media (max-width: 950px) {
   .mainLayout {
     flex-direction: column;
     align-items: center;
     padding: 1rem;
+    gap: 1.25rem;
   }
 
   .sidebar {
     width: 100%;
+    max-width: min(920px, 94vw);
     position: static;
   }
+}
 
+@media (max-width: 520px) {
   .bookScene {
-    aspect-ratio: auto;
-    height: 600px;
-    width: 100%;
+    width: 96vw;
+    max-height: 60vh;
   }
 
-  .bookContainer {
-    box-shadow: none;
+  .controls {
+    gap: 1rem;
   }
 
-  .bookContainer::before {
-    display: none;
+  .pageIndicator {
+    font-size: 0.7rem;
+    text-align: center;
+  }
+}
+
+/* ── Modo de Página Expandida (ativado por duplo clique sobre o livro) ── */
+.bookWrapper {
+  transition: gap 0.3s ease;
+}
+
+.bookWrapperExpanded {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  margin: 0;
+  padding: 2rem;
+  background: rgba(2, 6, 15, 0.94);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  animation: expandFadeIn 0.25s ease;
+}
+
+@keyframes expandFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bookWrapperExpanded .bookScene {
+  width: min(1150px, 92vw);
+  max-height: min(800px, 78dvh);
+  cursor: zoom-out;
+}
+
+.expandCloseBtn {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 1001;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.expandCloseBtn:hover {
+  background: var(--color-primary);
+  color: var(--color-bg);
+  transform: scale(1.05);
+}
+
+@media (max-width: 520px) {
+  .bookWrapperExpanded {
+    padding: 1rem;
   }
 
-  /* Em telas menores, desabilitamos o 3D e mostramos apenas a página ativa como única */
-  .sheet {
-    width: 100%;
-    left: 0;
-    transform: none !important;
-    display: none;
-  }
-
-  /* Mostrar apenas a folha que contém a página atual */
-  .sheetActiveMobile {
-    display: block !important;
-    position: relative;
-    height: 100%;
-  }
-
-  .pageFace {
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  }
-
-  .pageFaceBack {
-    transform: none !important; /* remove rotação no mobile */
-  }
-
-  .spineCrease {
-    display: none;
+  .bookWrapperExpanded .bookScene {
+    width: 96vw;
+    max-height: 70dvh;
   }
 }
 
@@ -627,8 +683,17 @@
   }
 
   /* Ocultar elementos desnecessários na impressão */
-  .navbar, .sidebar, .controls, .spineCrease {
+  .navbar, .sidebar, .controls, .spineCrease, .expandCloseBtn {
     display: none !important;
+  }
+
+  .bookWrapperExpanded {
+    position: static !important;
+    inset: auto !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    animation: none !important;
   }
 
   .mainLayout {
