@@ -260,15 +260,17 @@ export default function Manual() {
                 {/* Pág 0 (Frente): Capa */}
                 <div className={`${styles.pageFace} ${styles.pageFaceFront}`}>
                   <div className={styles.coverPage}>
-                    <img src="/my_voice_default.png" alt="The Lenz Voice" className={styles.coverLogo} />
-                    <span className={styles.coverBadge}>{L('Guia de Funcionalidades', 'Feature Guide')}</span>
-                    <h1 className={styles.coverTitle}>{L('Manual do Professor', "Teacher's Manual")}</h1>
-                    <p className={styles.coverSubtitle}>
-                      {L(
-                        'Tudo sobre a tecnologia da sua plataforma: gravações, transmissões, materiais e publicação de aulas.',
-                        'Everything about your platform\'s technology: recordings, live streams, materials, and publishing lessons.'
-                      )}
-                    </p>
+                    <div className={styles.coverContent}>
+                      <img src="/my_voice_default.png" alt="The Lenz Voice" className={styles.coverLogo} />
+                      <span className={styles.coverBadge}>{L('Guia de Funcionalidades', 'Feature Guide')}</span>
+                      <h1 className={styles.coverTitle}>{L('Manual do Professor', "Teacher's Manual")}</h1>
+                      <p className={styles.coverSubtitle}>
+                        {L(
+                          'Tudo sobre a tecnologia da sua plataforma: gravações, transmissões, materiais e publicação de aulas.',
+                          'Everything about your platform\'s technology: recordings, live streams, materials, and publishing lessons.'
+                        )}
+                      </p>
+                    </div>
                     <div className={styles.coverFooter}>
                       {L('Plataforma de Reforço Escolar The Lenz Voice © 2026', 'The Lenz Voice Tutoring Platform © 2026')}
                     </div>
