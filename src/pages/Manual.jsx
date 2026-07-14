@@ -780,7 +780,10 @@ export default function Manual() {
                         )}
                       </p>
                       <p style={{ color: '#d4af37', fontSize: '0.85rem', fontWeight: 700, marginTop: '1.5rem' }}>
-                        suporte@myvoice.com.br
+                        raulvilera@gmail.com
+                      </p>
+                      <p style={{ color: '#d4af37', fontSize: '0.85rem', fontWeight: 700, marginTop: '0.35rem' }}>
+                        WhatsApp: (11) 96838-0160
                       </p>
                     </div>
                     <div className={styles.pageFooter} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)' }}>
