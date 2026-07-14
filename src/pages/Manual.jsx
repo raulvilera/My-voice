@@ -149,7 +149,7 @@ export default function Manual() {
         <div className={styles.logoInfo}>
           <img src="/my_voice_default.png" alt="Logo" style={{ width: '42px', height: '42px', borderRadius: '50%', border: '1px solid #d4af37' }} />
           <div>
-            <h2>My Voice</h2>
+            <h2>The Lenz Voice</h2>
             <span className={styles.roleTag}>Manual de Recursos Tecnológicos</span>
           </div>
         </div>
@@ -212,14 +212,14 @@ export default function Manual() {
                 {/* Pág 0 (Frente): Capa */}
                 <div className={`${styles.pageFace} ${styles.pageFaceFront}`}>
                   <div className={styles.coverPage}>
-                    <img src="/my_voice_default.png" alt="My Voice" className={styles.coverLogo} />
+                    <img src="/my_voice_default.png" alt="The Lenz Voice" className={styles.coverLogo} />
                     <span className={styles.coverBadge}>Guia de Funcionalidades</span>
                     <h1 className={styles.coverTitle}>Manual do Professor</h1>
                     <p className={styles.coverSubtitle}>
                       Tudo sobre a tecnologia da sua plataforma: gravações, transmissões, materiais e publicação de aulas.
                     </p>
                     <div className={styles.coverFooter}>
-                      Plataforma de Reforço Escolar My Voice © 2026
+                      Plataforma de Reforço Escolar The Lenz Voice © 2026
                     </div>
                   </div>
                 </div>
@@ -284,7 +284,7 @@ export default function Manual() {
                       </div>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 1</span>
                     </div>
                   </div>
@@ -320,7 +320,7 @@ export default function Manual() {
                       </div>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 2</span>
                     </div>
                   </div>
@@ -350,7 +350,7 @@ export default function Manual() {
                       </p>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 3</span>
                     </div>
                   </div>
@@ -386,7 +386,7 @@ export default function Manual() {
                       </p>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 4</span>
                     </div>
                   </div>
@@ -417,7 +417,7 @@ export default function Manual() {
                       </p>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 5</span>
                     </div>
                   </div>
@@ -454,7 +454,7 @@ export default function Manual() {
                       </div>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 6</span>
                     </div>
                   </div>
@@ -485,7 +485,7 @@ export default function Manual() {
                       </p>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 7</span>
                     </div>
                   </div>
@@ -520,7 +520,7 @@ export default function Manual() {
                       </div>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 8</span>
                     </div>
                   </div>
@@ -547,7 +547,7 @@ export default function Manual() {
                       </ul>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 9</span>
                     </div>
                   </div>
@@ -582,7 +582,7 @@ export default function Manual() {
                       </p>
                     </div>
                     <div className={styles.pageFooter}>
-                      <span>My Voice — Manual do Professor</span>
+                      <span>The Lenz Voice — Manual do Professor</span>
                       <span>Página 10</span>
                     </div>
                   </div>
@@ -606,7 +606,7 @@ export default function Manual() {
                       </p>
                     </div>
                     <div className={styles.pageFooter} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)' }}>
-                      <span>Plataforma My Voice</span>
+                      <span>Plataforma The Lenz Voice</span>
                       <span>Página 11</span>
                     </div>
                   </div>
