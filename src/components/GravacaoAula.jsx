@@ -13,7 +13,7 @@ import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import {
   Video, StopCircle, Play, Pause, Trash2, Upload,
   CheckCircle, Loader2, Camera, Mic, MicOff, VideoOff,
-  ChevronDown, BookOpen, AlertCircle, RefreshCw, Eye, Edit3, Monitor,
+  ChevronDown, BookOpen, AlertCircle, RefreshCw, Eye, Edit3, Monitor, Copy, Link2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -62,6 +62,8 @@ export default function GravacaoAula() {
   const [tituloVideo, setTituloVideo] = useState('');
   const [publicando, setPublicando] = useState(false);
   const [sucesso, setSucesso] = useState('');
+  const [linkVideoPublicado, setLinkVideoPublicado] = useState('');
+  const [linkCopiado, setLinkCopiado] = useState(false);
   const [erro, setErro] = useState('');
   const [etapa, setEtapa] = useState('gravar'); // 'gravar' | 'revisar' | 'editar' | 'publicar' | 'concluido'
 
@@ -534,6 +536,7 @@ export default function GravacaoAula() {
 
       console.log('[GravacaoAula] Vídeo registrado com sucesso');
 
+      setLinkVideoPublicado(videoUrl);
       setSucesso('Vídeo publicado com sucesso! Os alunos já podem assistir na área de exercícios.');
       setEtapa('concluido');
     } catch (e) {
@@ -548,6 +551,8 @@ export default function GravacaoAula() {
   const novaGravacao = () => {
     descartar();
     setSucesso('');
+    setLinkVideoPublicado('');
+    setLinkCopiado(false);
     setAulaSelecionada('');
     setTituloVideo('');
     setEtapa('gravar');
@@ -964,6 +969,49 @@ export default function GravacaoAula() {
             <p className={styles.sucessoDetalhe}>
               O vídeo foi vinculado à aula selecionada e já está disponível para os alunos na seção de exercícios.
             </p>
+
+            {linkVideoPublicado && (
+              <div style={{
+                marginTop: '1.2rem',
+                textAlign: 'left',
+                background: 'rgba(139,92,246,0.08)',
+                border: '1px solid rgba(139,92,246,0.25)',
+                borderRadius: 12,
+                padding: '0.9rem 1rem',
+              }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '0.4rem' }}>
+                  <Link2 size={15} /> Link direto do vídeo
+                </p>
+                <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginBottom: '0.6rem' }}>
+                  Este link abre o vídeo direto no navegador do celular — o aluno consegue assistir mesmo sem entrar/logar na plataforma. Envie por WhatsApp, e-mail etc.
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    readOnly
+                    value={linkVideoPublicado}
+                    onFocus={(e) => e.target.select()}
+                    className={styles.input}
+                    style={{ flex: '1 1 200px', fontSize: '0.72rem' }}
+                  />
+                  <button
+                    className={styles.btnSecundario}
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(linkVideoPublicado);
+                        setLinkCopiado(true);
+                        setTimeout(() => setLinkCopiado(false), 2000);
+                      } catch {
+                        /* clipboard pode falhar em contexto não seguro — o campo acima já permite copiar manualmente */
+                      }
+                    }}
+                  >
+                    <Copy size={16} /> {linkCopiado ? 'Copiado!' : 'Copiar link'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <button className={styles.btnPrimary} onClick={novaGravacao} style={{marginTop:'1.5rem'}}>
               <RefreshCw size={18} /> Gravar outro vídeo
             </button>
