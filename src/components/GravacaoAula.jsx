@@ -73,6 +73,48 @@ export default function GravacaoAula() {
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);     // fallback mobile nativo
 
+  // ── Detecta se estamos rodando como PWA instalado (modo "standalone") ──────
+  // Isso importa porque, no Android, um PWA instalado ("Adicionar à tela
+  // inicial") vira um WebAPK: ele aparece como um APP SEPARADO nas
+  // Configurações do celular, com sua PRÓPRIA permissão de Câmera/Microfone —
+  // diferente da permissão do navegador Chrome. Por isso as instruções de
+  // erro precisam apontar para lugares diferentes dependendo de onde a
+  // professora está usando o app.
+  const isStandalone =
+    typeof window !== 'undefined' &&
+    (window.matchMedia?.('(display-mode: standalone)').matches ||
+      window.navigator?.standalone === true ||
+      document.referrer.startsWith('android-app://'));
+
+  // Nome exibido do app instalado (usado nas instruções de permissão do PWA)
+  const NOME_APP = 'The Lenz Voice';
+
+  // ── Verifica o estado da permissão de câmera/microfone assim que a tela
+  //    monta, para já avisar a professora ANTES dela clicar em "Ligar Câmera"
+  //    caso a permissão já esteja bloqueada (evita ela ficar clicando à toa) ──
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!navigator.permissions?.query) return;
+        const cam = await navigator.permissions.query({ name: 'camera' });
+        if (cam.state === 'denied') {
+          setErro(mensagemPermissaoNegada());
+        }
+      } catch {
+        // Permissions API pode não suportar 'camera' em todo navegador — ignora silenciosamente
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Monta a mensagem certa de acordo com o contexto (PWA instalado x navegador comum)
+  const mensagemPermissaoNegada = () => {
+    if (isStandalone) {
+      return `Permissão de câmera/microfone bloqueada para o app "${NOME_APP}". No celular, vá em Configurações > Aplicativos (ou "Apps") > ${NOME_APP} > Permissões e libere Câmera e Microfone. (No Android, o app instalado tem uma permissão própria, separada do navegador). Depois, volte aqui e toque em "Tentar novamente".`;
+    }
+    return 'Permissão negada. No celular, vá em Configurações > Aplicativos > seu Navegador (Chrome/Safari) > Permissões e libere Câmera/Microfone. (Ou abra no Chrome ao invés de redes sociais).';
+  };
+
   // ── Lista as câmeras/microfones disponíveis (para o seletor de dispositivo) ──
   useEffect(() => {
     (async () => {
@@ -194,7 +236,7 @@ export default function GravacaoAula() {
       
       let mensagem = e.message || 'Não foi possível acessar câmera/microfone.';
       if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-        mensagem = 'Permissão negada. No celular, vá em Configurações > Aplicativos > seu Navegador (Chrome/Safari) > Permissões e libere Câmera/Microfone. (Ou abra no Chrome ao invés de redes sociais).';
+        mensagem = mensagemPermissaoNegada();
       } else if (e.name === 'NotFoundError') {
         mensagem = 'Nenhum dispositivo de câmera ou microfone físico foi encontrado.';
       } else if (e.name === 'NotReadableError') {
@@ -762,14 +804,24 @@ export default function GravacaoAula() {
               {/* Botão de Fallback para App de Câmera Nativa do Celular (Apenas se for erro de dispositivo/permissão/suporte) */}
               {(erro.toLowerCase().includes('permissão') ||
                 erro.toLowerCase().includes('negada') ||
+                erro.toLowerCase().includes('bloqueada') ||
                 erro.toLowerCase().includes('suporta') ||
                 erro.toLowerCase().includes('indisponível') ||
                 erro.toLowerCase().includes('encontrado') ||
                 erro.toLowerCase().includes('acessar') ||
                 erro.toLowerCase().includes('erro ao iniciar gravação')) && (
                 <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
+                  <button
+                    className={styles.btnPrimary}
+                    onClick={iniciarCamera}
+                    disabled={iniciando}
+                    style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '10px' }}
+                  >
+                    {iniciando ? <Loader2 size={18} className={styles.spin} /> : <RefreshCw size={18} />}
+                    {iniciando ? 'Tentando...' : 'Tentar novamente'}
+                  </button>
                   <p style={{ fontSize: '0.85rem', marginBottom: '8px', color: '#cbd5e1' }}>
-                    Não quer mexer nas configurações? Grave usando a câmera nativa do seu celular:
+                    Já ajustou a permissão e ainda não funcionou? Grave usando a câmera nativa do seu celular:
                   </p>
                   <button 
                     className={styles.btnPrimary} 
