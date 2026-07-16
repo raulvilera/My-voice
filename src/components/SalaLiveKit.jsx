@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { Loader2, AlertCircle } from 'lucide-react';
 
-export default function SalaLiveKit({ aulaId, modo }) {
+export default function SalaLiveKit({ aulaId, modo, convidado = false, nomeConvidado = '' }) {
   const { user, profile } = useAuth();
   const [token, setToken] = useState('');
   const [erro, setErro] = useState('');
@@ -17,6 +17,36 @@ export default function SalaLiveKit({ aulaId, modo }) {
 
   useEffect(() => {
     async function fetchToken() {
+      // Convidado (link público de convite): nunca é professora, nunca publica
+      // câmera/mic da professora — só assiste. Não exige login.
+      if (convidado && !isProfessora) {
+        if (!serverUrl) {
+          setErro('VITE_LIVEKIT_URL não está configurado. A professora precisa adicionar as chaves no Vercel.');
+          setCarregando(false);
+          return;
+        }
+        try {
+          const identidadeConvidado = `convidado-${Math.random().toString(36).slice(2, 10)}`;
+          const { data, error } = await supabase.functions.invoke('livekit-token', {
+            body: {
+              room: `aula-${aulaId}`,
+              identity: identidadeConvidado,
+              name: nomeConvidado?.trim() || 'Visitante',
+              isProfessora: false,
+            }
+          });
+          if (error) throw error;
+          if (!data?.token) throw new Error('Token não retornado pela função.');
+          setToken(data.token);
+        } catch (err) {
+          console.error('Erro ao buscar token LiveKit (convidado):', err);
+          setErro('Falha ao conectar na sala ao vivo.');
+        } finally {
+          setCarregando(false);
+        }
+        return;
+      }
+
       if (!user) {
         setErro('Você precisa estar logado para acessar a sala ao vivo.');
         setCarregando(false);
@@ -52,7 +82,7 @@ export default function SalaLiveKit({ aulaId, modo }) {
     }
 
     fetchToken();
-  }, [aulaId, user, isProfessora]);
+  }, [aulaId, user, isProfessora, convidado, nomeConvidado]);
 
   if (carregando) {
     return (
