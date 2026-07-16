@@ -168,6 +168,9 @@ export default function TransmissaoAoVivo() {
             {salvando ? 'Encerrando...' : 'Encerrar Transmissão'}
           </button>
         </div>
+        <div style={{ padding: '0.8rem 1rem', background: '#0f172a', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <LinkConvite aulaId={aulaSelecionada} />
+        </div>
         <div style={{ height: '65vh' }}>
           <SalaLiveKit aulaId={aulaSelecionada} modo="professora" />
         </div>
@@ -231,6 +234,12 @@ export default function TransmissaoAoVivo() {
         </button>
 
         {aulaSelecionada && (
+          <div style={{ marginTop: '1rem' }}>
+            <LinkConvite aulaId={aulaSelecionada} />
+          </div>
+        )}
+
+        {aulaSelecionada && (
           <PainelMateriais
             materiais={materiais}
             tituloMaterial={tituloMaterial}
@@ -253,6 +262,53 @@ export default function TransmissaoAoVivo() {
 // ── Painel de materiais anexados à aula ──────────────────────────────────────
 // Uma vez anexado, o material fica disponível para TODOS os alunos que têm
 // acesso à aula (não só quem assistiu à transmissão ao vivo).
+function LinkConvite({ aulaId }) {
+  const [copiado, setCopiado] = useState(false);
+  if (!aulaId) return null;
+  const link = `${window.location.origin}/assistir/${aulaId}`;
+
+  const copiar = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      /* clipboard pode falhar em contexto não seguro — campo abaixo permite copiar manualmente */
+    }
+  };
+
+  return (
+    <div style={{
+      background: 'rgba(139,92,246,0.08)',
+      border: '1px solid rgba(139,92,246,0.25)',
+      borderRadius: 10,
+      padding: '0.7rem 0.9rem',
+    }}>
+      <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '0.35rem' }}>
+        <LinkIcon size={14} /> Link de convite (aluno assiste sem logar)
+      </p>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <input
+          type="text"
+          readOnly
+          value={link}
+          onFocus={(e) => e.target.select()}
+          style={{ flex: '1 1 180px', fontSize: '0.72rem', padding: '0.4rem 0.6rem', borderRadius: 6, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }}
+        />
+        <button
+          onClick={copiar}
+          style={{ background: '#8b5cf6', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: 6, fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem' }}
+        >
+          {copiado ? 'Copiado!' : 'Copiar link'}
+        </button>
+      </div>
+      <p style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '0.35rem' }}>
+        O aluno só consegue entrar quando a transmissão estiver ativa. Ele entra só como espectador (sem câmera/mic).
+      </p>
+    </div>
+  );
+}
+
 function PainelMateriais({
   materiais, tituloMaterial, setTituloMaterial, linkMaterial, setLinkMaterial,
   arquivoMaterial, setArquivoMaterial, enviandoMaterial, erroMaterial,
